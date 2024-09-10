@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Property Report</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        td, th {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+            width: 25%; /* Fixed width for the columns */
+        }
+        .header {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .highlight {
+            background-color: yellow;
+        }
+        .section-title {
+            font-weight: bold;
+            margin-top: 20px;
+        }
+        .bar-graph {
+            display: inline-block;
+            height: 24px;
+            background-color: blue;
+        }
+        .walk-score {
+            background-color: blue;
+        }
+        .bike-score {
+            background-color: green;
+        }
+        .two-column td {
+            width: 25%; /* First column 25% */
+        }
+        .two-column td:nth-child(2) {
+            width: 75%; /* Second column 75% */
+        }
+        .photos-section {
+            margin-top: 20px;
+        }
+        .photos-section h3 {
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+        .photos-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+        .photo-placeholder {
+            width: 100%;
+            height: 200px;
+            background-color: #cccccc;
+            text-align: center;
+            line-height: 200px;
+            font-size: 18px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">Soyhome</div>
+    <p><b>Address:</b> 1600 Salem St, Lakewood, NJ 08701</p>
+    <p><b>Email:</b> market@soyhome.net</p>
+
+    <h3>1. 拍卖信息 Auction Information</h3>
+    <table>
+        <tr>
+            <td><b>Property Street Address</b></td>
+            <td>1600 Salem St, Lakewood, NJ 08701</td>
+            <td><b>Parcel number</b></td>
+            <td>-</td>
+        </tr>
+        <tr>
+            <td><b>Batch Number</b></td>
+            <td>-</td>
+            <td><b>Advnum</b></td>
+            <td>482</td>
+        </tr>
+        <tr>
+            <td><b>Face Value 欠税金额</b></td>
+            <td class="highlight"> $8041.97</td>
+            <td><b>Auction Type</b></td>
+            <td>Lien</td>
+        </tr>
+        <tr>
+            <td><b>Auction Tax Year</b></td>
+            <td>-</td>
+            <td></td>
+            <td></td>
+        </tr>
+    </table>
+
+    <h3>2. 官方数据 Government Official Data</h3>
+    <table>
+        <tr>
+            <td><b>Property class</b></td>
+            <td>2 - Residential</td>
+            <td><b>Owner name</b></td>
+            <td>BRIEGER, CHAIM</td>
+        </tr>
+        <tr>
+            <td><b>Owner phone</b></td>
+            <td>-</td>
+            <td><b>Owner email</b></td>
+            <td>-</td>
+        </tr>
+        <tr>
+            <td><b>Tax overdue</b></td>
+            <td>-</td>
+            <td><b>Accessed land value</b></td>
+            <td>$275,400</td>
+        </tr>
+        <tr>
+            <td><b>Accessed improvement value</b></td>
+            <td>$596,800</td>
+            <td><b>Total assessed value</b></td>
+            <td>$872,200</td>
+        </tr>
+        <tr>
+            <td><b>Tax amount annual</b></td>
+            <td>-</td>
+            <td></td>
+            <td></td>
+        </tr>
+    </table>
+
+    <h3>3. 商业数据 Market Data</h3>
+    <table>
+        <tr>
+            <td><b>Zillow link</b></td>
+            <td><a href="https://www.redfin.com/NJ/Lakewood/1600-Salem-St-08701/home/181074742">Redfin Listing</a></td>
+            <td><b>Zestimate</b></td>
+            <td>$1,699,000</td>
+        </tr>
+        <tr>
+            <td><b>Year built</b></td>
+            <td>2023</td>
+            <td><b>Lot</b></td>
+            <td>4,100 sqft</td>
+        </tr>
+        <tr>
+            <td><b>Bedroom number</b></td>
+            <td>10 bd</td>
+            <td><b>Bathroom number</b></td>
+            <td>7.5 ba</td>
+        </tr>
+        <tr>
+            <td><b>Near schools</b></td>
+            <td>Lakewood High School</td>
+            <td><b>Environmental Hazard Status</b></td>
+            <td>-</td>
+        </tr>
+        <tr>
+            <td><b>Flood Status</b></td>
+            <td>-</td>
+            <td><b>Loan Amount</b></td>
+            <td>$260,000</td>
+        </tr>
+        <tr>
+            <td><b>Loan Due Date</b></td>
+            <td>03/27/2023 - D</td>
+            <td><b>Loan Type</b></td>
+            <td>Mortgage</td>
+        </tr>
+    </table>
+
+    <!-- Updated part with two-column structure -->
+    <table class="two-column">
+        <tr>
+            <td><b>Walk score</b></td>
+            <td>
+                <div class="walk-score bar-graph" id="walk-score-bar" style="width: 0%;"></div> <span id="walk-score-value">24</span>
+            </td>
+        </tr>
+        <tr>
+            <td><b>Transit score</b></td>
+            <td>
+                <div class="bar-graph" id="transit-score-bar" style="background-color: red; width: 0%;"></div> <span id="transit-score-value">100</span>
+            </td>
+        </tr>
+        <tr>
+            <td><b>Bike score</b></td>
+            <td>
+                <div class="bike-score bar-graph" id="bike-score-bar" style="width: 0%;"></div> <span id="bike-score-value">32</span>
+            </td>
+        </tr>
+    </table>
+
+    <script>
+        function updateBarGraph(scoreId, barId) {
+            var score = document.getElementById(scoreId).innerText;
+            var bar = document.getElementById(barId);
+            bar.style.width = `calc(90% * (${score} / 100))`;
+        }
+
+        // Update the bars dynamically based on the score
+        updateBarGraph('walk-score-value', 'walk-score-bar');
+        updateBarGraph('transit-score-value', 'transit-score-bar');
+        updateBarGraph('bike-score-value', 'bike-score-bar');
+    </script>
+
+    <div class="photos-section">
+        <h3>Photos</h3>
+        <div class="photos-grid">
+            <div class="photo">
+                <img src="/mnt/data/image.png" alt="Photo 1" style="width: 100%; height: auto;">
+            </div>
+            <div class="photo">
+                <img src="/mnt/data/image.png" alt="Photo 2" style="width: 100%; height: auto;">
+            </div>
+            <div class="photo">
+                <img src="/mnt/data/image.png" alt="Photo 3" style="width: 100%; height: auto;">
+            </div>
+            <div class="photo">
+                <img src="/mnt/data/image.png" alt="Photo 4" style="width: 100%; height: auto;">
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
