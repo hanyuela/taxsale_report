@@ -1,0 +1,44 @@
+advnum,owner_name,property_location,face_value,land_value,improvement_value,total_assessed_value,zestimate,year_built,lot,walk_score,transit_score,bike_score,sqft,zillow_link,bedroom,bathroom
+482,"BRIEGER, CHAIM",1600-1600A SALEM STREET,8041.97,"275,400","596,800","872,200","$1,699,000 ",2023,0,24,0,32,"4,100 sqft",https://www.redfin.com/NJ/Lakewood/1600-Salem-St-08701/home/181074742,10 bd,7.5 ba
+30,1407 NORTH LAKE DRIVE LLC,1407 NORTH LAKE DRIVE,3623.33,"246,500","278,400","524,900","$1,604,800 ",1970,0.58 Acres,17,0,33,"2,842 sqft",https://www.zillow.com/homes/1407-NORTH-LAKE-DRIVE-Lakewood_rb/,5 bd,4 ba
+29,ELUL 5772 LLC,240 OAK KNOLL ROAD,7029.06,"243,300","485,400","728,700","$1,573,200 ",1969,0.46 Acres,14,0,33,"3,565 sqft",https://www.zillow.com/homes/240-OAK-KNOLL-ROAD-Lakewood_rb/,8 bd,5 ba
+182,"SCHWARTZ, AARON",14 GEM DRIVE,2214.24,"213,500","443,800","657,300","$1,526,500 ",2020,0.28 Acres,14,0,32,"3,677 sqft",https://www.zillow.com/homes/14-GEM-DRIVE-Lakewood_rb/,8 bd,6 ba
+184,"GUTTMAN, JACOB & RUCHY GREENBAUM",34 GEM DRIVE,2110.76,"217,000","458,500","675,500","$1,512,300 ",2017,0.34 Acres,4,0,29,"3,717 sqft",https://www.zillow.com/homes/34-GEM-DRIVE-Lakewood_rb/,9 bd,7 ba
+35,1506 TANGLEWOOD LANE TRUST,1506 TANGLEWOOD LANE,2569.16,"235,500","514,800","750,300","$1,512,100 ",2010,"9,375 sqft",28,0,41,"4,607 sqft",https://www.zillow.com/homes/1506-TANGLEWOOD-LANE-Lakewood_rb/,9 bd,6 ba
+183,"SPITZER, SHLOMIE",30 GEM DRIVE,984.33,"215,000","462,200","677,200","$1,500,000 ",2017,0.31 Acres,13,0,30,"3,863 sqft",https://www.zillow.com/homes/30-GEM-DRIVE-Lakewood_rb/,9 bd,7 ba
+40,1151 BUCKWALD LLC,1151 BUCKWALD COURT,4369.03,"192,800","438,100","630,900","$1,491,900 ",1995,0.30 Acres,12,0,29,"3,612 sqft",https://www.zillow.com/homes/1151-BUCKWALD-COURT-Lakewood_rb/,5 bd,4 ba
+179,"WIEDER, MOISHE",15 TUSCANY TERRACE,2746.83,"227,800","479,400","707,200","$1,457,400 ",2008,0.76 Acres,14,0,33,"3,466 sqft",https://www.zillow.com/homes/15-TUSCANY-TERRACE-Lakewood_rb/,8 bd,6 ba
+181,"COHEN, YITZCHOK I & RACHEL",10 GEM DRIVE,2100.53,"213,500","470,200","683,700","$1,454,300 ",2020,0.28 Acres,4,0,29,"3,998 sqft",https://www.zillow.com/homes/10-GEM-DRIVE-Lakewood_rb/,8 bd,6 ba
+180,"FRIEDMAN, ISREAL & GOLDIE",6 GEM DRIVE,2168.71,"213,500","473,300","686,800","$1,443,300 ",2020,0.28 Acres,4,0,29,"3,998 sqft",https://www.zillow.com/homes/6-GEM-DRIVE-Lakewood_rb/,8 bd,6 ba
+191,"INGBER, MOSHE",28 GEFEN DRIVE,3205.86,"217,500","469,000","686,500","$1,393,500 ",2003,0.36 Acres,6,0,29,"3,532 sqft",https://www.zillow.com/homes/28-GEFEN-DRIVE-Lakewood_rb/,8 bd,6 ba
+311,"WEISBERG, BARUCH",401-401A KIRYAS SANZ AVE,8259.52,"207,000","743,700","950,700","$1,359,762 ",2023,"10,019 sqft",49,0,49,0,https://www.redfin.com/NJ/Lakewood/401-Kiryas-Sanz-Ave-08701/unit-401A/home/171791971,0,0
+32,1425 14TH LAKEWOOD LLC,1425 14TH STREET,3896.91,"238,500","325,100","563,600","$1,357,700 ",1975,0.28 Acres,16,0,35,"2,593 sqft",https://www.zillow.com/homes/1425-14TH-STREET-Lakewood_rb/,5 bd,5 bd
+175,"PASKES, ELIEZER & RUTH",4 SHEMEN STREET,755.9,"214,500","444,600","659,100","$1,352,200 ",2004,0.30 Acres,10,0,29,"3,336 sqft",https://www.zillow.com/homes/4-SHEMEN-STREET-Lakewood_rb/,9 bd,6 ba
+126,"SCHORR, BRACHA & WOLMARK, JOSEPH",13 GRANDVIEW DRIVE,1889.71,"189,000","470,500","659,500","$1,338,900 ",2016,0.29 Acres,10,0,36,"3,583 sqft",https://www.zillow.com/homes/13-GRANDVIEW-DRIVE-Lakewood_rb/,8 bd,6 ba
+198,"SAALKIND, HILLEL & YAFFE",48 CABINFIELD CIRCLE,5320.13,"188,000","488,600","676,600","$1,332,500 ",1997,"8,576 sqft",17,0,36,"3,722 sqft",https://www.zillow.com/homes/48-CABINFIELD-CIRCLE-Lakewood_rb/,8 bd,5 ba
+189,"GRUNFELD, HARRY & MIRYAM",4 REMON LANE,2033.3,"217,500","446,400","663,900","$1,327,200 ",2003,0.36 Acres,7,0,30,"3,416 sqft",https://www.zillow.com/homes/4-REMON-LANE-Lakewood_rb/,8 bd,5 ba
+164,"UNGAR, BENJAMIN & HADASSAH",1507 LONG BEACH AVENUE,911.69,"197,500","558,000","755,500","$1,270,800 ",1973,0.46 Acres,6,0,35,"5,159 sqft",https://www.zillow.com/homes/1507-LONG-BEACH-AVENUE-Lakewood_rb/,9 bd,8 ba
+301,"BAUMWOLSPINER, MANUEL",4 EAGLE LANE,1435.75,"131,500","535,500","667,000","$1,239,800 ",2013,0.36 Acres,14,0,26,"4,205 sqft",https://www.zillow.com/homes/4-EAGLE-LANE-Lakewood_rb/,7 bd,4 ba
+279,"FREUNDLICH, ESTHER & YECHIEL",22 SHENANDOAH DRIVE,1237.81,"136,500","473,300","609,800","$1,233,400 ",2015,"10,018 sqft",25,0,39,"3,350 sqft",https://www.zillow.com/homes/22-SHENANDOAH-DRIVE-Lakewood_rb/,8 bd,6 ba
+192,"WEBER, MORDECHAI",3 REMON LANE,1462.39,"217,800","363,600","581,400","$1,181,000 ",2003,0.37 Acres,9,0,28,"2,756 sqft",https://www.zillow.com/homes/3-REMON-LANE-Lakewood_rb/,5 bd,3 ba
+190,"DANZIGER, MOSHE T & RIVA Z",22 GEFEN DRIVE,1852.68,"217,500","360,100","577,600","$1,180,100 ",2002,0.36 Acres,7,0,30,"2,849 sqft",https://www.zillow.com/homes/22-GEFEN-DRIVE-Lakewood_rb/,7 bd,5 ba
+304,"LICHTER, WAYNE & SHANI",5 - 5A EAGLE LANE,1387.31,"129,500","462,600","592,100","$1,170,200 ",2013,"4,150 sqft",14,0,26,"3,874 sqft",https://www.zillow.com/homes/5---5A-EAGLE-LANE-Lakewood_rb/,9 bd,6 ba
+288,69 WINDWARD LLC,530 DR. M. L. KING DRIVE,3568.9,"142,000","376,600","518,600","$1,168,600 ",1971,0.45 Acres,35,0,57,"3,592 sqft",https://www.zillow.com/homes/530-DR.-M.-L.-KING-DRIVE-Lakewood_rb/,4 bd,3 ba
+74,"BLUMENKRANTZ, DAVID & YEHUDIS",703 TWIN OAKS DRIVE,4056.7,"187,500","398,700","586,200","$1,167,900 ",2000,"4,746 sqft",22,0,40,"3,217 sqft",https://www.zillow.com/homes/703-TWIN-OAKS-DRIVE-Lakewood_rb/,6 bd,4 ba
+419,BEWE INTERNATIONAL LLC,22 ISABELLA DRIVE,818.44,"199,300","412,300","611,600","$1,166,400 ",2001,0.52 Acres,5,0,24,0,https://www.zillow.com/homes/22-ISABELLA-DRIVE-Lakewood_rb/,4 bd,3 ba
+188,"KATZMAN, YECHIEL",5 GEFEN DRIVE,1821.6,"218,300","350,300","568,600","$1,138,500 ",2003,0.38 Acres,7,0,30,"2,785 sqft",https://www.zillow.com/homes/5-GEFEN-DRIVE-Lakewood_rb/,7 bd,4 ba
+293,"SHABOT, DAVID & ALEXIS",110 WALL STREET,7241.66,"159,000","391,400","550,400","$1,136,800 ",2017,0,34,0,48,"3,547 sqft",https://www.zillow.com/homes/110-WALL-STREET-Lakewood_rb/,10 bd,7 ba
+33,"LAKS, RALPH",1487 CEDAR ROW,8837.83,"243,300","346,700","590,000","$1,122,000 ",1986,0.46 Acres,17,0,36,"2,900 sqft",https://www.zillow.com/homes/1487-CEDAR-ROW-Lakewood_rb/,3 bd,4 ba
+102,"GERSTLE, MOSHE YEHUDA",1370 ALVARADO AVENUE,836.09,"191,500","353,300","544,800","$1,114,100 ",2012,0.34 Acres,7,0,34,"3,756 sqft",https://www.zillow.com/homes/1370-ALVARADO-AVENUE-Lakewood_rb/,4 bd,3 ba
+303,"DICKSTEIN, SHALOM & TZIREL",105 CANARY DRIVE,1495.94,"129,000","442,500","571,500","$1,101,900 ",2012,"3,780 sqft",14,0,26,"3,316 sqft",https://www.zillow.com/homes/105-CANARY-DRIVE-Lakewood_rb/,8 bd,5 ba
+83,"BERGER, JOSHUA & LIEBA",1299 EAST COUNTY LINE RD.,1602.8,"205,800","314,700","520,500","$1,077,800 ",1973,0.89 Acres,1,0,29,"3,400 sqft",https://www.zillow.com/homes/1299-EAST-COUNTY-LINE-RD.-Lakewood_rb/,5 bd,4 ba
+319,"FEDER, YOSEF & MALKA",47 TURIN AVENUE,7215.67,"205,500","356,800","562,300","$1,068,100 ",2018,0,48,0,43,"3,211 sqft",https://www.zillow.com/homes/47-TURIN-AVENUE-Lakewood_rb/,9 bd,6 ba
+299,"HARTMAN, EVELYN",26 GOLDCREST DRIVE,1055.43,"85,000","418,500","503,500","$1,058,900 ",2009,"8,710 sqft",8,0,32,"3,254 sqft",https://www.zillow.com/homes/26-GOLDCREST-DRIVE-Lakewood_rb/,8 bd,6 ba
+287,"SUTTON, EYTAN & SORA M",236 LINCOLN STREET,7136.46,"158,500","361,800","520,300","$1,054,800 ",2007,"7,575 sqft",41,0,54,"2,704 sqft",https://www.zillow.com/homes/236-LINCOLN-STREET-Lakewood_rb/,7 bd,4 ba
+294,"MARGULSKI, ROBERT L & URSULA A J",769 CYPRESS AVENUE,817.66,"258,500","261,900","520,400","$1,044,300 ",2002,0.28 Acres,22,0,33,"2,396 sqft",https://www.zillow.com/homes/769-CYPRESS-AVENUE-Lakewood_rb/,5 bd,4 ba
+347,"BIEGELEISEN, YISROEL",16 SABLOW DRIVE,1213.23,"175,500","369,100","544,600","$1,023,600 ",2019,0,11,0,33,"3,094 sqft",https://www.zillow.com/homes/16-SABLOW-DRIVE-Lakewood_rb/,8 bd,6 ba
+3,565 SETON LLC,565 SETON CIRCLE,7565.79,"243,300","342,500","585,800","$1,002,900 ",1987,0.39 Acres,10,0,29,"2,605 sqft",https://www.zillow.com/homes/565-SETON-CIRCLE-Lakewood_rb/,1 bd,3 ba
+350,"SIGAL, AVROM Y & BAILI",40 HANOVER WAY,1330.2,"177,000","363,300","540,300","$986,500 ",2018,0,13,0,32,"3,106 sqft",https://www.zillow.com/homes/40-HANOVER-WAY-Lakewood_rb/,8 bd,6 ba
+148,"LIEBERMAN, ISAAC & MIRIAM",9 MELROSE COURT,1389.09,"155,500","347,900","503,400","$948,000 ",2020,0,28,0,36,"2,940 sqft",https://www.zillow.com/homes/9-MELROSE-COURT-Lakewood_rb/,8 bd,6 ba
+147,"PERLSTEIN, MARTIN & PFLASTER, CHANA",3 MELROSE COURT,1512.92,"155,000","349,000","504,000","$942,500 ",2021,"4,704 sqft",7,0,34,"2,940 sqft",https://www.zillow.com/homes/3-MELROSE-COURT-Lakewood_rb/,5 bd,4 ba
+312,"MEYER, YEHUDIS T & NACHMAN",58 EDGECOMB AVE.,6308.64,"150,000","482,500","632,500","$926,057 ",2023,"8,233 sqft",35,0,39,0,https://www.redfin.com/NJ/Lakewood/58-Edgecomb-Ave-08701/home/181020615,0,0
