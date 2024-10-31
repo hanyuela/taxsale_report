@@ -1,5 +1,13 @@
 import os
 
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.zoho.com'
+EMAIL_PORT = 465
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'tech@soyhome.app'
+EMAIL_HOST_PASSWORD = 'Soyhome@us2021!'
+
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 SECRET_KEY = 'replace-this-with-your-secret-key'
@@ -84,4 +92,5 @@ USE_TZ = True
 STATIC_URL = '/assets/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'assets')]
 
+LOGIN_URL = '/login/'
 
