@@ -39,7 +39,29 @@
     <!-- Responsive css-->
     <link rel="stylesheet" type="text/css" href="../assets/css/responsive.css">
   </head>
-  <body> 
+  <style>
+    .notifications {
+      position: fixed; /* 固定在页面顶部 */
+      top: 0;
+      left: 0;
+      width: 100%; /* 占据整个宽度 */
+      z-index: 1050; /* 确保层级高于其他元素 */
+      padding: 10px;
+    }
+  
+    .notifications .alert {
+      margin-bottom: 5px;
+    }
+  </style>
+  <body>
+    <!-- 顶部显示通知 -->
+    {% if messages %}
+    <div class="notifications">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %} 
     <!-- loader starts-->
     <div class="loader-wrapper">
       <div class="theme-loader">    
@@ -53,397 +75,12 @@
     <!-- page-wrapper Start-->
     <div class="page-wrapper compact-wrapper" id="pageWrapper">
       <!-- Page Header Start-->
-      <div class="page-header">
-        <div class="header-wrapper row m-0">
-          <div class="header-logo-wrapper col-auto p-0">
-            <div class="logo-wrapper"><a href="index.html"><img class="img-fluid for-light" src="../assets/images/logo/logo.png" alt=""><img class="img-fluid for-dark" src="../assets/images/logo/logo.png" alt=""></a></div>
-            <div class="toggle-sidebar">
-              <svg class="sidebar-toggle"> 
-                <use href="../assets/svg/icon-sprite.svg#stroke-animation"></use>
-              </svg>
-            </div>
-          </div>
-          <form class="col-sm-4 form-inline search-full d-none d-xl-block" action="#" method="get">
-            <div class="form-group">
-              <div class="Typeahead Typeahead--twitterUsers">
-                <div class="u-posRelative"> 
-                  <input class="demo-input Typeahead-input form-control-plaintext w-100" type="text" placeholder="Type to Search .." name="q" title="" autofocus>
-                  <svg class="search-bg svg-color"> 
-                    <use href="../assets/svg/icon-sprite.svg#search"></use>
-                  </svg>
-                </div>
-                <div class="Typeahead-menu"> </div>
-              </div>
-            </div>
-          </form>
-          <div class="nav-right col-xl-8 col-lg-12 col-auto pull-right right-header p-0">
-            <ul class="nav-menus">
-              <li class="serchinput">
-                <div class="serchbox">
-                  <svg>
-                    <use href="../assets/svg/icon-sprite.svg#search"></use>
-                  </svg>
-                </div>
-                <div class="form-group search-form">
-                  <input type="text" placeholder="Search here...">
-                </div>
-              </li>
-              <li class="onhover-dropdown"> 
-                <div class="notification-box">
-                  <svg> 
-                    <use href="../assets/svg/icon-sprite.svg#Bell"></use>
-                  </svg>
-                </div>
-                <div class="onhover-show-div notification-dropdown"> 
-                  <h6 class="f-18 mb-0 dropdown-title">Notifications</h6>
-                  <div class="notification-card">
-                    <ul>
-                      <li>
-                        <div class="user-notification">
-                          <div><img src="../assets/images/avtar/2.jpg" alt="avatar"></div>
-                          <div class="user-description"><a href="../template/letter-box.html">
-                              <h4>You have new finical page design. </h4></a><span>Today 11:45pm</span></div>
-                        </div>
-                        <div class="notification-btn">
-                          <button class="btn btn-pill btn-primary" type="button" title="btn btn-pill btn-primary">Accpet</button>
-                          <button class="btn btn-pill btn-secondary" type="button" title="btn btn-pill btn-primary">Decline</button>
-                        </div>
-                        <div class="show-btn"><a href="../template/index.html"> <span>Show</span></a></div>
-                      </li>
-                      <li>
-                        <div class="user-notification">
-                          <div><img src="../assets/images/avtar/17.jpg" alt="avatar"></div>
-                          <div class="user-description"><a href="../template/letter-box.html">
-                              <h4>Congrats! you all task for today.</h4></a><span>Today 01:05pm</span></div>
-                        </div>
-                        <div class="notification-btn">
-                          <button class="btn btn-pill btn-primary" type="button" title="btn btn-pill btn-primary">Accpet</button>
-                          <button class="btn btn-pill btn-secondary" type="button" title="btn btn-pill btn-primary">Decline</button>
-                        </div>
-                        <div class="show-btn"><a href="../template/index.html"> <span>Show</span></a></div>
-                      </li>
-                      <li>
-                        <div class="user-notification">
-                          <div> <img src="../assets/images/avtar/18.jpg" alt="avatar"></div>
-                          <div class="user-description"><a href="../template/letter-box.html">
-                              <h4>You have new in landing page design.</h4></a><span>Today 06:55pm</span></div>
-                        </div>
-                        <div class="notification-btn">
-                          <button class="btn btn-pill btn-primary" type="button" title="btn btn-pill btn-primary">Accpet</button>
-                          <button class="btn btn-pill btn-secondary" type="button" title="btn btn-pill btn-primary">Decline</button>
-                        </div>
-                        <div class="show-btn"><a href="../template/index.html"> <span>Show</span></a></div>
-                      </li>
-                      <li>
-                        <div class="user-notification">
-                          <div><img src="../assets/images/avtar/19.jpg" alt="avatar"></div>
-                          <div class="user-description"><a href="../template/letter-box.html">
-                              <h4>Congrats! you all task for today.</h4></a><span>Today 06:55pm</span></div>
-                        </div>
-                        <div class="notification-btn">
-                          <button class="btn btn-pill btn-primary" type="button" title="btn btn-pill btn-primary">Accpet</button>
-                          <button class="btn btn-pill btn-secondary" type="button" title="btn btn-pill btn-primary">Decline</button>
-                        </div>
-                        <div class="show-btn"> <a href="../template/index.html"><span>Show</span></a></div>
-                      </li>
-                      <li><a class="f-w-700" href="../template/letter-box.html">Check all </a></li>
-                    </ul>
-                  </div>
-                </div>
-              </li>
-              <li class="onhover-dropdown">
-                <svg>
-                  <use href="../assets/svg/icon-sprite.svg#Bookmark"></use>
-                </svg>
-                <div class="onhover-show-div bookmark-flip">
-                  <div class="flip-card">
-                    <div class="flip-card-inner">
-                      <div class="front">
-                        <h6 class="f-18 mb-0 dropdown-title">Bookmark</h6>
-                        <ul class="bookmark-dropdown">
-                          <li>
-                            <div class="row">
-                              <div class="col-4 text-center"><a href="../template/form-validation.html">
-                                  <div class="bookmark-content">
-                                    <div class="bookmark-icon bg-light-primary"><i data-feather="file-text"></i></div><span>Forms</span>
-                                  </div></a></div>
-                              <div class="col-4 text-center"><a href="../template/user-profile.html">
-                                  <div class="bookmark-content"> 
-                                    <div class="bookmark-icon bg-light-secondary"><i data-feather="user"></i></div><span>Profile</span>
-                                  </div></a></div>
-                              <div class="col-4 text-center"><a href="../template/bootstrap-basic-table.html">
-                                  <div class="bookmark-content">
-                                    <div class="bookmark-icon bg-light-warning"> <i data-feather="server"> </i></div><span>Tables </span>
-                                  </div></a></div>
-                            </div>
-                          </li>
-                          <li class="text-centermedia-body"> <a class="flip-btn f-w-700" id="flip-btn" href="javascript:void(0)">Add New Bookmark</a></li>
-                        </ul>
-                      </div>
-                      <div class="back">
-                        <ul>
-                          <li>
-                            <div class="bookmark-dropdown flip-back-content">
-                              <input type="text" placeholder="search...">
-                            </div>
-                          </li>
-                          <li><a class="f-w-700 d-block flip-back" id="flip-back" href="javascript:void(0)">Back</a></li>
-                        </ul>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </li>
-              <li class="onhover-dropdown"> 
-                <div class="message position-relative">
-                  <svg>
-                    <use href="../assets/svg/icon-sprite.svg#Message"></use>
-                  </svg><span class="rounded-pill badge-danger"></span>
-                </div>
-                <div class="onhover-show-div message-dropdown">
-                  <h6 class="f-18 mb-0 dropdown-title">Message                               </h6>
-                  <ul>
-                    <li>
-                      <div class="d-flex align-items-start">
-                        <div class="message-img bg-light-primary"><img src="../assets/images/user/3.jpg" alt=""></div>
-                        <div class="flex-grow-1">
-                          <h5><a href="../template/letter-box.html">Emay Walter</a></h5>
-                          <p>Do you want to go see movie?</p>
-                        </div>
-                        <div class="notification-right"><i data-feather="x"></i></div>
-                      </div>
-                    </li>
-                    <li>
-                      <div class="d-flex align-items-start">
-                        <div class="message-img bg-light-primary"><img src="../assets/images/user/6.jpg" alt=""></div>
-                        <div class="flex-grow-1">
-                          <h5> <a href="../template/letter-box.html">Jason Borne</a></h5>
-                          <p>Thank you for rating us.</p>
-                        </div>
-                        <div class="notification-right"><i data-feather="x"></i></div>
-                      </div>
-                    </li>
-                    <li>
-                      <div class="d-flex align-items-start"> 
-                        <div class="message-img bg-light-primary"><img src="../assets/images/user/10.jpg" alt=""></div>
-                        <div class="flex-grow-1">
-                          <h5> <a href="../template/letter-box.html">Sarah Loren</a></h5>
-                          <p>What`s the project report update?</p>
-                        </div>
-                        <div class="notification-right"><i data-feather="x"></i></div>
-                      </div>
-                    </li>
-                    <li> <a class="f-w-700" href="../template/private-chat.html">Check all</a></li>
-                  </ul>
-                </div>
-              </li>
-              <li class="cart-nav onhover-dropdown"> 
-                <div class="cart-box">
-                  <svg> 
-                    <use href="../assets/svg/icon-sprite.svg#Buy"></use>
-                  </svg>
-                </div>
-                <div class="cart-dropdown onhover-show-div">
-                  <h6 class="f-18 mb-0 dropdown-title">Cart</h6>
-                  <ul>
-                    <li>
-                      <div class="d-flex"><img class="img-fluid b-r-5 img-60" src="../assets/images/ecommerce/05.jpg" alt="">
-                        <div class="flex-grow-1"><span>Women's Track Suit</span>
-                          <div class="qty-box">
-                            <div class="input-group"><span class="input-group-prepend">
-                                <button class="btn quantity-left-minus" type="button" data-type="minus" data-field="">-</button></span>
-                              <input class="form-control input-number" type="text" name="quantity" value="1"><span class="input-group-prepend">
-                                <button class="btn quantity-right-plus" type="button" data-type="plus" data-field="">+</button></span>
-                            </div>
-                          </div>
-                          <h6 class="font-primary">$500</h6>
-                        </div>
-                        <div class="close-circle"><a class="bg-danger" href="#"><i data-feather="x"></i></a></div>
-                      </div>
-                    </li>
-                    <li>
-                      <div class="d-flex"><img class="img-fluid b-r-5 img-60" src="../assets/images/ecommerce/02.jpg" alt="">
-                        <div class="flex-grow-1"><span>Men's Jacket</span>
-                          <div class="qty-box">
-                            <div class="input-group"><span class="input-group-prepend">
-                                <button class="btn quantity-left-minus" type="button" data-type="minus" data-field="">-</button></span>
-                              <input class="form-control input-number" type="text" name="quantity" value="1"><span class="input-group-prepend">
-                                <button class="btn quantity-right-plus" type="button" data-type="plus" data-field="">+</button></span>
-                            </div>
-                          </div>
-                          <h6 class="font-primary">$500.00</h6>
-                        </div>
-                        <div class="close-circle"><a class="bg-danger" href="#"><i data-feather="x"></i></a></div>
-                      </div>
-                    </li>
-                    <li>
-                      <div class="d-flex"><img class="img-fluid b-r-5 img-60" src="../assets/images/ecommerce/02.jpg" alt="">
-                        <div class="flex-grow-1"><span>Boys T-shirt Track Pants</span>
-                          <div class="qty-box">
-                            <div class="input-group"><span class="input-group-prepend">
-                                <button class="btn quantity-left-minus" type="button" data-type="minus" data-field="">-</button></span>
-                              <input class="form-control input-number" type="text" name="quantity" value="1"><span class="input-group-prepend">
-                                <button class="btn quantity-right-plus" type="button" data-type="plus" data-field="">+</button></span>
-                            </div>
-                          </div>
-                          <h6 class="font-primary">$500.00</h6>
-                        </div>
-                        <div class="close-circle"><a class="bg-danger" href="#"><i data-feather="x"></i></a></div>
-                      </div>
-                    </li>
-                    <li class="total">
-                      <h6 class="mb-0">Order Total :<span class="f-right">$1000.00</span></h6>
-                    </li>
-                    <li class="text-center"><a class="d-block mb-3 view-cart f-w-700" href="../template/cart.html">Go to your cart</a><a class="btn btn-primary view-checkout" href="../template/checkout.html">Checkout  </a></li>
-                  </ul>
-                </div>
-              </li>
-              <li>
-                <div class="mode">
-                  <svg>
-                    <use href="../assets/svg/icon-sprite.svg#moon"></use>
-                  </svg>
-                </div>
-              </li>
-              <li class="language-nav">
-                <div class="translate_wrapper">
-                  <div class="current_lang">
-                    <div class="lang"><i class="flag-icon flag-icon-gb"></i><span class="lang-txt">EN</span></div>
-                  </div>
-                  <div class="more_lang">
-                    <div class="lang selected" data-value="en"><i class="flag-icon flag-icon-us"></i><span class="lang-txt">English<span> (US)</span></span></div>
-                    <div class="lang" data-value="de"><i class="flag-icon flag-icon-de"></i><span class="lang-txt">Deutsch</span></div>
-                    <div class="lang" data-value="es"><i class="flag-icon flag-icon-es"></i><span class="lang-txt">Español</span></div>
-                    <div class="lang" data-value="fr"><i class="flag-icon flag-icon-fr"></i><span class="lang-txt">Français</span></div>
-                    <div class="lang" data-value="pt"><i class="flag-icon flag-icon-pt"></i><span class="lang-txt">Português<span> (BR)</span></span></div>
-                    <div class="lang" data-value="cn"><i class="flag-icon flag-icon-cn"></i><span class="lang-txt">简体中文</span></div>
-                    <div class="lang" data-value="ae"><i class="flag-icon flag-icon-ae"></i><span class="lang-txt">لعربية <span> (ae)</span></span></div>
-                  </div>
-                </div>
-              </li>
-              <li class="profile-nav onhover-dropdown pe-0 py-0">
-                <div class="d-flex align-items-center profile-media"><img class="b-r-25" src="../assets/images/dashboard/profile.png" alt="">
-                  <div class="flex-grow-1 user"><span>Helen Walter</span>
-                    <p class="mb-0 font-nunito">Admin 
-                      <svg>
-                        <use href="../assets/svg/icon-sprite.svg#header-arrow-down"></use>
-                      </svg>
-                    </p>
-                  </div>
-                </div>
-                <ul class="profile-dropdown onhover-show-div">
-                  <li><a href="../template/user-profile.html"><i data-feather="user"></i><span>Account </span></a></li>
-                  <li><a href="../template/letter-box.html"><i data-feather="mail"></i><span>Inbox </span></a></li>
-                  <li><a href="../template/task.html"><i data-feather="file-text"></i><span>Taskboard</span></a></li>
-                  <li><a href="../template/edit-profile.html"><i data-feather="settings"></i><span>Settings</span></a></li>
-                  <li><a href="../template/login.html"><i data-feather="log-in"> </i><span>Log in</span></a></li>
-                </ul>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </div>
+      {% include 'header.html' %}
       <!-- Page Header Ends-->
       <!-- Page Body Start-->
       <div class="page-body-wrapper horizontal-menu">
         <!-- Page Sidebar Start-->
-        <div class="sidebar-wrapper" data-layout="stroke-svg">
-          <div>
-            <div class="logo-wrapper"><a href="index.html"> <img class="img-fluid for-light" src="../assets/images/logo/logo.png" alt=""><img class="img-fluid for-dark" src="../assets/images/logo/logo_dark.png" alt=""></a>
-              <div class="toggle-sidebar">
-                <svg class="sidebar-toggle"> 
-                  <use href="../assets/svg/icon-sprite.svg#toggle-icon"> </use>
-                </svg>
-              </div>
-            </div>
-            <div class="logo-icon-wrapper"><a href="index.html"><img class="img-fluid" src="../assets/images/logo/logo-icon.png" alt=""></a></div>
-            <nav class="sidebar-main">
-              <div class="left-arrow" id="left-arrow"><i data-feather="arrow-left"></i></div>
-              <div id="sidebar-menu">
-                <ul class="sidebar-links" id="simple-bar">
-                  <li class="back-btn">
-                    <div class="mobile-back text-end"><span>Back</span><i class="fa fa-angle-right ps-2" aria-hidden="true"></i></div>
-                  </li>
-                  <li class="pin-title sidebar-main-title">
-                    <div> 
-                      <h6>Pinned</h6>
-                    </div>
-                  </li>
-                  <li class="sidebar-list"><i class="fa fa-thumb-tack"></i><a class="sidebar-link sidebar-title" href="../template/index.html" target="_blank">
-                      <svg class="stroke-icon">
-                        <use href="../assets/svg/icon-sprite.svg#stroke-home"></use>
-                      </svg>
-                      <svg class="fill-icon">
-                        <use href="../assets/svg/icon-sprite.svg#fill-home"></use>
-                      </svg><span>Dashboard </span></a></li>
-                  <li class="mega-menu sidebar-list"><i class="fa fa-thumb-tack"></i><a class="sidebar-link sidebar-title" href="#">
-                      <svg class="stroke-icon">
-                        <use href="../assets/svg/icon-sprite.svg#stroke-others"></use>
-                      </svg>
-                      <svg class="fill-icon">
-                        <use href="../assets/svg/icon-sprite.svg#fill-others"></use>
-                      </svg><span>Others</span></a>
-                    <div class="mega-menu-container menu-content">
-                      <div class="container-fluid">
-                        <div class="row">
-                          <div class="col mega-box">
-                            <div class="link-section">
-                              <div class="submenu-title">
-                                <h5>Stater-kit</h5>
-                              </div>
-                              <ul class="submenu-content opensubmegamenu">
-                                <li><a href="index.html">Layout Light</a></li>
-                                <li><a href="layout-dark.html">Layout Dark</a></li>
-                              </ul>
-                            </div>
-                          </div>
-                          <div class="col mega-box">
-                            <div class="link-section">
-                              <div class="submenu-title">
-                                <h5>Page Layout</h5>
-                              </div>
-                              <ul class="submenu-content opensubmegamenu">
-                                <li><a href="boxed.html">Boxed</a></li>
-                                <li><a href="layout-rtl.html">RTL</a></li>
-                              </ul>
-                            </div>
-                          </div>
-                          <div class="col mega-box">
-                            <div class="link-section">
-                              <div class="submenu-title">
-                                <h5>Footers</h5>
-                              </div>
-                              <ul class="submenu-content opensubmegamenu">
-                                <li><a href="footer-light.html">Footer Light</a></li>
-                                <li><a href="footer-dark.html">Footer Dark</a></li>
-                                <li><a href="footer-fixed.html">Footer Fixed</a></li>
-                              </ul>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </li>
-                  <li class="sidebar-list"><i class="fa fa-thumb-tack"></i><a class="sidebar-link sidebar-title" href="https://support.pixelstrap.com/portal/en/signin" target="_blank">
-                      <svg class="stroke-icon">
-                        <use href="../assets/svg/icon-sprite.svg#stroke-social"></use>
-                      </svg>
-                      <svg class="fill-icon">
-                        <use href="../assets/svg/icon-sprite.svg#fill-social"></use>
-                      </svg><span>Raise Support</span></a></li>
-                  <li class="sidebar-list"><i class="fa fa-thumb-tack"></i><a class="sidebar-link sidebar-title" href="https://docs.pixelstrap.com/Zono/html/document/" target="_blank">
-                      <svg class="stroke-icon">
-                        <use href="../assets/svg/icon-sprite.svg#stroke-form"></use>
-                      </svg>
-                      <svg class="fill-icon">
-                        <use href="../assets/svg/icon-sprite.svg#fill-form"></use>
-                      </svg><span>Documentation                                    </span></a></li>
-                </ul>
-              </div>
-              <div class="right-arrow" id="right-arrow"><i data-feather="arrow-right"></i></div>
-            </nav>
-          </div>
-        </div>
+        {% include 'sidenav.html' %}
         <!-- Page Sidebar Ends-->
         <div class="page-body">
           <div class="container-fluid">
@@ -461,7 +98,7 @@
                           <ul class="onhover-show-div left-dropdown">
                             <li class="flyout-right"><a href="#">Dashboards</a><i class="fa fa-angle-right"></i>
                               <ul>
-                                <li> <a href="index.html">Default  </a></li>
+                                <li> <a href="{% url 'index' %}">Default  </a></li>
                                 <li> <a href="dashboard-02.html">Ecommerce</a></li>
                               </ul>
                             </li>
@@ -744,7 +381,7 @@
                 </div>
                 <div class="col-xl-3 col-sm-5 box-col-4"> 
                   <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="index.html">
+                    <li class="breadcrumb-item"><a href="{% url 'index' %}">
                         <svg class="stroke-icon"> 
                           <use href="../assets/svg/icon-sprite.svg#stroke-home"></use>
                         </svg></a></li>
@@ -1005,5 +642,24 @@
     <script src="../assets/js/script.js"></script>
     <script src="../assets/js/theme-customizer/customizer.js"></script>
     <!-- Plugin used-->
+     <!-- 添加 JavaScript 来实现自动隐藏通知 -->
+    <script>
+      // 等待页面加载完成后执行
+      document.addEventListener("DOMContentLoaded", function() {
+          // 选择所有的通知元素
+          const notifications = document.querySelectorAll('.notifications .alert');
+          notifications.forEach(notification => {
+              // 设置一个定时器，3秒后开始淡出效果
+              setTimeout(() => {
+                  notification.style.transition = "opacity 0.5s";
+                  notification.style.opacity = "0";
+                  // 在淡出效果完成后，彻底隐藏通知元素
+                  setTimeout(() => {
+                      notification.style.display = "none";
+                  }, 500);
+              }, 3000); // 3秒后开始淡出
+          });
+      });
+    </script>
   </body>
 </html>
