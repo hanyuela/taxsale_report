@@ -25,35 +25,40 @@ def register(request):
         form = UserRegistrationForm()
     return render(request, 'sign-up-wizard.html', {'form': form})
 
-# 登录页面
 def user_login(request):
     if request.method == "POST":
         email = request.POST.get("email")
         password = request.POST.get("password")
-        # 注销当前已登录的用户（如果有）
-        if request.user.is_authenticated:
-            logout(request)
-
         user = authenticate(request, username=email, password=password)
-        
+
         if user is not None:
-            login(request, user)
-            messages.success(request, "登录成功！")
-            return redirect("index")  # 假设 'index' 是您的首页 URL 名称
+            user_profile = UserProfile.objects.get(user=user)
+            if user_profile.is_password_reset_confirmed:
+                login(request, user)
+                messages.success(request, "Login successful!")
+                return redirect("index")
+            else:
+                messages.error(request, "Please confirm your password reset by clicking the link in your email.")
+                return redirect("login")
         else:
-            messages.error(request, "邮箱或密码错误，请重试。")
+            messages.error(request, "Invalid email or password, please try again.")
             return redirect("login")
     
     return render(request, "login.html")
 
+
 def logout(request):
     django_logout(request)
     messages.success(request, "您已成功退出")
-    return redirect("login")  # 假设 'login_view' 是您的登录视图的 URL 名称
+    return redirect("index")  # 重定向到 index 视图，确保该视图渲染 base.html
 
-# 首页
+
 def index(request):
-    return render(request, 'index.html')
+    if request.user.is_authenticated:
+        return render(request, 'index.html')  # 用户已登录，渲染 index.html
+    else:
+        return render(request, 'base.html')  # 用户未登录，渲染 base.html
+
 
 # 编辑个人资料页面
 def edit_profile(request):
@@ -63,19 +68,24 @@ def edit_profile(request):
 def datatable(request):
     return render(request, 'datatable.html')
 
-# 忘记密码页面
-def forget_password(request):
-    return render(request, 'forget-password.html')
+
 
 # 错误页面
 def error_503(request):
     return render(request, 'error-503.html')
 
+# views.py
 def signup_wizard(request):
     if request.method == 'POST':
         email = request.POST['email']
         password = request.POST['password']
+        confirm_password = request.POST['confirm_password']
         
+        # 检查密码是否匹配
+        if password != confirm_password:
+            messages.error(request, "两次输入的密码不一致，请重试。")
+            return render(request, 'sign-up-wizard.html')
+
         # 创建用户并存入数据库
         if User.objects.filter(username=email).exists():
             messages.error(request, "Email is already registered.")
@@ -91,6 +101,7 @@ def signup_wizard(request):
             return redirect('index')  # 重定向到主页
 
     return render(request, 'sign-up-wizard.html')
+
 
 def template_index(request):
     return render(request, 'template/index.html')  # 渲染 template/index.html
@@ -114,6 +125,7 @@ def forget_password(request):
             token = uuid.uuid4()
             user_profile, created = UserProfile.objects.get_or_create(user=user)
             user_profile.password_reset_token = token
+            user_profile.is_password_reset_confirmed = False  # 设置为未确认
             user_profile.save()
 
             # 构建确认链接
@@ -155,20 +167,49 @@ def forget_password(request):
 
 
 def confirm_password_reset(request, user_id, token):
+    print("Confirm password reset view called")  # 确认视图是否被调用
     try:
+        # 获取用户对象
         user = User.objects.get(id=user_id)
         user_profile = UserProfile.objects.get(user=user)
 
-        # 验证令牌是否匹配
-        if str(user_profile.password_reset_token) == token:
-            # 清除令牌，表示密码已重置
+        # 打印调试信息，查看用户和令牌
+        print(f"User ID: {user_id}, Token in URL: {token}")
+        print(f"Token in Database: {user_profile.password_reset_token}")
+
+        # 将 token 转换为字符串并进行比较
+        if str(user_profile.password_reset_token) == str(token):
+            print("Token matches, proceeding to update...")  # 验证令牌匹配
+
+            # 更新字段
+            user_profile.is_password_reset_confirmed = True
             user_profile.password_reset_token = None
-            user_profile.save()
-            messages.success(request, 'Your password has been successfully updated.')
+
+            # 尝试保存更改，并捕获保存成功或失败的信息
+            try:
+                user_profile.save()  # 尝试保存更改
+                print("Password reset confirmed:", user_profile.is_password_reset_confirmed)  # 保存成功
+                messages.success(request, 'Your password has been successfully updated.')
+            except Exception as e:
+                # 捕获保存错误并输出
+                print("Error saving user profile:", e)
+                messages.error(request, 'Failed to update profile. Please try again later.')
         else:
+            print("Token does not match.")  # 如果令牌不匹配
             messages.error(request, 'Password reset link is invalid or expired.')
-    except (User.DoesNotExist, UserProfile.DoesNotExist):
+    except User.DoesNotExist:
+        print("User does not exist.")  # 用户不存在
         messages.error(request, 'User does not exist.')
+    except UserProfile.DoesNotExist:
+        print("User profile does not exist.")  # 用户配置文件不存在
+        messages.error(request, 'User profile does not exist.')
 
-    return redirect('/login/')  # 重定向到登录页面
+    return redirect('/login/')
 
+
+def dashboard(request):
+    return render(request, 'dashboard.html')
+
+
+def datatable(request):
+    return render(request, 'datatable.html')
