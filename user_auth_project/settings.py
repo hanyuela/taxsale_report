@@ -91,8 +91,9 @@ USE_L10N = True
 
 USE_TZ = True
 
-STATIC_URL = '/assets/'
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'assets')]
-
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, "assets"),  # 拼接 BASE_DIR 和 assets 文件夹路径
+]
 LOGIN_URL = '/login/'
 
