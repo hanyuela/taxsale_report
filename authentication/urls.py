@@ -14,4 +14,5 @@ urlpatterns = [
     path('dashboard/', views.dashboard, name='dashboard'),
     path('request_password_reset/', views.request_password_reset, name='request_password_reset'),
     path('reset/<uidb64>/<token>/', views.reset_password, name='reset_password'),
+    path('footer-light', views.footer_light, name='footer-light'),
 ]

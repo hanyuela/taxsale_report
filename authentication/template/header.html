@@ -1,16 +1,17 @@
 <!-- Page Header Start-->
+{% load static %}
 <div class="page-header">
     <div class="header-wrapper row m-0">
         <div class="header-logo-wrapper col-auto p-0">
             <div class="logo-wrapper">
                 <a href="{% url 'index' %}">
-                    <img class="img-fluid for-light" src="../assets/images/logo/logo.png" alt="">
-                    <img class="img-fluid for-dark" src="../assets/images/logo/logo.png" alt="">
+                    <img class="img-fluid for-light" src="{% static 'images/logo/logo.png' %}" alt="">
+                    <img class="img-fluid for-dark" src="{% static 'images/logo/logo.png' %}" alt="">
                 </a>
             </div>
             <div class="toggle-sidebar">
                 <svg class="sidebar-toggle">
-                    <use href="../assets/svg/icon-sprite.svg#stroke-animation"></use>
+                    <use href="{% static 'svg/icon-sprite.svg#stroke-animation' %}"></use>
                 </svg>
             </div>
         </div>
@@ -20,7 +21,7 @@
                     <div class="u-posRelative">
                         <input class="demo-input Typeahead-input form-control-plaintext w-100" type="text" placeholder="Type to Search .." name="q" title="" autofocus>
                         <svg class="search-bg svg-color">
-                            <use href="../assets/svg/icon-sprite.svg#search"></use>
+                            <use href="{% static 'svg/icon-sprite.svg#search' %}"></use>
                         </svg>
                     </div>
                     <div class="Typeahead-menu"> </div>
@@ -32,7 +33,7 @@
                 <li class="serchinput">
                     <div class="serchbox">
                         <svg>
-                            <use href="../assets/svg/icon-sprite.svg#search"></use>
+                            <use href="{% static 'svg/icon-sprite.svg#search' %}"></use>
                         </svg>
                     </div>
                     <div class="form-group search-form">
@@ -42,7 +43,7 @@
                 <li class="onhover-dropdown">
                     <div class="notification-box">
                         <svg>
-                            <use href="../assets/svg/icon-sprite.svg#Bell"></use>
+                            <use href="{% static 'svg/icon-sprite.svg#Bell' %}"></use>
                         </svg>
                     </div>
                     <div class="onhover-show-div notification-dropdown">
@@ -67,7 +68,7 @@
                 </li>
                 <li class="profile-nav onhover-dropdown pe-0 py-0">
                     <div class="d-flex align-items-center profile-media">
-                        <img class="b-r-25" src="../assets/images/dashboard/profile.png" alt="">
+                        <img class="b-r-25" src="{% static 'images/dashboard/profile.png' %}" alt="">
                         <div class="flex-grow-1 user">
                             {% if user.is_authenticated %}
                                 <span>{{ user.username }}</span>
@@ -77,15 +78,15 @@
                                 <p class="mb-0 font-nunito">Not logged in</p>
                             {% endif %}
                             <svg>
-                                <use href="../assets/svg/icon-sprite.svg#header-arrow-down"></use>
+                                <use href="{% static 'svg/icon-sprite.svg#header-arrow-down' %}"></use>
                             </svg>
                         </div>
                     </div>
                     <ul class="profile-dropdown onhover-show-div">
                         {% if user.is_authenticated %}
-                            <li><a href="../template/user-profile.html"><i data-feather="user"></i><span>Account</span></a></li>
-                            <li><a href="../template/letter-box.html"><i data-feather="mail"></i><span>Inbox</span></a></li>
-                            <li><a href="../template/task.html"><i data-feather="file-text"></i><span>Taskboard</span></a></li>
+                            <li><a href="{% static 'template/user-profile.html' %}"><i data-feather="user"></i><span>Account</span></a></li>
+                            <li><a href="{% static 'template/letter-box.html' %}"><i data-feather="mail"></i><span>Inbox</span></a></li>
+                            <li><a href="{% static 'template/task.html' %}"><i data-feather="file-text"></i><span>Taskboard</span></a></li>
                             <li><a href="{% url 'edit-profile' %}"><i data-feather="settings"></i><span>Settings</span></a></li>
                             <li><a href="{% url 'logout' %}"><i data-feather="log-out"></i><span>Log out</span></a></li>
                         {% else %}

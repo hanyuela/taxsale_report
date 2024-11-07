@@ -186,3 +186,7 @@ def dashboard(request):
 
 def datatable(request):
     return render(request, 'datatable.html')
+
+
+def footer_light(request):
+    return render(request, 'footer-light.html')
