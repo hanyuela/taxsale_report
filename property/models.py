@@ -8,12 +8,6 @@ class Property(models.Model):
     state = models.CharField(max_length=100)
     zip = models.CharField(max_length=20)
     parcel_number = models.CharField(max_length=50)
-    face_value = models.DecimalField(max_digits=10, decimal_places=2)
-    auction_type = models.CharField(max_length=20, choices=[('lien', 'Lien'), ('deed', 'Deed')])
-    auction_tax_year = models.IntegerField()
-    batch_number = models.CharField(max_length=50)
-    sort_no = models.CharField(max_length=50)
-    bankruptcy_flag = models.BooleanField(default=False)
     property_class = models.CharField(max_length=255)
     tax_overdue = models.BooleanField(default=False)
     accessed_land_value = models.DecimalField(max_digits=12, decimal_places=2)
@@ -43,6 +37,27 @@ class Property(models.Model):
 
     def __str__(self):
         return self.street_address
+
+
+class Auction(models.Model):
+    property = models.ForeignKey('Property', on_delete=models.CASCADE)  # Foreign key to Property
+    face_value = models.DecimalField(max_digits=10, decimal_places=2)
+    auction_type = models.CharField(
+        max_length=20,
+        choices=[('lien', 'Lien'), ('deed', 'Deed')]
+    )
+    auction_tax_year = models.IntegerField()
+    batch_number = models.CharField(max_length=50)
+    sort_no = models.CharField(max_length=50)
+    bankruptcy_flag = models.BooleanField(default=False)
+    deposit_deadline = models.DateField()  # Date field for the deposit deadline
+    auction_start = models.DateField()  # Date field for the auction start
+    auction_end = models.DateField()  # Date field for the auction end
+    redemption_period = models.IntegerField()  # Integer field for the redemption period in years
+    foreclosure_date = models.DateField()  # Date field for the foreclosure date
+
+    def __str__(self):
+        return f"Auction {self.batch_number} - {self.sort_no}"
 
 
 class Loan(models.Model):
