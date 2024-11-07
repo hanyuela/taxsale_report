@@ -56,8 +56,7 @@ def index(request):
     if request.user.is_authenticated:
         return render(request, 'index.html')  # 用户已登录，渲染 index.html
     else:
-        return render(request, 'login.html')  # 用户未登录，渲染 base.html
-
+        return redirect('login')  # 用户未登录，重定向到登录页面
 
 # 编辑个人资料页面
 def edit_profile(request):
