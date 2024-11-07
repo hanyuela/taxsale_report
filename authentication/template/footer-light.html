@@ -287,13 +287,14 @@
               <li class="profile-nav onhover-dropdown pe-0 py-0">
                 <div class="d-flex align-items-center profile-media">
                   <img class="b-r-25" src="{% static 'images/dashboard/profile.png' %}" alt="">
-                  <div class="flex-grow-1 user"><span>Helen Walter</span>
+                  <div class="flex-grow-1 user">
+                    <span>{{ user.email }}</span> <!-- 显示当前登录用户的邮箱 -->
                     <p class="mb-0 font-nunito">Admin 
-                      <svg>
-                        <use href="{% static 'svg/icon-sprite.svg#header-arrow-down' %}"></use>
-                      </svg>
+                        <svg>
+                            <use href="{% static 'svg/icon-sprite.svg#header-arrow-down' %}"></use>
+                        </svg>
                     </p>
-                  </div>
+                </div>                
                 </div>                
                 <ul class="profile-dropdown onhover-show-div">
                   <li><a href="../template/user-profile.html"><i data-feather="user"></i><span>Account </span></a></li>
