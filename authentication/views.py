@@ -35,19 +35,15 @@ def user_login(request):
         user = authenticate(request, username=email, password=password)
 
         if user is not None:
-            user_profile = UserProfile.objects.get(user=user)
-            if user_profile.is_password_reset_confirmed:
-                login(request, user)
-                messages.success(request, "Login successful!")
-                return redirect("index")
-            else:
-                messages.error(request, "Please confirm your password reset by clicking the link in your email.")
-                return redirect("login")
+            login(request, user)
+            messages.success(request, "Login successful!")
+            return redirect("index")
         else:
             messages.error(request, "Invalid email or password, please try again.")
             return redirect("login")
     
     return render(request, "login.html")
+
 
 
 def logout(request):
