@@ -26,6 +26,7 @@ INSTALLED_APPS = [
     'authentication',
     'property',
     'dashboard',
+    'criterion',
 ]
 
 MIDDLEWARE = [
