@@ -7,8 +7,7 @@ class UserProfile(models.Model):
     address = models.CharField(max_length=255, blank=True, null=True)
     birth_date = models.DateField(blank=True, null=True)
     profile_picture = models.ImageField(upload_to='profile_pics/', blank=True, null=True)
-    password_reset_token = models.UUIDField(blank=True, null=True)  # 添加这个字段
-
+    is_password_reset_confirmed = models.BooleanField(default=False)  # 添加字段
     def __str__(self):
         return self.user.username
 
