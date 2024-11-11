@@ -27,7 +27,7 @@ INSTALLED_APPS = [
     'property',
     'dashboard',
     'criterion',
-    'My Holdings',
+    'holdings',
 ]
 
 MIDDLEWARE = [
