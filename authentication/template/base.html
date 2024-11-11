@@ -41,6 +41,26 @@
     <link rel="stylesheet" type="text/css" href="{% static 'css/responsive.css' %}">
   </head>
   <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .page-wrapper {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .page-body-wrapper {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
     .notifications {
       position: fixed; /* 固定在页面顶部 */
       top: 0;
