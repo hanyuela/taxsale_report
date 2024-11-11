@@ -2,58 +2,7 @@
 <html lang="en">
   <head>
     {% load static %}
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Zono admin is super flexible, powerful, clean &amp; modern responsive bootstrap 5 admin template with unlimited possibilities.">
-    <meta name="keywords" content="admin template, Zono admin template, dashboard template, flat admin template, responsive admin template, web app">
-    <meta name="author" content="pixelstrap">
-    <link rel="icon" href="{% static 'images/favicon.png' %}" type="image/x-icon">
-    <link rel="shortcut icon" href="{% static 'images/favicon.png' %}" type="image/x-icon">
-    <title>Zono - Premium Admin Template</title>
-    <!-- Google font -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
-    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@200;300;400;600;700;800;900&amp;display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,500,500i,700,700i,900&amp;display=swap" rel="stylesheet">
-    <link rel="stylesheet" type="text/css" href="{% static 'css/font-awesome.css' %}">
-    <!-- ico-font-->
-    <link rel="stylesheet" type="text/css" href="{% static 'css/vendors/icofont.css' %}">
-    <!-- Themify icon-->
-    <link rel="stylesheet" type="text/css" href="{% static 'css/vendors/themify.css' %}">
-    <!-- Flag icon-->
-    <link rel="stylesheet" type="text/css" href="{% static 'css/vendors/flag-icon.css' %}">
-    <!-- Feather icon-->
-    <link rel="stylesheet" type="text/css" href="{% static 'css/vendors/feather-icon.css' %}">
-    <!-- Plugins css start-->
-    <link rel="stylesheet" type="text/css" href="{% static 'css/vendors/slick.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'css/vendors/slick-theme.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'css/vendors/scrollbar.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'css/vendors/animate.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'css/vendors/prism.css' %}">
-    <!-- Plugins css Ends-->
-    <!-- Bootstrap css-->
-    <link rel="stylesheet" type="text/css" href="{% static 'css/vendors/bootstrap.css' %}">
-    <!-- App css-->
-    <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
-    <link id="color" rel="stylesheet" href="{% static 'css/color-1.css' %}" media="screen">
-    <!-- Responsive css-->
-    <link rel="stylesheet" type="text/css" href="{% static 'css/responsive.css' %}">
   </head>
-  <style>
-    .notifications {
-      position: fixed; /* 固定在页面顶部 */
-      top: 0;
-      left: 0;
-      width: 100%; /* 占据整个宽度 */
-      z-index: 1050; /* 确保层级高于其他元素 */
-      padding: 10px;
-    }
-  
-    .notifications .alert {
-      margin-bottom: 5px;
-    }
-  </style>
   <body>
     <!-- 顶部显示通知 -->
     {% if messages %}
@@ -66,55 +15,6 @@
     <!-- loader starts-->
     {% include 'base.html' %}
     <!-- latest jquery-->
-    <script src="{% static 'js/jquery.min.js' %}"></script>
-    <!-- Bootstrap js-->
-    <script src="{% static 'js/bootstrap/bootstrap.bundle.min.js' %}"></script>
-    <!-- feather icon js-->
-    <script src="{% static 'js/icons/feather-icon/feather.min.js' %}"></script>
-    <script src="{% static 'js/icons/feather-icon/feather-icon.js' %}"></script>
-    <!-- scrollbar js-->
-    <script src="{% static 'js/scrollbar/simplebar.js' %}"></script>
-    <script src="{% static 'js/scrollbar/custom.js' %}"></script>
-    <!-- Sidebar jquery-->
-    <script src="{% static 'js/config.js' %}"></script>
-    <!-- Plugins JS start-->
-    <script src="{% static 'js/sidebar-menu.js' %}"></script>
-    <script src="{% static 'js/sidebar-pin.js' %}"></script>
-    <script src="{% static 'js/slick/slick.min.js' %}"></script>
-    <script src="{% static 'js/slick/slick.js' %}"></script>
-    <script src="{% static 'js/header-slick.js' %}"></script>
-    <script src="{% static 'js/prism/prism.min.js' %}"></script>
-    <script src="{% static 'js/clipboard/clipboard.min.js' %}"></script>
-    <script src="{% static 'js/custom-card/custom-card.js' %}"></script>
-    <script src="{% static 'js/typeahead/handlebars.js' %}"></script>
-    <script src="{% static 'js/typeahead/typeahead.bundle.js' %}"></script>
-    <script src="{% static 'js/typeahead/typeahead.custom.js' %}"></script>
-    <script src="{% static 'js/typeahead-search/handlebars.js' %}"></script>
-    <script src="{% static 'js/typeahead-search/typeahead-custom.js' %}"></script>
-    <script src="{% static 'js/hide-on-scroll.js' %}"></script>
-    <!-- Plugins JS Ends-->
-    <!-- Theme js-->
-    <script src="{% static 'js/script.js' %}"></script>
-    <script src="{% static 'js/theme-customizer/customizer.js' %}"></script>
-    <!-- Plugin used-->
-     <!-- 添加 JavaScript 来实现自动隐藏通知 -->
-    <script>
-      // 等待页面加载完成后执行
-      document.addEventListener("DOMContentLoaded", function() {
-          // 选择所有的通知元素
-          const notifications = document.querySelectorAll('.notifications .alert');
-          notifications.forEach(notification => {
-              // 设置一个定时器，3秒后开始淡出效果
-              setTimeout(() => {
-                  notification.style.transition = "opacity 0.5s";
-                  notification.style.opacity = "0";
-                  // 在淡出效果完成后，彻底隐藏通知元素
-                  setTimeout(() => {
-                      notification.style.display = "none";
-                  }, 500);
-              }, 3000); // 3秒后开始淡出
-          });
-      });
-    </script>
+    
   </body>
 </html>
