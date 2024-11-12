@@ -40,9 +40,9 @@
               </svg><span>Dashboard </span>
             </a>
           </li>
-          <li class="mega-menu sidebar-list">
+          <li class="sidebar-list">
             <i class="fa fa-thumb-tack"></i>
-            <a class="sidebar-link sidebar-title" href="{% url 'datatable' %}">
+            <a class="sidebar-link sidebar-title" href="{% url 'datatable' %}" target="_blank">
               <svg class="stroke-icon">
                 <use href="{% static 'svg/icon-sprite.svg#stroke-others' %}"></use>
               </svg>
@@ -50,50 +50,10 @@
                 <use href="{% static 'svg/icon-sprite.svg#fill-others' %}"></use>
               </svg><span>Auction Data</span>
             </a>
-            <div class="mega-menu-container menu-content">
-              <div class="container-fluid">
-                <div class="row">
-                  <div class="col mega-box">
-                    <div class="link-section">
-                      <div class="submenu-title">
-                        <h5>Stater-kit</h5>
-                      </div>
-                      <ul class="submenu-content opensubmegamenu">
-                        <li><a href="{% url 'index' %}">Layout Light</a></li>
-                        <li><a href="layout-dark.html">Layout Dark</a></li>
-                      </ul>
-                    </div>
-                  </div>
-                  <div class="col mega-box">
-                    <div class="link-section">
-                      <div class="submenu-title">
-                        <h5>Page Layout</h5>
-                      </div>
-                      <ul class="submenu-content opensubmegamenu">
-                        <li><a href="boxed.html">Boxed</a></li>
-                        <li><a href="layout-rtl.html">RTL</a></li>
-                      </ul>
-                    </div>
-                  </div>
-                  <div class="col mega-box">
-                    <div class="link-section">
-                      <div class="submenu-title">
-                        <h5>Footers</h5>
-                      </div>
-                      <ul class="submenu-content opensubmegamenu">
-                        <li><a href="footer-light.html">Footer Light</a></li>
-                        <li><a href="footer-dark.html">Footer Dark</a></li>
-                        <li><a href="footer-fixed.html">Footer Fixed</a></li>
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
           </li>
           <li class="sidebar-list">
             <i class="fa fa-thumb-tack"></i>
-            <a class="sidebar-link sidebar-title" href="https://support.pixelstrap.com/portal/en/signin" target="_blank">
+            <a class="sidebar-link sidebar-title" href="{% url 'holdings' %}" target="_blank">
               <svg class="stroke-icon">
                 <use href="{% static 'svg/icon-sprite.svg#stroke-social' %}"></use>
               </svg>
@@ -104,7 +64,7 @@
           </li>
           <li class="sidebar-list">
             <i class="fa fa-thumb-tack"></i>
-            <a class="sidebar-link sidebar-title" href="https://docs.pixelstrap.com/Zono/html/document/" target="_blank">
+            <a class="sidebar-link sidebar-title" href="{% url 'criterion' %}" target="_blank">
               <svg class="stroke-icon">
                 <use href="{% static 'svg/icon-sprite.svg#stroke-form' %}"></use>
               </svg>
