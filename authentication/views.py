@@ -48,7 +48,7 @@ def user_login(request):
 
 def logout(request):
     django_logout(request)
-    messages.success(request, "您已成功退出")
+    messages.success(request, "You have successfully exited")
     return redirect("index")  # 重定向到 index 视图，确保该视图渲染 base.html
 
 
@@ -189,3 +189,9 @@ def datatable(request):
 
 def footer_light(request):
     return render(request, 'footer-light.html')
+
+def holdings(request):
+    return render(request, 'holdings.html')
+
+def criterion(request):
+    return render(request, 'criterion.html')
