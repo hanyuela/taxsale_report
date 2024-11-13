@@ -32,7 +32,6 @@ class Criterion(models.Model):
     property_type = models.CharField(max_length=30, choices=PROPERTY_TYPE_CHOICES)
     market_value = models.DecimalField(max_digits=12, decimal_places=2)
     budget_face_value = models.DecimalField(max_digits=12, decimal_places=2)
-    total_budget = models.DecimalField(max_digits=12, decimal_places=2)
 
     def __str__(self):
         return f"{self.auction_type} - {self.goal}"
