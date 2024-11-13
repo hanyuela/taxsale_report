@@ -51,18 +51,21 @@ def logout(request):
     messages.success(request, "You have successfully exited")
     return redirect("index")  # 重定向到 index 视图，确保该视图渲染 base.html
 
-
+@login_required
 def index(request):
     if request.user.is_authenticated:
         return render(request, 'index.html')  # 用户已登录，渲染 index.html
     else:
         return redirect('login')  # 用户未登录，重定向到登录页面
+    
 
 # 编辑个人资料页面
+@login_required
 def edit_profile(request):
     return render(request, 'edit-profile.html')
 
 # 数据表页面
+@login_required
 def datatable(request):
     return render(request, 'datatable.html')
 
@@ -99,10 +102,6 @@ def signup_wizard(request):
             return redirect('index')  # 重定向到主页
 
     return render(request, 'sign-up-wizard.html')
-
-
-def template_index(request):
-    return render(request, 'template/index.html')  # 渲染 template/index.html
 
 
 
@@ -178,20 +177,22 @@ def reset_password(request, uidb64, token):
         messages.error(request, 'Invalid or expired reset link.')
         return redirect('request_password_reset')
 
-
+@login_required
 def dashboard(request):
     return render(request, 'dashboard.html')
 
-
+@login_required
 def datatable(request):
     return render(request, 'datatable.html')
 
-
+@login_required
 def footer_light(request):
     return render(request, 'footer-light.html')
+@login_required
 
 def holdings(request):
     return render(request, 'holdings.html')
 
+@login_required
 def criterion(request):
     return render(request, 'criterion.html')
