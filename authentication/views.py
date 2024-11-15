@@ -75,26 +75,35 @@ def datatable(request):
 def error_503(request):
     return render(request, 'error-503.html')
 
-# views.py
+#注册页面
 def signup_wizard(request):
     if request.method == 'POST':
-        email = request.POST['email']
-        password = request.POST['password']
-        confirm_password = request.POST['confirm_password']
+        email = request.POST.get('email', '').strip()
+        password = request.POST.get('password', '').strip()
+        confirm_password = request.POST.get('confirm_password', '').strip()
+
+        # 检查邮箱和密码是否为空
+        if not email and not password:
+            messages.error(request, "Email and Password are required fields.")
+            return render(request, 'sign-up-wizard.html')
         
-        # 检查密码是否匹配
-        if password != confirm_password:
-            messages.error(request, "两次输入的密码不一致，请重试。")
+        if not email:
+            messages.error(request, "Email is required.")
+            return render(request, 'sign-up-wizard.html')
+
+        if not password:
+            messages.error(request, "Password is required.")
+            return render(request, 'sign-up-wizard.html')
+
+        # 检查邮箱是否已注册
+        if User.objects.filter(username=email).exists():
+            messages.error(request, "This email is already registered.")
             return render(request, 'sign-up-wizard.html')
 
         # 创建用户并存入数据库
-        if User.objects.filter(username=email).exists():
-            messages.error(request, "Email is already registered.")
-            return render(request, 'sign-up-wizard.html')
-        
         user = User.objects.create_user(username=email, email=email, password=password)
         user.save()
-        
+
         # 自动登录用户
         user = authenticate(username=email, password=password)
         if user is not None:
