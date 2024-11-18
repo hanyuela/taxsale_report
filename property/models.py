@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 # Create your models here.
 
@@ -32,7 +33,7 @@ class Property(models.Model):
     flood_risk = models.CharField(max_length=100, blank=True, null=True)
     latest_sale_date = models.DateField()
     latest_sale_price = models.DecimalField(max_digits=12, decimal_places=2)
-
+    foreclose_score = models.PositiveSmallIntegerField(default=0, validators=[MinValueValidator(0), MaxValueValidator(5)])  # Foreclosure score ranging from 0 (lowest) to 5 (highest).
     owners = models.ManyToManyField('Owner', related_name='properties')
 
     def __str__(self):
@@ -55,6 +56,7 @@ class Auction(models.Model):
     auction_end = models.DateField()  # Date field for the auction end
     redemption_period = models.IntegerField()  # Integer field for the redemption period in years
     foreclosure_date = models.DateField()  # Date field for the foreclosure date
+    authority_name = models.CharField(max_length=255)  # Name of the authority hosting the tax sale auction, e.g., County or City.
 
     def __str__(self):
         return f"Auction {self.batch_number} - {self.sort_no}"
