@@ -115,19 +115,19 @@
                                           <label for="tax_lien">Tax Lien</label>
                                       </div>
                                       <div style="width: 48%;"> <!-- 减小每项的宽度 -->
-                                          <input type="checkbox" id="tax_deed" name="interests" value="Tax Deed" {% if 'Tax Deed' in user_criteria.interests %}checked{% endif %}>
-                                          <label for="tax_deed">Tax Deed</label>
-                                      </div>
-                                      <div style="width: 48%;"> <!-- 减小每项的宽度 -->
                                           <input type="checkbox" id="online_auction" name="interests" value="Online auction" {% if 'Online auction' in user_criteria.interests %}checked{% endif %}>
                                           <label for="online_auction">Online auction</label>
+                                      </div>
+                                      <div style="width: 48%;"> <!-- 减小每项的宽度 -->
+                                          <input type="checkbox" id="tax_deed" name="interests" value="Tax Deed" {% if 'Tax Deed' in user_criteria.interests %}checked{% endif %}>
+                                          <label for="tax_deed">Tax Deed</label>
                                       </div>
                                       <div style="width: 48%;"> <!-- 减小每项的宽度 -->
                                           <input type="checkbox" id="in_person" name="interests" value="In person" {% if 'In person' in user_criteria.interests %}checked{% endif %}>
                                           <label for="in_person">In person</label>
                                       </div>
                                   </div>
-                                </div>   
+                                </div>                                 
                                 <div class="mb-3">
                                     <label class="form-label" for="states">Select States</label>
                                     <select id="states" name="states" class="form-control" multiple>
