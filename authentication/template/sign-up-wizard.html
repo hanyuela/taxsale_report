@@ -43,7 +43,15 @@
     align-items: center;
     justify-content: start;
     margin-bottom: 10px; /* 设置适当的间距 */
-  }
+    }
+
+    li a h4 {
+    margin-top: 10px; /* 调整这个值以控制下移的距离 */   
+    }
+
+    li a h5 {
+      margin-top: 20px; /* 调整这个值以控制标题下移的距离 */
+    }
   </style>
   <body>
     {% if messages %}
@@ -53,261 +61,295 @@
     {% endif %}
     <!-- login page start-->
     <div class="container-fluid">
-        <div class="row">
+      <div class="row">
           <div class="col-12 p-0">
-            <div>
-                <div class="theme-form">                     
-                    <div class="wizard-4" id="wizard">                       
-                        <ul class="custom-scrollbar">
-                            <li>
-                              <a class="logo text-start" href="{% url 'index' %}">
-                                <img class="img-fluid for-light" src="{% static 'images/logo/logo.png' %}" alt="loginpage">
-                                <img class="img-fluid for-dark" src="{% static 'images/logo/logo_dark.png' %}" alt="loginpage">
-                              </a>
+              <div>
+                  <div class="theme-form">
+                      <div class="wizard-4" id="wizard">
+                          <ul class="custom-scrollbar">
+                              <li>
+                                  <a class="logo text-start" href="{% url 'index' %}">
+                                      <img class="img-fluid for-light" src="{% static 'images/logo/logo.png' %}" alt="loginpage">
+                                      <img class="img-fluid for-dark" src="{% static 'images/logo/logo_dark.png' %}" alt="loginpage">
+                                  </a>
+                              </li>
+                              <li>
+                                  <a href="#step-1">
+                                      <h4>1</h4>
+                                      <h5>Register</h5>
+                                  </a>
+                              </li>
+                              <li>
+                                  <a href="#step-2">
+                                      <h4>2</h4>
+                                      <h5>Personal</h5>
+                                  </a>
+                              </li>
+                              <li>
+                                  <a href="#step-3">
+                                      <h4>3</h4>
+                                      <h5>Preferences</h5>
+                                  </a>
+                              </li>
+                              <li>
+                                  <a href="#step-4">
+                                      <h4>4</h4>
+                                      <h5>Done <i class="fa fa-thumbs-o-up"></i></h5>
+                                  </a>
+                              </li>
+                              <li>
                             </li>
-                            <li>
-                              <a href="#step-1">
-                                <h4>1</h4>
-                                <h5>Personal</h5><small>Add personal details</small>
-                              </a>
-                            </li>
-                            <li>
-                              <a href="#step-2">
-                                <h4>2</h4>
-                                <h5>Address</h5><small>Add additional info</small>
-                              </a>
-                            </li>
-                            <li>
-                              <a href="#step-3">
-                                <h4>3</h4>
-                                <h5>Message</h5><small>Add message(optional)</small>
-                              </a>
-                            </li>
-                            <li>
-                              <a href="#step-4">
-                                <h4>4</h4>
-                                <h5>Done <i class="fa fa-thumbs-o-up"></i></h5>
-                                <small>Complete.. !</small>
-                              </a>
-                            </li>
-                            <li>
-                            </li>                             
-                          </ul>                           
-                        <!-- Step 1: Sign Up -->
-                        <div id="step-1">
-                          <div class="wizard-title">
-                              <h2>Sign Up to Account</h2>
-                              <h5 class="text-muted mb-4">Enter your email & password to sign up</h5>
-                          </div>
-                          <div class="login-main">
-                              <div class="theme-form">
-                                  <form id="signupForm" action="{% url 'sign-up-wizard' %}" method="POST">
-                                      {% csrf_token %}
-                                      <div class="form-group mb-3 m-t-15">
-                                          <label for="email">Email Address</label>
-                                          <input class="form-control" id="email" type="email" name="email" placeholder="name@example.com">
-                                      </div>
-                                      <div class="form-group mb-3">
-                                          <label for="password">Password</label>
-                                          <input class="form-control" id="password" type="password" name="password" placeholder="Password">
-                                      </div>
-                                      <div class="form-group mb-3">
-                                          <label for="confirm_password">Confirm Password</label>
-                                          <input class="form-control" id="confirm_password" type="password" name="confirm_password" placeholder="Confirm Password">
-                                          <div id="passwordError" class="text-danger" style="display: none;">Passwords do not match!</div>
-                                      </div>
-                                      <button type="submit" class="btn btn-primary w-100">Sign Up</button>
-                                  </form>
+                          </ul>
+
+                          <!-- Step 1: Sign Up -->
+                          <div id="step-1">
+                              <div class="wizard-title">
+                                  <h2>Sign Up to Account</h2>
+                                  <h5 class="text-muted mb-4">Enter your email & password to sign up</h5>
                               </div>
-                          </div>
-                        </div>                     
-                        <!-- Step 2: Personal Information -->
-                        <div id="step-2">
-                            <div class="wizard-title">
-                            <h2>Personal Information</h2>
-                            <h5 class="text-muted mb-4">Enter your name and contact information</h5>
-                            </div>
-                            <div class="login-main">
-                            <div class="theme-form">
-                                <form action="{% url 'sign-up-wizard' %}" method="POST">
-                                {% csrf_token %}
-                                <div class="form-group mb-3">
-                                    <label for="first_name">First Name</label>
-                                    <input class="form-control" id="first_name" type="text" name="first_name" placeholder="John" required>
-                                </div>
-                                <div class="form-group mb-3">
-                                    <label for="last_name">Last Name</label>
-                                    <input class="form-control" id="last_name" type="text" name="last_name" placeholder="Doe" required>
-                                </div>
-                                <div class="form-group mb-3">
-                                    <label for="phone_number">Phone Number</label>
-                                    <input class="form-control" id="phone_number" type="text" name="phone_number" placeholder="123-456-7890" required>
-                                </div>
-                                <div class="form-group mb-3">
-                                    <label for="investment_amount">How much are you planning to invest in tax sales?</label>
-                                    <input class="form-control" id="investment_amount" type="number" name="investment_amount" placeholder="Investment amount" required>
-                                </div>
-                                
-                                </form>
-                            </div>
-                            </div>
-                        </div>  
-                        <!-- Step 3: User Preferences -->
-                        <div id="step-3">
-                          <div class="wizard-title">
-                              <h2>User Preferences</h2>
-                              <h5 class="text-muted mb-4">Select your preferences for investment</h5>
-                          </div>
-                          <div class="login-main">
-                              <div class="theme-form">
-                                  <form action="{% url 'sign-up-wizard' %}" method="POST">
-                                      {% csrf_token %}
-                                      <div class="form-group mb-3">
-                                          <label for="investment_purpose">What is your main purpose for investing in tax sales?</label><br>
-                                          <input type="radio" id="earn_interest" name="investment_purpose" value="Earn Interest">
-                                          <label for="earn_interest">Earn Interest</label><br>
-                                          <input type="radio" id="foreclose_property" name="investment_purpose" value="Foreclose on properties">
-                                          <label for="foreclose_property">Foreclose on properties</label><br>
-                                      </div>                   
-                                      
-                                      <!-- Forgot Password and Login Links -->
-                                      <div class="form-group mb-3">
-                                          <a href="{% url 'request_password_reset' %}" class="text-primary">Forgot Password?</a><br>
-                                          <a href="{% url 'login' %}" class="text-primary">Already have an account? Login</a>
-                                      </div>
-                                  </form>
-                              </div>
-                          </div>
-                        </div>                      
-                        <div id="step-4">
-                            <div class="wizard-title">
-                              <h2>Address Information</h2>
-                              <h5 class="text-muted mb-4">Enter your country, state, and city</h5>
-                            </div>
-                            <div class="login-main">
-                              <div class="theme-form">
-                                <form action="{% url 'sign-up-wizard' %}" method="POST">
-                                  {% csrf_token %}
-                                  <div class="form-group mb-3">
-                                    <label for="tax_lien_interest">Are you interested in:</label>
-                                    <div class="interest-container" style="display: flex; justify-content: space-between; margin-top: 10px;">
-                                        <div class="interest-group" style="display: flex; flex-direction: column; align-items: flex-start; gap: 8px;">
-                                            <label for="tax_lien" style="display: flex; align-items: center;">
-                                                <input type="checkbox" id="tax_lien" name="tax_lien" value="Tax Lien" style="margin-right: 5px;">
-                                                Tax Lien
-                                            </label>
-                                            <label for="tax_deed" style="display: flex; align-items: center;">
-                                                <input type="checkbox" id="tax_deed" name="tax_deed" value="Tax Deed" style="margin-right: 5px;">
-                                                Tax Deed
-                                            </label>
-                                        </div>
-                                        <div class="interest-group" style="display: flex; flex-direction: column; align-items: flex-start; gap: 8px;">
-                                            <label for="online_auction" style="display: flex; align-items: center;">
-                                                <input type="checkbox" id="online_auction" name="online_auction" value="Online auction" style="margin-right: 5px;">
-                                                Online auction
-                                            </label>
-                                            <label for="in_person" style="display: flex; align-items: center;">
-                                                <input type="checkbox" id="in_person" name="in_person" value="In person" style="margin-right: 5px;">
-                                                In person
-                                            </label>
-                                        </div>
-                                    </div>
+                              <div class="login-main">
+                                  <div class="theme-form">
+                                      <form id="form-step-1">
+                                          <div class="form-group mb-3 m-t-15">
+                                              <label for="email">Email Address</label>
+                                              <input class="form-control" id="email" type="email" name="email" placeholder="name@example.com">
+                                          </div>
+                                          <div class="form-group mb-3">
+                                              <label for="password">Password</label>
+                                              <input class="form-control" id="password" type="password" name="password" placeholder="Password">
+                                          </div>
+                                          <div class="form-group mb-3">
+                                              <label for="confirm_password">Confirm Password</label>
+                                              <input class="form-control" id="confirm_password" type="password" name="confirm_password" placeholder="Confirm Password">
+                                              <div id="passwordError" class="text-danger" style="display: none;">Passwords do not match!</div>
+                                          </div>
+                                          <div class="form-group mb-3" style="text-align: center;">
+                                              <a href="{% url 'request_password_reset' %}" class="text-primary">Forgot Password?</a><br>
+                                              <a href="{% url 'login' %}" class="text-primary">Already have an account? Login</a>
+                                          </div>
+                                      </form>
                                   </div>
-                                  <div class="col-12"> 
-                                    <div class="card w-100"> 
-                                        <div class="card-header pb-0"> 
-                                            <h4>Select States</h4>
-                                            <p class="f-m-light mt-1">
-                                               Use the multi-select dropdown to select one or more states.
-                                            </p>
-                                        </div>
-                                        <div class="card-body"> 
-                                            <form>
-                                                <select class="form-control mt-1" name="state" id="state" multiple required>
-                                                    <option value="AL">Alabama</option>
-                                                    <option value="AK">Alaska</option>
-                                                    <option value="AZ">Arizona</option>
-                                                    <option value="AR">Arkansas</option>
-                                                    <option value="CA">California</option>
-                                                    <option value="CO">Colorado</option>
-                                                    <option value="CT">Connecticut</option>
-                                                    <option value="DE">Delaware</option>
-                                                    <option value="DC">Washington, D.C.</option>
-                                                    <option value="FL">Florida</option>
-                                                    <option value="GA">Georgia</option>
-                                                    <option value="HI">Hawaii</option>
-                                                    <option value="ID">Idaho</option>
-                                                    <option value="IL">Illinois</option>
-                                                    <option value="IN">Indiana</option>
-                                                    <option value="IA">Iowa</option>
-                                                    <option value="KS">Kansas</option>
-                                                    <option value="KY">Kentucky</option>
-                                                    <option value="LA">Louisiana</option>
-                                                    <option value="ME">Maine</option>
-                                                    <option value="MD">Maryland</option>
-                                                    <option value="MA">Massachusetts</option>
-                                                    <option value="MI">Michigan</option>
-                                                    <option value="MN">Minnesota</option>
-                                                    <option value="MS">Mississippi</option>
-                                                    <option value="MO">Missouri</option>
-                                                    <option value="MT">Montana</option>
-                                                    <option value="NE">Nebraska</option>
-                                                    <option value="NV">Nevada</option>
-                                                    <option value="NH">New Hampshire</option>
-                                                    <option value="NJ">New Jersey</option>
-                                                    <option value="NM">New Mexico</option>
-                                                    <option value="NY">New York</option>
-                                                    <option value="NC">North Carolina</option>
-                                                    <option value="ND">North Dakota</option>
-                                                    <option value="OH">Ohio</option>
-                                                    <option value="OK">Oklahoma</option>
-                                                    <option value="OR">Oregon</option>
-                                                    <option value="PA">Pennsylvania</option>
-                                                    <option value="RI">Rhode Island</option>
-                                                    <option value="SC">South Carolina</option>
-                                                    <option value="SD">South Dakota</option>
-                                                    <option value="TN">Tennessee</option>
-                                                    <option value="TX">Texas</option>
-                                                    <option value="UT">Utah</option>
-                                                    <option value="VT">Vermont</option>
-                                                    <option value="VA">Virginia</option>
-                                                    <option value="WA">Washington</option>
-                                                    <option value="WV">West Virginia</option>
-                                                    <option value="WI">Wisconsin</option>
-                                                    <option value="WY">Wyoming</option>
-                                                </select>
-                                            </form>
-                                        </div>
-                                    </div>
-                                  </div>
-                                  <button type="submit" class="btn btn-primary w-100">Complete Registration</button>
-                                </form>
                               </div>
-                            </div>
                           </div>
-                    </div>
-                    </div>
-                </div>
-            </div>
-      <!-- latest jquery-->
-      <script src="{% static 'js/jquery.min.js' %}"></script>
-      <!-- Bootstrap js-->
-      <script src="{% static 'js/bootstrap/bootstrap.bundle.min.js' %}"></script>
-      <!-- feather icon js-->
-      <script src="{% static 'js/icons/feather-icon/feather.min.js' %}"></script>
-      <script src="{% static 'js/icons/feather-icon/feather-icon.js' %}"></script>
-      <!-- scrollbar js-->
-      <!-- Sidebar jquery-->
-      <script src="{% static 'js/config.js' %}"></script>
-      <!-- Plugins JS start-->
-      <script src="{% static 'js/form-wizard/form-wizard-five.js' %}"></script>
-      <script src="{% static 'js/tooltip-init.js' %}"></script>
-      <!-- Plugins JS Ends-->
-      <!-- Theme js-->
-      <script src="{% static 'js/script.js' %}"></script>
-      <script src="{% static 'js/theme-customizer/customizer.js' %}"></script>
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
-      <!-- Plugin used-->
+
+                          <!-- Step 2: Personal Information -->
+                          <div id="step-2">
+                              <div class="wizard-title">
+                                  <h2>Personal Information</h2>
+                                  <h5 class="text-muted mb-4">Enter your name and contact information</h5>
+                              </div>
+                              <div class="login-main">
+                                  <div class="theme-form">
+                                      <form id="form-step-2">
+                                          <div class="form-group mb-3">
+                                              <label for="first_name">First Name</label>
+                                              <input class="form-control" id="first_name" type="text" name="first_name" placeholder="John" required>
+                                          </div>
+                                          <div class="form-group mb-3">
+                                              <label for="last_name">Last Name</label>
+                                              <input class="form-control" id="last_name" type="text" name="last_name" placeholder="Doe" required>
+                                          </div>
+                                          <div class="form-group mb-3">
+                                              <label for="phone_number">Phone Number</label>
+                                              <input class="form-control" id="phone_number" type="text" name="phone_number" placeholder="123-456-7890" required>
+                                          </div>
+                                          <div class="form-group mb-3">
+                                              <label for="investment_amount">How much are you planning to invest in tax sales?</label>
+                                              <input class="form-control" id="investment_amount" type="number" name="investment_amount" placeholder="Investment amount" required>
+                                          </div>
+                                      </form>
+                                  </div>
+                              </div>
+                          </div>
+
+                          <!-- Step 3: User Preferences -->
+                          <div id="step-3">
+                              <div class="wizard-title">
+                                  <h2>User Preferences</h2>
+                                  <h5 class="text-muted mb-4">Select your preferences for investment</h5>
+                              </div>
+                              <div class="login-main">
+                                  <div class="theme-form">
+                                      <form id="form-step-3">
+                                          <div class="form-group mb-3">
+                                              <label for="investment_purpose">What is your main purpose for investing in tax sales?</label><br>
+                                              <input type="radio" id="earn_interest" name="investment_purpose" value="Earn Interest">
+                                              <label for="earn_interest">Earn Interest</label><br>
+                                              <input type="radio" id="foreclose_property" name="investment_purpose" value="Foreclose on properties">
+                                              <label for="foreclose_property">Foreclose on properties</label><br>
+                                          </div>
+                                          <div class="form-group mb-3">
+                                              <label for="property_type">What type of property are you interested in?</label>
+                                              <div class="interest-container" style="display: flex; flex-direction: column; gap: 10px;">
+                                                  <label for="single_family">
+                                                      <input type="checkbox" id="single_family" name="property_type" value="Single-Family Residential" style="margin-right: 5px;">
+                                                      Single-Family Residential
+                                                  </label>
+                                                  <label for="multi_family">
+                                                      <input type="checkbox" id="multi_family" name="property_type" value="Multi-Family Residential" style="margin-right: 5px;">
+                                                      Multi-Family Residential
+                                                  </label>
+                                                  <label for="other_residentials">
+                                                      <input type="checkbox" id="other_residentials" name="property_type" value="Other Residentials" style="margin-right: 5px;">
+                                                      Other Residentials
+                                                  </label>
+                                                  <label for="commercial">
+                                                      <input type="checkbox" id="commercial" name="property_type" value="Commercial" style="margin-right: 5px;">
+                                                      Commercial
+                                                  </label>
+                                                  <label for="vacant_land">
+                                                      <input type="checkbox" id="vacant_land" name="property_type" value="Vacant Land" style="margin-right: 5px;">
+                                                      Vacant Land
+                                                  </label>
+                                                  <label for="agricultural">
+                                                      <input type="checkbox" id="agricultural" name="property_type" value="Agricultural" style="margin-right: 5px;">
+                                                      Agricultural
+                                                  </label>
+                                                  <label for="industrial">
+                                                      <input type="checkbox" id="industrial" name="property_type" value="Industrial" style="margin-right: 5px;">
+                                                      Industrial
+                                                  </label>
+                                                  <label for="miscellaneous">
+                                                      <input type="checkbox" id="miscellaneous" name="property_type" value="Miscellaneous" style="margin-right: 5px;">
+                                                      Miscellaneous
+                                                  </label>
+                                              </div>
+                                          </div>
+                                      </form>
+                                  </div>
+                              </div>
+                          </div>
+
+                          <!-- Step 4: Done -->
+                          <div id="step-4">
+                              <div class="wizard-title">
+                                  <h2>Address Information</h2>
+                                  <h5 class="text-muted mb-4">Enter your country, state, and city</h5>
+                              </div>
+                              <div class="login-main">
+                                  <div class="theme-form">
+                                      <form id="final-form" action="{% url 'sign-up-wizard' %}" method="POST">
+                                         {% csrf_token %}
+                                          <div class="form-group mb-3">
+                                              <label for="tax_lien_interest">Are you interested in:</label>
+                                              <div class="interest-container" style="display: flex; justify-content: space-between; margin-top: 10px;">
+                                                  <div class="interest-group" style="display: flex; flex-direction: column; align-items: flex-start; gap: 8px;">
+                                                      <label for="tax_lien" style="display: flex; align-items: center;">
+                                                          <input type="checkbox" id="tax_lien" name="tax_lien" value="Tax Lien" style="margin-right: 5px;">
+                                                          Tax Lien
+                                                      </label>
+                                                      <label for="tax_deed" style="display: flex; align-items: center;">
+                                                          <input type="checkbox" id="tax_deed" name="tax_deed" value="Tax Deed" style="margin-right: 5px;">
+                                                          Tax Deed
+                                                      </label>
+                                                  </div>
+                                                  <div class="interest-group" style="display: flex; flex-direction: column; align-items: flex-start; gap: 8px;">
+                                                      <label for="online_auction" style="display: flex; align-items: center;">
+                                                          <input type="checkbox" id="online_auction" name="online_auction" value="Online auction" style="margin-right: 5px;">
+                                                          Online auction
+                                                      </label>
+                                                      <label for="in_person" style="display: flex; align-items: center;">
+                                                          <input type="checkbox" id="in_person" name="in_person" value="In person" style="margin-right: 5px;">
+                                                          In person
+                                                      </label>
+                                                  </div>
+                                              </div>
+                                          </div>
+                                          <div class="col-12">
+                                              <div class="card w-100">
+                                                  <div class="card-header pb-0">
+                                                      <h4>Select States</h4>
+                                                      <p class="f-m-light mt-1">
+                                                          Use the multi-select dropdown to select one or more states.
+                                                      </p>
+                                                  </div>
+                                                  <div class="card-body">
+                                                      <select class="form-control mt-1" name="state" id="state" multiple>
+                                                        <option value="AL">Alabama</option>
+                                                        <option value="AK">Alaska</option>
+                                                        <option value="AZ">Arizona</option>
+                                                        <option value="AR">Arkansas</option>
+                                                        <option value="CA">California</option>
+                                                        <option value="CO">Colorado</option>
+                                                        <option value="CT">Connecticut</option>
+                                                        <option value="DE">Delaware</option>
+                                                        <option value="DC">Washington, D.C.</option>
+                                                        <option value="FL">Florida</option>
+                                                        <option value="GA">Georgia</option>
+                                                        <option value="HI">Hawaii</option>
+                                                        <option value="ID">Idaho</option>
+                                                        <option value="IL">Illinois</option>
+                                                        <option value="IN">Indiana</option>
+                                                        <option value="IA">Iowa</option>
+                                                        <option value="KS">Kansas</option>
+                                                        <option value="KY">Kentucky</option>
+                                                        <option value="LA">Louisiana</option>
+                                                        <option value="ME">Maine</option>
+                                                        <option value="MD">Maryland</option>
+                                                        <option value="MA">Massachusetts</option>
+                                                        <option value="MI">Michigan</option>
+                                                        <option value="MN">Minnesota</option>
+                                                        <option value="MS">Mississippi</option>
+                                                        <option value="MO">Missouri</option>
+                                                        <option value="MT">Montana</option>
+                                                        <option value="NE">Nebraska</option>
+                                                        <option value="NV">Nevada</option>
+                                                        <option value="NH">New Hampshire</option>
+                                                        <option value="NJ">New Jersey</option>
+                                                        <option value="NM">New Mexico</option>
+                                                        <option value="NY">New York</option>
+                                                        <option value="NC">North Carolina</option>
+                                                        <option value="ND">North Dakota</option>
+                                                        <option value="OH">Ohio</option>
+                                                        <option value="OK">Oklahoma</option>
+                                                        <option value="OR">Oregon</option>
+                                                        <option value="PA">Pennsylvania</option>
+                                                        <option value="RI">Rhode Island</option>
+                                                        <option value="SC">South Carolina</option>
+                                                        <option value="SD">South Dakota</option>
+                                                        <option value="TN">Tennessee</option>
+                                                        <option value="TX">Texas</option>
+                                                        <option value="UT">Utah</option>
+                                                        <option value="VT">Vermont</option>
+                                                        <option value="VA">Virginia</option>
+                                                        <option value="WA">Washington</option>
+                                                        <option value="WV">West Virginia</option>
+                                                        <option value="WI">Wisconsin</option>
+                                                        <option value="WY">Wyoming</option>
+                                                      </select>
+                                                  </div>
+                                              </div>
+                                          </div>
+                                          <button type="submit" class="btn btn-primary w-100">Complete Registration</button>
+                                      </form>
+                                  </div>
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </div>
+    </div>
+    <!-- latest jquery-->
+    <script src="{% static 'js/jquery.min.js' %}"></script>
+    <!-- Bootstrap js-->
+    <script src="{% static 'js/bootstrap/bootstrap.bundle.min.js' %}"></script>
+    <!-- feather icon js-->
+    <script src="{% static 'js/icons/feather-icon/feather.min.js' %}"></script>
+    <script src="{% static 'js/icons/feather-icon/feather-icon.js' %}"></script>
+    <!-- scrollbar js-->
+    <!-- Sidebar jquery-->
+    <script src="{% static 'js/config.js' %}"></script>
+    <!-- Plugins JS start-->
+    <script src="{% static 'js/form-wizard/form-wizard-five.js' %}"></script>
+    <script src="{% static 'js/tooltip-init.js' %}"></script>
+    <!-- Plugins JS Ends-->
+    <!-- Theme js-->
+    <script src="{% static 'js/script.js' %}"></script>
+    <script src="{% static 'js/theme-customizer/customizer.js' %}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+    <!-- Plugin used-->
     <script>
       $(document).ready(function() {
           $('#state').select2({
@@ -318,20 +360,41 @@
       });
     </script>
     <script>
-      document.getElementById('signupForm').addEventListener('submit', function(event) {
-          // 获取密码和确认密码字段的值
-          const password = document.getElementById('password').value;
-          const confirmPassword = document.getElementById('confirm_password').value;
-          const passwordError = document.getElementById('passwordError');
-      
-          // 检查密码是否匹配
-          if (password !== confirmPassword) {
-              event.preventDefault();  // 阻止表单提交
-              passwordError.style.display = 'block';  // 显示错误提示
-          } else {
-              passwordError.style.display = 'none';  // 隐藏错误提示
+      document.getElementById('final-form').addEventListener('submit', function (event) {
+      // 获取步骤1的表单数据
+      const step1Fields = document.querySelectorAll('#form-step-1 input');
+      step1Fields.forEach(field => {
+          const hiddenInput = document.createElement('input');
+          hiddenInput.type = 'hidden';
+          hiddenInput.name = field.name;
+          hiddenInput.value = field.value;
+          document.getElementById('final-form').appendChild(hiddenInput);
+      });
+
+      // 获取步骤2的表单数据
+      const step2Fields = document.querySelectorAll('#form-step-2 input');
+      step2Fields.forEach(field => {
+          if (field.value) { // 仅拷贝非空字段
+              const hiddenInput = document.createElement('input');
+              hiddenInput.type = 'hidden';
+              hiddenInput.name = field.name;
+              hiddenInput.value = field.value;
+              document.getElementById('final-form').appendChild(hiddenInput);
           }
       });
+
+      // 获取步骤3的表单数据
+      const step3Fields = document.querySelectorAll('#form-step-3 input:checked');
+      step3Fields.forEach(field => {
+          const hiddenInput = document.createElement('input');
+          hiddenInput.type = 'hidden';
+          hiddenInput.name = field.name;
+          hiddenInput.value = field.value;
+          document.getElementById('final-form').appendChild(hiddenInput);
+      });
+
+      // 表单提交前会动态添加字段
+  });
       </script>
     </div>
   </body>
