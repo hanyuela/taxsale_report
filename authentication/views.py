@@ -8,7 +8,7 @@ from django.contrib.auth import logout as django_logout
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
 from django.core.mail import send_mail
-import uuid
+from criterion.models import Criterion, States
 from .models import UserProfile
 from email.mime.text import MIMEText
 from email.header import Header
@@ -75,43 +75,106 @@ def datatable(request):
 def error_503(request):
     return render(request, 'error-503.html')
 
-#注册页面
 def signup_wizard(request):
     if request.method == 'POST':
+        # 获取用户信息
         email = request.POST.get('email', '').strip()
         password = request.POST.get('password', '').strip()
         confirm_password = request.POST.get('confirm_password', '').strip()
 
-        # 检查邮箱和密码是否为空
-        if not email and not password:
-            messages.error(request, "Email and Password are required fields.")
-            return render(request, 'sign-up-wizard.html')
-        
+        # 初始化上下文以保留已填写数据
+        context = {
+            'email': email,
+            'auction_type': request.POST.get('auction_type', ''),
+            'investment_purpose': request.POST.get('investment_purpose', ''),
+            'property_type': request.POST.getlist('property_type'),
+            'market_value': request.POST.get('market_value', ''),
+            'budget_face_value': request.POST.get('budget_face_value', ''),
+            'states': request.POST.getlist('states'),
+            'first_name': request.POST.get('first_name', '').strip(),
+            'last_name': request.POST.get('last_name', '').strip(),
+            'phone_number': request.POST.get('phone_number', '').strip(),
+            'investment_amount': request.POST.get('investment_amount', '').strip(),
+        }
+
+        # 验证用户信息
         if not email:
             messages.error(request, "Email is required.")
-            return render(request, 'sign-up-wizard.html')
+            return render(request, 'sign-up-wizard.html', context)
 
         if not password:
             messages.error(request, "Password is required.")
-            return render(request, 'sign-up-wizard.html')
+            return render(request, 'sign-up-wizard.html', context)
 
-        # 检查邮箱是否已注册
+        if password != confirm_password:
+            messages.error(request, "Passwords do not match.")
+            return render(request, 'sign-up-wizard.html', context)
+
         if User.objects.filter(username=email).exists():
             messages.error(request, "This email is already registered.")
-            return render(request, 'sign-up-wizard.html')
+            return render(request, 'sign-up-wizard.html', context)
 
-        # 创建用户并存入数据库
-        user = User.objects.create_user(username=email, email=email, password=password)
-        user.save()
+        # 创建用户
+        try:
+            user = User.objects.create_user(username=email, email=email, password=password)
+            user.save()
+        except Exception as e:
+            messages.error(request, f"An error occurred during registration: {str(e)}")
+            return render(request, 'sign-up-wizard.html', context)
+
+        # 保存 UserProfile 信息
+        try:
+            UserProfile.objects.create(
+                user=user,
+                first_name=request.POST.get('first_name', '').strip(),
+                last_name=request.POST.get('last_name', '').strip(),
+                phone_number=request.POST.get('phone_number', '').strip(),
+                investment_amount=request.POST.get('investment_amount', '').strip() or None,
+            )
+        except Exception as e:
+            messages.error(request, f"Failed to save personal information: {str(e)}")
+            return render(request, 'sign-up-wizard.html', context)
+
+        # 保存 Criterion 信息
+        try:
+            auction_type = request.POST.get('auction_type', '').strip()
+            investment_purpose = request.POST.get('investment_purpose', '').strip()
+            property_types = request.POST.getlist('property_type')
+            market_value = request.POST.get('market_value', '').strip()
+            budget_face_value = request.POST.get('budget_face_value', '').strip()
+            selected_states = request.POST.getlist('states')
+
+            property_types_str = ",".join(property_types)
+
+            criterion = Criterion.objects.create(
+                user=user,
+                auction_type=auction_type,
+                goal=investment_purpose,
+                property_type=property_types_str,
+                market_value=market_value,
+                budget_face_value=budget_face_value,
+            )
+
+            if selected_states:
+                states = States.objects.filter(id__in=selected_states)
+                criterion.states.set(states)
+
+            criterion.save()
+        except Exception as e:
+            messages.error(request, f"Failed to save preferences: {str(e)}")
+            return render(request, 'sign-up-wizard.html', context)
 
         # 自动登录用户
         user = authenticate(username=email, password=password)
         if user is not None:
             login(request, user)
             return redirect('index')  # 重定向到主页
+        else:
+            messages.error(request, "Authentication failed. Please try logging in.")
 
-    return render(request, 'sign-up-wizard.html')
-
+    # GET 请求：渲染表单页面并提供所有州数据
+    states = States.objects.all()
+    return render(request, 'sign-up-wizard.html', {'states': states})
 
 
 # 处理第一步：请求重置密码链接
