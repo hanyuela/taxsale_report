@@ -113,16 +113,17 @@
                                           <div class="form-group mb-3 m-t-15">
                                               <label for="email">Email Address</label>
                                               <input class="form-control" id="email" type="email" name="email" placeholder="name@example.com">
+                                              <small id="emailError" class="text-danger" style="display: none;">This email is already registered.</small>
                                           </div>
                                           <div class="form-group mb-3">
-                                              <label for="password">Password</label>
-                                              <input class="form-control" id="password" type="password" name="password" placeholder="Password">
-                                          </div>
-                                          <div class="form-group mb-3">
-                                              <label for="confirm_password">Confirm Password</label>
-                                              <input class="form-control" id="confirm_password" type="password" name="confirm_password" placeholder="Confirm Password">
-                                              <div id="passwordError" class="text-danger" style="display: none;">Passwords do not match!</div>
-                                          </div>
+                                            <label for="password">Password</label>
+                                            <input class="form-control" id="password" type="password" name="password" placeholder="Password">
+                                            </div>
+                                            <div class="form-group mb-3">
+                                                <label for="confirm_password">Confirm Password</label>
+                                                <input class="form-control" id="confirm_password" type="password" name="confirm_password" placeholder="Confirm Password">
+                                                <small id="passwordError" class="text-danger" style="display: none;">Passwords do not match!</small>
+                                            </div>
                                           <div class="form-group mb-3" style="text-align: center;">
                                               <a href="{% url 'request_password_reset' %}" class="text-primary">Forgot Password?</a><br>
                                               <a href="{% url 'login' %}" class="text-primary">Already have an account? Login</a>
@@ -394,8 +395,66 @@
       });
 
       // 表单提交前会动态添加字段
-  });
+        });
+
+        document.getElementById('email').addEventListener('blur', function () {
+            const email = this.value.trim();
+
+            // 验证是否为空
+            if (!email) {
+                document.getElementById('emailError').innerText = 'Email is required.';
+                document.getElementById('emailError').style.display = 'block';
+                return;
+            }
+
+            // 发起 Ajax 请求检查邮箱
+            fetch('/check-email/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}', // 确保 CSRF token 正确设置
+                },
+                body: JSON.stringify({ email: email }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.exists) {
+                    document.getElementById('emailError').innerText = 'This email is already registered.';
+                    document.getElementById('emailError').style.display = 'block';
+                } else {
+                    document.getElementById('emailError').style.display = 'none';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('emailError').innerText = 'Error checking email. Please try again later.';
+                document.getElementById('emailError').style.display = 'block';
+            });
+        });
+
       </script>
+      <script>// 获取密码输入框
+        const passwordField = document.getElementById('password');
+        const confirmPasswordField = document.getElementById('confirm_password');
+        const passwordError = document.getElementById('passwordError');
+        
+        // 检查两次密码是否一致
+        function checkPasswordsMatch() {
+            const password = passwordField.value.trim();
+            const confirmPassword = confirmPasswordField.value.trim();
+        
+            if (password && confirmPassword && password !== confirmPassword) {
+                passwordError.innerText = 'Passwords do not match!';
+                passwordError.style.display = 'block';
+            } else {
+                passwordError.style.display = 'none';
+            }
+        }
+        
+        // 绑定事件监听
+        passwordField.addEventListener('input', checkPasswordsMatch);
+        confirmPasswordField.addEventListener('input', checkPasswordsMatch);
+        </script>
     </div>
   </body>
 </html>
