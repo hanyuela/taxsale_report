@@ -67,7 +67,7 @@ class Auction(models.Model):
     auction_end = models.DateField()  # Date field for the auction end
     redemption_period = models.IntegerField()  # Integer field for the redemption period in years
     foreclosure_date = models.DateField()  # Date field for the foreclosure date
-
+    authority_name = models.CharField(max_length=255)  # Name of the authority hosting the tax sale auction, e.g., County or City.
     def __str__(self):
         return f"Auction {self.batch_number} - {self.sort_no}"
 
