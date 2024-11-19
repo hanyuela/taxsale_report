@@ -17,4 +17,5 @@ urlpatterns = [
     path('footer-light', views.footer_light, name='footer-light'),
     path('holdings/', views.holdings, name='holdings'),
     path('criterion/', views.criterion, name='criterion'),
+    path('check-email/', views.check_email, name='check_email'),
 ]

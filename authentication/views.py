@@ -17,6 +17,10 @@ import smtplib
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
 from django.contrib.auth.tokens import default_token_generator
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+import json
+
 # 注册页面
 def register(request):
     if request.method == 'POST':
@@ -176,6 +180,17 @@ def signup_wizard(request):
     states = States.objects.all()
     return render(request, 'sign-up-wizard.html', {'states': states})
 
+@csrf_exempt  # 允许不经过 CSRF 验证，前端已提供 CSRF token
+def check_email(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            email = data.get('email', '').strip()
+            exists = User.objects.filter(username=email).exists()
+            return JsonResponse({'exists': exists})
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=400)
+    return JsonResponse({'error': 'Invalid request method.'}, status=405)
 
 # 处理第一步：请求重置密码链接
 def request_password_reset(request):
