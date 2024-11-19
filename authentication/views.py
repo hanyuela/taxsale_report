@@ -283,3 +283,7 @@ def holdings(request):
 @login_required
 def criterion(request):
     return render(request, 'criterion.html')
+
+@login_required
+def report(request):
+    return render(request, 'report.html')
