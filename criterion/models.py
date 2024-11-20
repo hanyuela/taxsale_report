@@ -29,8 +29,13 @@ class Criterion(models.Model):
     AUCTION_TYPE_CHOICES = [
         ('tax deed', 'Tax Deed'),
         ('tax lien', 'Tax Lien'),
-        ('both', 'Both'),
     ]
+    
+    IS_ONLINE_CHOICES = [
+        ('online', 'Online'),
+        ('in-person', 'In-person'),
+    ]
+
     GOAL_CHOICES = [
         ('interest', 'Interest'),
         ('foreclosure', 'Foreclosure'),
@@ -47,14 +52,13 @@ class Criterion(models.Model):
         ('miscellaneous', 'Miscellaneous'),
     ]
 
-    IS_ONLINE_CHOICES = [
-        ('online', 'Online'),
-        ('in-person', 'In-person'),
-    ]
 
     # Fields
     auction_type = models.CharField(
         max_length=10, choices=AUCTION_TYPE_CHOICES, null=True, blank=True, default=""
+    )
+    is_online = models.TextField(
+        max_length=10, choices=IS_ONLINE_CHOICES, null=True, blank=True, default=""
     )
     goal = models.CharField(
         max_length=15, choices=GOAL_CHOICES, null=True, blank=True, default=""
