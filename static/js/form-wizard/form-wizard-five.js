@@ -32,36 +32,68 @@
           c.includeFinishButton && k.append(s);
           k.append(q).append(r);
           z = p.width();
-          // 验证邮箱和密码的逻辑
-          function validateStep1() {
-            const email = $("#email").val().trim();
-            const password = $("#password").val().trim();
-            const confirmPassword = $("#confirm_password").val().trim();
-
-            if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
-              alert("Invalid email format.");
-              return false;
-            }
-            if (password.length < 6) {
-              alert("Password must be at least 6 characters.");
-              return false;
-            }
-            if (password !== confirmPassword) {
-              alert("Passwords do not match.");
-              return false;
-            }
-            return true;
+            function validateStep1(callback) {
+              const email = $("#email").val().trim();
+              const password = $("#password").val().trim();
+              const confirmPassword = $("#confirm_password").val().trim();
+          
+              // 验证邮箱格式
+              if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+                  alert("Invalid email format.");
+                  return callback(false); // 验证失败，调用回调函数返回 false
+              }
+              // 验证密码长度
+              if (password.length < 6) {
+                  alert("Password must be at least 6 characters.");
+                  return callback(false);
+              }
+              // 验证密码是否匹配
+              if (password !== confirmPassword) {
+                  alert("Passwords do not match.");
+                  return callback(false);
+              }
+          
+              // 使用 AJAX 检查邮箱是否已被注册
+              $.ajax({
+                  url: "/check-email/", // 替换为你的后端 URL
+                  type: "POST",
+                  contentType: "application/json", // 设置请求的 Content-Type
+                  data: JSON.stringify({ email: email }), // 将数据序列化为 JSON 格式
+                  headers: {
+                      "X-CSRFToken": $("input[name='csrfmiddlewaretoken']").val(), // 添加 CSRF 令牌
+                  },
+                  success: function (response) {
+                      if (response.exists) {
+                          alert("This email is already registered.");
+                          callback(false); // 邮箱已注册，返回 false
+                      } else {
+                          callback(true); // 邮箱未注册，返回 true
+                      }
+                  },
+                  error: function (xhr, status, error) {
+                      console.error("Error:", xhr.responseText); // 打印具体错误信息
+                      alert("An error occurred while checking the email. Please try again.");
+                      callback(false);
+                  },
+              });
           }
-
+          
+          // 点击按钮时的逻辑
           a(q).click(function () {
-            if (a(this).hasClass("buttonDisabled")) return !1;
-            // 在第一步时验证邮箱和密码
-            if (h === 0 && !validateStep1()) {
-              return !1;
-            }
-
-            A();
-            return !1;
+              if (a(this).hasClass("buttonDisabled")) return false;
+          
+              // 在第一步时验证邮箱和密码
+              if (h === 0) {
+                  validateStep1(function (isValid) {
+                      if (isValid) {
+                          A(); // 如果验证通过，继续下一步
+                      }
+                  });
+                  return false; // 阻止默认行为，等待回调执行
+              }
+          
+              A();
+              return false;
           });
           a(r).click(function () {
             if (a(this).hasClass("buttonDisabled")) return !1;
