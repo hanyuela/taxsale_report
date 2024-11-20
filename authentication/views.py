@@ -20,6 +20,7 @@ from django.contrib.auth.tokens import default_token_generator
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
+from django.db import transaction
 
 # 注册页面
 def register(request):
@@ -79,29 +80,44 @@ def datatable(request):
 def error_503(request):
     return render(request, 'error-503.html')
 
+
 def signup_wizard(request):
     if request.method == 'POST':
-        # 获取用户信息
+        # 获取用户提交的表单数据
         email = request.POST.get('email', '').strip()
         password = request.POST.get('password', '').strip()
         confirm_password = request.POST.get('confirm_password', '').strip()
 
+        # 获取其他字段
+        auction_type = request.POST.get('auction_type', '').strip()  # 获取 auction_type
+        is_online = request.POST.get('is_online', '').strip()  # 获取 is_online
+        investment_purpose = request.POST.get('investment_purpose', '').strip()
+        property_types = request.POST.getlist('property_type')
+        market_value_min = request.POST.get('market_value_min', '').strip()
+        market_value_max = request.POST.get('market_value_max', '').strip()
+        face_value_min = request.POST.get('face_value_min', '').strip()
+        face_value_max = request.POST.get('face_value_max', '').strip()
+        selected_states = request.POST.getlist('states')  # 前端传递的州缩写
+
         # 初始化上下文以保留已填写数据
         context = {
             'email': email,
-            'auction_type': request.POST.get('auction_type', ''),
-            'investment_purpose': request.POST.get('investment_purpose', ''),
-            'property_type': request.POST.getlist('property_type'),
-            'market_value': request.POST.get('market_value', ''),
-            'budget_face_value': request.POST.get('budget_face_value', ''),
-            'states': request.POST.getlist('states'),
+            'auction_type': auction_type,
+            'is_online': is_online,
+            'investment_purpose': investment_purpose,
+            'property_type': property_types,
+            'market_value_min': market_value_min,
+            'market_value_max': market_value_max,
+            'face_value_min': face_value_min,
+            'face_value_max': face_value_max,
+            'states': selected_states,
             'first_name': request.POST.get('first_name', '').strip(),
             'last_name': request.POST.get('last_name', '').strip(),
             'phone_number': request.POST.get('phone_number', '').strip(),
             'investment_amount': request.POST.get('investment_amount', '').strip(),
         }
 
-        # 验证用户信息
+        # 验证用户输入
         if not email:
             messages.error(request, "Email is required.")
             return render(request, 'sign-up-wizard.html', context)
@@ -118,67 +134,58 @@ def signup_wizard(request):
             messages.error(request, "This email is already registered.")
             return render(request, 'sign-up-wizard.html', context)
 
-        # 创建用户
         try:
-            user = User.objects.create_user(username=email, email=email, password=password)
-            user.save()
+            with transaction.atomic():
+                # 创建用户
+                user = User.objects.create_user(username=email, email=email, password=password)
+                user.save()
+
+                # 保存 UserProfile 信息
+                UserProfile.objects.create(
+                    user=user,
+                    first_name=request.POST.get('first_name', '').strip(),
+                    last_name=request.POST.get('last_name', '').strip(),
+                    phone_number=request.POST.get('phone_number', '').strip(),
+                    investment_amount=request.POST.get('investment_amount', '').strip() or None,
+                )
+
+                # 保存 Criterion 信息
+                property_types_str = ",".join(property_types)
+
+                criterion = Criterion.objects.create(
+                    user=user,
+                    auction_type=auction_type,  # 存储 auction_type
+                    is_online=is_online,  # 存储 is_online
+                    goal=investment_purpose,
+                    property_type=property_types_str,
+                    market_value_min=market_value_min or None,
+                    market_value_max=market_value_max or None,
+                    face_value_min=face_value_min or None,
+                    face_value_max=face_value_max or None,
+                )
+
+                # 获取选中的 States
+                if selected_states:
+                    states = States.objects.filter(abbreviation__in=selected_states)
+                    criterion.states.add(*states)
+
+                criterion.save()
+
         except Exception as e:
-            messages.error(request, f"An error occurred during registration: {str(e)}")
-            return render(request, 'sign-up-wizard.html', context)
-
-        # 保存 UserProfile 信息
-        try:
-            UserProfile.objects.create(
-                user=user,
-                first_name=request.POST.get('first_name', '').strip(),
-                last_name=request.POST.get('last_name', '').strip(),
-                phone_number=request.POST.get('phone_number', '').strip(),
-                investment_amount=request.POST.get('investment_amount', '').strip() or None,
-            )
-        except Exception as e:
-            messages.error(request, f"Failed to save personal information: {str(e)}")
-            return render(request, 'sign-up-wizard.html', context)
-
-        # 保存 Criterion 信息
-        try:
-            auction_type = request.POST.get('auction_type', '').strip()
-            investment_purpose = request.POST.get('investment_purpose', '').strip()
-            property_types = request.POST.getlist('property_type')
-            market_value = request.POST.get('market_value', '').strip()
-            budget_face_value = request.POST.get('budget_face_value', '').strip()
-            selected_states = request.POST.getlist('states')
-
-            property_types_str = ",".join(property_types)
-
-            criterion = Criterion.objects.create(
-                user=user,
-                auction_type=auction_type,
-                goal=investment_purpose,
-                property_type=property_types_str,
-                market_value=market_value,
-                budget_face_value=budget_face_value,
-            )
-
-            if selected_states:
-                states = States.objects.filter(id__in=selected_states)
-                criterion.states.set(states)
-
-            criterion.save()
-        except Exception as e:
-            messages.error(request, f"Failed to save preferences: {str(e)}")
+            messages.error(request, f"An error occurred: {e}")
             return render(request, 'sign-up-wizard.html', context)
 
         # 自动登录用户
         user = authenticate(username=email, password=password)
         if user is not None:
             login(request, user)
-            return redirect('index')  # 重定向到主页
-        else:
-            messages.error(request, "Authentication failed. Please try logging in.")
+            return redirect('index')
 
     # GET 请求：渲染表单页面并提供所有州数据
     states = States.objects.all()
     return render(request, 'sign-up-wizard.html', {'states': states})
+
+
 
 @csrf_exempt  # 允许不经过 CSRF 验证，前端已提供 CSRF token
 def check_email(request):
