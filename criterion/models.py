@@ -47,6 +47,11 @@ class Criterion(models.Model):
         ('miscellaneous', 'Miscellaneous'),
     ]
 
+    IS_ONLINE_CHOICES = [
+        ('online', 'Online'),
+        ('in-person', 'In-person'),
+    ]
+
     # Fields
     auction_type = models.CharField(
         max_length=10, choices=AUCTION_TYPE_CHOICES, null=True, blank=True, default=""
