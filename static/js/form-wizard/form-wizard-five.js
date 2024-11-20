@@ -32,8 +32,34 @@
           c.includeFinishButton && k.append(s);
           k.append(q).append(r);
           z = p.width();
+          // 验证邮箱和密码的逻辑
+          function validateStep1() {
+            const email = $("#email").val().trim();
+            const password = $("#password").val().trim();
+            const confirmPassword = $("#confirm_password").val().trim();
+
+            if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+              alert("Invalid email format.");
+              return false;
+            }
+            if (password.length < 6) {
+              alert("Password must be at least 6 characters.");
+              return false;
+            }
+            if (password !== confirmPassword) {
+              alert("Passwords do not match.");
+              return false;
+            }
+            return true;
+          }
+
           a(q).click(function () {
             if (a(this).hasClass("buttonDisabled")) return !1;
+            // 在第一步时验证邮箱和密码
+            if (h === 0 && !validateStep1()) {
+              return !1;
+            }
+
             A();
             return !1;
           });
@@ -292,10 +318,77 @@
 
   $("#wizard").smartWizard({
     transitionEffect: "slideleft",
-    onFinish: onFinishCallback,
+    onFinish: onFinishCallback, // 自定义完成回调
   });
-
+  
   function onFinishCallback() {
-    $("#wizard").smartWizard("showMessage", "Congratulation ! All step Done.");
+    // 显示完成消息
+    $("#wizard").smartWizard("showMessage", "All step Done.");
+  
+    // 获取目标表单
+    const form = $("#final-form");
+    if (form.length) {
+      // 确保 CSRF token 存在于表单中
+      ensureCsrfToken(form);
+  
+      // 在提交前动态添加隐藏字段
+      addHiddenFieldsFromSteps();
+  
+      // 延迟提交表单，确保提示显示一段时间
+      setTimeout(() => {
+        console.log("Submitting form with data:", form.serialize()); // 打印调试信息
+        form.submit();
+      }, 1000); // 1秒后提交表单
+    } else {
+      alert("Form not found. Please ensure the form exists."); // 如果表单未找到，显示错误提示
+    }
   }
+  
+  // 确保表单中存在 CSRF token
+  function ensureCsrfToken(form) {
+    const csrfToken = $("input[name='csrfmiddlewaretoken']");
+    if (!csrfToken.length) {
+      console.error("CSRF token missing!");
+      alert("CSRF token is missing. Cannot proceed.");
+      return;
+    }
+  
+    // 确保 CSRF token 在表单中
+    if (!$("input[name='csrfmiddlewaretoken']", form).length) {
+      form.prepend(csrfToken.clone());
+    }
+  }
+  
+  // 动态添加隐藏字段
+  function addHiddenFieldsFromSteps() {
+    // 清理动态添加的隐藏字段（保留 CSRF token）
+    $("#final-form input[type='hidden']").not("input[name='csrfmiddlewaretoken']").remove();
+  
+    // 获取步骤1的表单数据
+    $("#form-step-1 input").each(function () {
+      addHiddenField($(this));
+    });
+  
+    // 获取步骤2的表单数据
+    $("#form-step-2 input").each(function () {
+      if ($(this).val().trim()) {
+        addHiddenField($(this));
+      }
+    });
+  
+    // 获取步骤3的表单数据（仅选择的项）
+    $("#form-step-3 input:checked").each(function () {
+      addHiddenField($(this));
+    });
+  }
+  
+  // 动态创建隐藏字段
+  function addHiddenField(field) {
+    const hiddenInput = $("<input>")
+      .attr("type", "hidden")
+      .attr("name", field.attr("name"))
+      .val(field.val());
+    $("#final-form").append(hiddenInput);
+  }
+  
 })(jQuery);
