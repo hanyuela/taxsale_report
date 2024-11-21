@@ -101,67 +101,77 @@
                             </li>
                           </ul>
 
-                          <!-- Step 1: Sign Up -->
                           <div id="step-1">
-                              <div class="wizard-title">
-                                  <h2>Sign Up to Account</h2>
-                                  <h5 class="text-muted mb-4">Enter your email & password to sign up</h5>
-                              </div>
-                              <div class="login-main">
-                                  <div class="theme-form">
-                                      <form id="form-step-1">
-                                          <div class="form-group mb-3 m-t-15">
-                                              <label for="email">Email Address</label>
-                                              <input class="form-control" id="email" type="email" name="email" placeholder="name@example.com">
-                                              <small id="emailError" class="text-danger" style="display: none;">This email is already registered.</small>
-                                          </div>
-                                          <div class="form-group mb-3">
+                            <div class="wizard-title">
+                                <h2>Sign Up to Account</h2>
+                                <h5 class="text-muted mb-4">Enter your email & password to sign up</h5>
+                            </div>
+                            <div class="login-main">
+                                <div class="theme-form">
+                                    <form id="form-step-1">
+                                        <div class="form-group mb-3 m-t-15">
+                                            <label for="email">Email Address</label>
+                                            <input class="form-control" id="email" type="email" name="email" placeholder="name@example.com">
+                                            <small id="emailError" class="text-danger" style="display: none;">This email is already registered.</small>
+                                        </div>
+                                        <div class="form-group mb-3">
                                             <label for="password">Password</label>
                                             <input class="form-control" id="password" type="password" name="password" placeholder="Password">
-                                            </div>
-                                            <div class="form-group mb-3">
-                                                <label for="confirm_password">Confirm Password</label>
-                                                <input class="form-control" id="confirm_password" type="password" name="confirm_password" placeholder="Confirm Password">
-                                                <small id="passwordError" class="text-danger" style="display: none;">Passwords do not match!</small>
-                                            </div>
-                                          <div class="form-group mb-3" style="text-align: center;">
-                                              <a href="{% url 'request_password_reset' %}" class="text-primary">Forgot Password?</a><br>
-                                              <a href="{% url 'login' %}" class="text-primary">Already have an account? Login</a>
-                                          </div>
-                                      </form>
-                                  </div>
-                              </div>
-                          </div>
+                                        </div>
+                                        <div class="form-group mb-3">
+                                            <label for="confirm_password">Confirm Password</label>
+                                            <input class="form-control" id="confirm_password" type="password" name="confirm_password" placeholder="Confirm Password">
+                                            <small id="passwordError" class="text-danger" style="display: none;">Passwords do not match!</small>
+                                        </div>
+                                        <div class="form-group mb-3" style="text-align: center;">
+                                            <a href="{% url 'request_password_reset' %}" class="text-primary">Forgot Password?</a><br>
+                                            <a href="{% url 'login' %}" class="text-primary">Already have an account? Login</a>
+                                        </div>
+                                        <!-- Buttons moved here -->
+                                        <div class="form-group button-group" style="text-align: right;">
+                                            <button type="button" id="next-step-1" class="btn btn-primary">Next</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        
 
                           <!-- Step 2: Personal Information -->
                           <div id="step-2">
-                              <div class="wizard-title">
-                                  <h2>Personal Information</h2>
-                                  <h5 class="text-muted mb-4">Enter your name and contact information</h5>
-                              </div>
-                              <div class="login-main">
-                                  <div class="theme-form">
-                                      <form id="form-step-2">
-                                          <div class="form-group mb-3">
-                                              <label for="first_name">First Name</label>
-                                              <input class="form-control" id="first_name" type="text" name="first_name" placeholder="John" required>
-                                          </div>
-                                          <div class="form-group mb-3">
-                                              <label for="last_name">Last Name</label>
-                                              <input class="form-control" id="last_name" type="text" name="last_name" placeholder="Doe" required>
-                                          </div>
-                                          <div class="form-group mb-3">
-                                              <label for="phone_number">Phone Number</label>
-                                              <input class="form-control" id="phone_number" type="text" name="phone_number" placeholder="123-456-7890" required>
-                                          </div>
-                                          <div class="form-group mb-3">
-                                              <label for="investment_amount">How much are you planning to invest in tax sales?</label>
-                                              <input class="form-control" id="investment_amount" type="number" name="investment_amount" placeholder="Investment amount" required>
-                                          </div>
-                                      </form>
-                                  </div>
-                              </div>
+                            <div class="wizard-title">
+                                <h2>Personal Information</h2>
+                                <h5 class="text-muted mb-4">Enter your name and contact information</h5>
+                            </div>
+                            <div class="login-main">
+                                <div class="theme-form">
+                                    <form id="form-step-2">
+                                        <div class="form-group mb-3">
+                                            <label for="first_name">First Name</label>
+                                            <input class="form-control" id="first_name" type="text" name="first_name" placeholder="John" required>
+                                        </div>
+                                        <div class="form-group mb-3">
+                                            <label for="last_name">Last Name</label>
+                                            <input class="form-control" id="last_name" type="text" name="last_name" placeholder="Doe" required>
+                                        </div>
+                                        <div class="form-group mb-3">
+                                            <label for="phone_number">Phone Number</label>
+                                            <input class="form-control" id="phone_number" type="text" name="phone_number" placeholder="123-456-7890" required>
+                                        </div>
+                                        <div class="form-group mb-3">
+                                            <label for="investment_amount">How much are you planning to invest in tax sales?</label>
+                                            <input class="form-control" id="investment_amount" type="number" name="investment_amount" placeholder="Investment amount" required>
+                                        </div>
+                                        <!-- Buttons moved here -->
+                                        <div class="form-group button-group" style="display: flex; justify-content: space-between;">
+                                            <button type="button" id="previous-step-2" class="btn btn-secondary">Previous</button>
+                                            <button type="button" id="next-step-2" class="btn btn-primary">Next</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
                           </div>
+                        
 
                           <!-- Step 3: User Preferences -->
                           <div id="step-3">
@@ -214,6 +224,11 @@
                                                       <input type="checkbox" id="miscellaneous" name="property_type" value="Miscellaneous" style="margin-right: 5px;">
                                                       Miscellaneous
                                                   </label>
+                                                  <!-- Buttons moved here -->
+                                                  <div class="form-group button-group" style="display: flex; justify-content: space-between;">
+                                                    <button type="button" id="previous-step-3" class="btn btn-secondary">Previous</button>
+                                                    <button type="button" id="next-step-3" class="btn btn-primary">Next</button>
+                                                  </div>
                                               </div>
                                           </div>
                                       </form>
@@ -272,6 +287,11 @@
                                                         {% endfor %}
                                                     </select>                                                                                                     
                                                   </div>
+                                                  <!-- Fields -->
+                                                    <div class="form-group button-group" style="display: flex; justify-content: space-between;">
+                                                        <button type="button" id="previous-step-4" class="btn btn-secondary">Previous</button>
+                                                        <button type="button" id="finish-step" class="btn btn-success">Finish</button>
+                                                    </div>
                                               </div>
                                           </div>
                                          <!-- <button type="submit" class="btn btn-primary w-100">Complete Registration</button> -->
