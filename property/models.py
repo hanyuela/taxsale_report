@@ -58,6 +58,10 @@ class Auction(models.Model):
         max_length=20,
         choices=[('lien', 'Lien'), ('deed', 'Deed')]
     )
+    is_online = models.CharField(
+        max_length=20,
+        choices=[('online', 'Online'), ('in-person', 'In-person')]
+    )
     auction_tax_year = models.IntegerField()
     batch_number = models.CharField(max_length=50)
     sort_no = models.CharField(max_length=50)
