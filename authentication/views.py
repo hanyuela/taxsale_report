@@ -287,9 +287,60 @@ def footer_light(request):
 def holdings(request):
     return render(request, 'holdings.html')
 
+
+
 @login_required
 def criterion(request):
-    return render(request, 'criterion.html')
+    # 获取或创建当前用户的投资偏好
+    user_criteria, created = Criterion.objects.get_or_create(user=request.user)
+    all_states = States.objects.all()  # 获取所有州
+
+    if request.method == 'POST':
+        # 更新目标（单选）
+        goal = request.POST.get('goal')
+        if goal:
+            user_criteria.goal = goal
+
+        # 更新 Property Type（单选）
+        property_type = request.POST.get('property_type')
+        if property_type:
+            user_criteria.auction_type = property_type
+
+        # 更新 Auction Type（单选）
+        auction_mode = request.POST.get('auction_mode')
+        if auction_mode:
+            user_criteria.is_online = auction_mode
+
+        # 更新市场价值范围
+        market_value_min = request.POST.get('market_value_min', None)
+        market_value_max = request.POST.get('market_value_max', None)
+        user_criteria.market_value_min = market_value_min if market_value_min else None
+        user_criteria.market_value_max = market_value_max if market_value_max else None
+
+        # 更新面值范围
+        face_value_min = request.POST.get('face_value_min', None)
+        face_value_max = request.POST.get('face_value_max', None)
+        user_criteria.face_value_min = face_value_min if face_value_min else None
+        user_criteria.face_value_max = face_value_max if face_value_max else None
+
+        state_ids = request.POST.getlist('states')  # 获取选中的州 ID
+        if state_ids:  # 确保有选中州
+            selected_states = States.objects.filter(id__in=state_ids)
+            user_criteria.states.set(selected_states)  # 更新多对多关系
+        else:
+            user_criteria.states.clear()  # 如果没有选择任何州，清空关联
+
+        user_criteria.save()
+
+        # 添加成功消息
+        messages.success(request, "Preferences updated successfully!")
+        return redirect("criterion")  # 重定向到当前页面
+
+    return render(request, "criterion.html", {
+        "user_criteria": user_criteria,
+        "all_states": all_states,
+    })
+
 
 @login_required
 def report(request):
