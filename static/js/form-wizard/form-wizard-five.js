@@ -423,4 +423,214 @@
     $("#final-form").append(hiddenInput);
   }
   
+  $(document).ready(function () {
+    // 初始化显示第一个步骤
+    showStep(1);
+
+    // 绑定 Step 1 的 Next 按钮
+    $("#next-step-1").click(function () {
+        validateStep1(function (isValid) {
+            if (isValid) {
+                showStep(2); // 验证通过，跳转到 Step 2
+            }
+        });
+    });
+
+    // 绑定 Step 2 的 Previous 和 Next 按钮
+    $("#previous-step-2").click(function () {
+        showStep(1); // 返回到 Step 1
+    });
+
+    $("#next-step-2").click(function () {
+        showStep(3); // 直接跳转到 Step 3，无需验证
+    });
+
+    // 绑定 Step 3 的 Previous 和 Next 按钮
+    $("#previous-step-3").click(function () {
+        showStep(2); // 返回到 Step 2
+    });
+
+    $("#next-step-3").click(function () {
+        showStep(4); // 直接跳转到 Step 4，无需验证
+    });
+
+    // 绑定 Step 4 的 Previous 和 Finish 按钮
+    $("#previous-step-4").click(function () {
+        showStep(3); // 返回到 Step 3
+    });
+
+    $("#finish-step").click(function () {
+        onFinishCallback(); // 调用完成的回调函数
+    });
+});
+
+/**
+ * 显示特定步骤
+ * @param {Number} stepNum - 要显示的步骤编号
+ */
+function showStep(stepNum) {
+    // 隐藏所有步骤
+    $("[id^='step-']").hide();
+
+    // 显示当前步骤
+    $("#step-" + stepNum).show();
+}
+
+/**
+ * 验证 Step 1 的逻辑
+ * @param {Function} callback - 验证完成后的回调函数
+ */
+function validateStep1(callback) {
+    const email = $("#email").val().trim();
+    const password = $("#password").val().trim();
+    const confirmPassword = $("#confirm_password").val().trim();
+
+    // 验证邮箱格式
+    if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+        alert("Invalid email format.");
+        return callback(false);
+    }
+    // 验证密码长度
+    if (password.length < 6) {
+        alert("Password must be at least 6 characters.");
+        return callback(false);
+    }
+    // 验证密码是否匹配
+    if (password !== confirmPassword) {
+        alert("Passwords do not match.");
+        return callback(false);
+    }
+
+    // 使用 AJAX 检查邮箱是否已注册
+    $.ajax({
+        url: "/check-email/", // 替换为你的后端 URL
+        type: "POST",
+        contentType: "application/json",
+        data: JSON.stringify({ email: email }),
+        headers: {
+            "X-CSRFToken": $("input[name='csrfmiddlewaretoken']").val(),
+        },
+        success: function (response) {
+            if (response.exists) {
+                alert("This email is already registered.");
+                callback(false);
+            } else {
+                callback(true);
+            }
+        },
+        error: function (xhr) {
+            console.error("Error:", xhr.responseText);
+            alert("An error occurred while checking the email. Please try again.");
+            callback(false);
+        },
+    });
+}
+
+/**
+ * 完成步骤的逻辑
+ */
+function onFinishCallback() {
+    const form = $("#final-form");
+    if (form.length) {
+        // 确保 CSRF token 存在于表单中
+        ensureCsrfToken(form);
+
+        // 在提交前动态添加隐藏字段
+        addHiddenFieldsFromSteps();
+
+        // 显示提交成功提示
+        showSubmissionMessage("CONGRATULATIONS, ALL STEP DONE!");
+
+        // 延迟 2 秒后提交表单
+        setTimeout(() => {
+            console.log("Submitting form with data:", form.serialize());
+            form.submit();
+        }, 2000); // 2 秒延迟
+    } else {
+        alert("Form not found. Please ensure the form exists.");
+    }
+}
+
+/**
+ * 确保表单中存在 CSRF token
+ */
+function ensureCsrfToken(form) {
+    const csrfToken = $("input[name='csrfmiddlewaretoken']");
+    if (!csrfToken.length) {
+        console.error("CSRF token missing!");
+        alert("CSRF token is missing. Cannot proceed.");
+        return;
+    }
+
+    // 确保 CSRF token 在表单中
+    if (!$("input[name='csrfmiddlewaretoken']", form).length) {
+        form.prepend(csrfToken.clone());
+    }
+}
+
+/**
+ * 动态添加隐藏字段
+ */
+function addHiddenFieldsFromSteps() {
+    // 清理动态添加的隐藏字段（保留 CSRF token）
+    $("#final-form input[type='hidden']").not("input[name='csrfmiddlewaretoken']").remove();
+
+    // 获取步骤1的表单数据
+    $("#form-step-1 input").each(function () {
+        addHiddenField($(this));
+    });
+
+    // 获取步骤2的表单数据
+    $("#form-step-2 input").each(function () {
+        addHiddenField($(this));
+    });
+
+    // 获取步骤3的表单数据
+    $("#form-step-3 input:checked").each(function () {
+        addHiddenField($(this));
+    });
+}
+
+/**
+ * 动态创建隐藏字段
+ */
+function addHiddenField(field) {
+    const hiddenInput = $("<input>")
+        .attr("type", "hidden")
+        .attr("name", field.attr("name"))
+        .val(field.val());
+    $("#final-form").append(hiddenInput);
+}
+
+/**
+ * 显示提交成功消息
+ * @param {String} message - 要显示的消息
+ */
+  function showSubmissionMessage(message) {
+    const messageDiv = $("<div>")
+        .text(message)
+        .css({
+            position: "fixed",
+            top: "20px", // 右上角位置
+            right: "20px",
+            background: "green",
+            color: "white",
+            padding: "10px 15px", // 缩小的内边距
+            "border-radius": "8px",
+            "font-size": "16px", // 缩小字体
+            "text-align": "center",
+            "z-index": 1000,
+            "box-shadow": "0 4px 6px rgba(0, 0, 0, 0.1)", // 添加阴影
+        });
+
+    $("body").append(messageDiv);
+
+    // 2 秒后移除提示
+    setTimeout(() => {
+        messageDiv.fadeOut(500, function () {
+            $(this).remove();
+        });
+    }, 2000);
+}
+
 })(jQuery);
