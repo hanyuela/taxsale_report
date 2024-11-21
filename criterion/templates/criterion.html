@@ -17,7 +17,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@200;300;400;600;700;800;900&amp;display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,500,500i,700,700i,900&amp;display=swap" rel="stylesheet">
     <!-- Select2 CSS -->
-    <link href="{% static 'css/vendors/select2.min.css' %}" rel="stylesheet" />
     <!-- Custom CSS files -->
     <link rel="stylesheet" type="text/css" href="{% static 'css/font-awesome.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/vendors/icofont.css' %}">
@@ -90,63 +89,210 @@
             <div class="row h-100">
                 <div class="col-12 h-100">
                     <div class="card h-100">
-                        <div class="card-header">
-                            <h4>Investment Preferences</h4>
-                        </div>
-                        <div class="card-body">
-                            <form method="post" >
-                                {% csrf_token %}
-                                <div class="mb-3">
-                                    <label class="form-label">My main purpose for investing in tax sales?</label>
-                                    <div>
-                                        <input type="radio" id="earn_interest" name="investment_purpose" value="Earn Interest" {% if user_criteria.investment_purpose == 'Earn Interest' %}checked{% endif %}>
-                                        <label for="earn_interest">Earn Interest</label>
-                                    </div>
-                                    <div>
-                                        <input type="radio" id="foreclose" name="investment_purpose" value="Foreclose on properties" {% if user_criteria.investment_purpose == 'Foreclose on properties' %}checked{% endif %}>
-                                        <label for="foreclose">Foreclose on properties</label>
-                                    </div>
+                      <div class="card-header" style="margin-left: -20px;">
+                        <h4>Investment Preferences</h4>
+                      </div>
+                        <form method="post">
+                          {% csrf_token %}
+                      
+                          <!-- 投资目的 -->
+                          <div class="mb-3">
+                              <label class="form-label">My main purpose for investing in tax sales?</label>
+                              <div>
+                                  <input type="radio" id="earn_interest" name="goal" value="Earn Interest" 
+                                      {% if user_criteria.goal == 'Earn Interest' %}checked{% endif %}>
+                                  <label for="earn_interest">Earn Interest</label>
+                              </div>
+                              <div>
+                                  <input type="radio" id="foreclosure" name="goal" value="Foreclose on properties" 
+                                      {% if user_criteria.goal == 'Foreclose on properties' %}checked{% endif %}>
+                                  <label for="foreclosure">Foreclose on properties</label>
+                              </div>
+                          </div>
+                      
+                           <!-- 第一组：Tax Lien 和 Tax Deed -->
+                          <div>
+                            <p><strong>Property Type:</strong></p>
+                            <div style="display: flex; flex-wrap: wrap; gap: 5px;">
+                                <div style="width: 48%;">
+                                    <input type="radio" id="tax_lien" name="property_type" value="tax lien" 
+                                        {% if user_criteria.auction_type == 'tax lien' %}checked{% endif %}>
+                                    <label for="tax_lien">Tax Lien</label>
                                 </div>
-                                <div class="mb-3">
-                                  <label class="form-label">I am interested in</label>
-                                  <div style="display: flex; flex-wrap: wrap; gap: 5px;"> <!-- 缩小 gap 间距 -->
-                                      <div style="width: 48%;"> <!-- 减小每项的宽度 -->
-                                          <input type="checkbox" id="tax_lien" name="interests" value="Tax Lien" {% if 'Tax Lien' in user_criteria.interests %}checked{% endif %}>
-                                          <label for="tax_lien">Tax Lien</label>
-                                      </div>
-                                      <div style="width: 48%;"> <!-- 减小每项的宽度 -->
-                                          <input type="checkbox" id="online_auction" name="interests" value="Online auction" {% if 'Online auction' in user_criteria.interests %}checked{% endif %}>
-                                          <label for="online_auction">Online auction</label>
-                                      </div>
-                                      <div style="width: 48%;"> <!-- 减小每项的宽度 -->
-                                          <input type="checkbox" id="tax_deed" name="interests" value="Tax Deed" {% if 'Tax Deed' in user_criteria.interests %}checked{% endif %}>
-                                          <label for="tax_deed">Tax Deed</label>
-                                      </div>
-                                      <div style="width: 48%;"> <!-- 减小每项的宽度 -->
-                                          <input type="checkbox" id="in_person" name="interests" value="In person" {% if 'In person' in user_criteria.interests %}checked{% endif %}>
-                                          <label for="in_person">In person</label>
-                                      </div>
-                                  </div>
-                                </div>                                 
-                                <div class="mb-3">
-                                    <label class="form-label" for="states">Select States</label>
-                                    <select id="states" name="states" class="form-control" multiple>
-                                        {% for state in all_states %}
-                                            <option value="{{ state.abbreviation }}" {% if state.abbreviation in user_criteria.states %}selected{% endif %}>{{ state.name }}</option>
-                                        {% endfor %}
-                                    </select>
+                                <div style="width: 48%;">
+                                    <input type="radio" id="tax_deed" name="property_type" value="tax deed" 
+                                        {% if user_criteria.auction_type == 'tax deed' %}checked{% endif %}>
+                                    <label for="tax_deed">Tax Deed</label>
                                 </div>
-                                <button type="submit" class="btn btn-primary">Save Preferences</button>
-                            </form>
+                            </div>
                         </div>
+
+                        <!-- 第二组：Online Auction 和 In Person -->
+                        <div>
+                            <p><strong>Auction Type:</strong></p>
+                            <div style="display: flex; flex-wrap: wrap; gap: 5px;">
+                                <div style="width: 48%;">
+                                    <input type="radio" id="online" name="auction_mode" value="online" 
+                                        {% if user_criteria.is_online == 'online' %}checked{% endif %}>
+                                    <label for="online">Online Auction</label>
+                                </div>
+                                <div style="width: 48%;">
+                                    <input type="radio" id="in_person" name="auction_mode" value="in person" 
+                                        {% if user_criteria.is_online == 'in person' %}checked{% endif %}>
+                                    <label for="in_person">In Person</label>
+                                </div>
+                            </div>
+                        </div>                   
+                      
+                          <!-- 市场价值范围 -->
+                          <div class="mb-3">
+                            <label class="form-label">
+                                <strong>What is the market value of the property you are looking to invest in?</strong>
+                            </label>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <span>Market value range: </span>
+                                <input type="number" id="market_value_min" name="market_value_min" class="form-control" placeholder="Min $" 
+                                    value="{{ user_criteria.market_value_min }}" style="width: 150px;">
+                                <span>;</span>
+                                <input type="number" id="market_value_max" name="market_value_max" class="form-control" placeholder="Max $" 
+                                    value="{{ user_criteria.market_value_max }}" style="width: 150px;">
+                            </div>
+                          </div>
+
+                          <!-- 面值范围 -->
+                          <div class="mb-3">
+                            <label class="form-label">
+                                <strong>How much tax are you willing to pay at the auction for each property?</strong>
+                            </label>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <span>Face value range: </span>
+                                <input type="number" id="face_value_min" name="face_value_min" class="form-control" placeholder="Min $" 
+                                    value="{{ user_criteria.face_value_min }}" style="width: 150px;">
+                                <span>;</span>
+                                <input type="number" id="face_value_max" name="face_value_max" class="form-control" placeholder="Max $" 
+                                    value="{{ user_criteria.face_value_max }}" style="width: 150px;">
+                            </div>
+                          </div>
+                      
+                          <!-- 已选择的州 -->
+                          <div class="mb-3">
+                              <label class="form-label">Selected States</label>
+                              <div id="selected-states">
+                                  {% for state in user_criteria.states.all %}
+                                  <span class="badge bg-primary text-white state-badge" data-id="{{ state.id }}">
+                                      {{ state.state }}
+                                      <button type="button" class="btn-close btn-close-white remove-state" aria-label="Close" data-id="{{ state.id }}"></button>
+                                  </span>
+                                  {% endfor %}
+                              </div>
+                          </div>
+                      
+                          <!-- 选择州 -->
+                          <div class="mb-3">
+                            <label class="form-label" for="states">Select States</label>
+                            <select id="states" name="states" class="form-control" multiple style="height: 200px;">
+                                {% for state in all_states %}
+                                <option value="{{ state.id }}" 
+                                        {% if state in user_criteria.states.all %}selected{% endif %}>
+                                    {{ state.state }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                          </div>
+                        
+                          <button type="submit" class="btn btn-primary">Save Preferences</button>
+                      </form>
+                      
                     </div>
                 </div>
             </div>
         </div>
-          <!-- Container-fluid Ends-->
-        </div>
+      </div>
+        
         <!-- footer start-->
         {% include 'footer-light.html' %}
+
+        <script>
+          document.addEventListener('DOMContentLoaded', function () {
+            const selectedStatesDiv = document.getElementById('selected-states');
+            const statesSelect = document.getElementById('states');
+        
+            // 初始化：页面加载时，将已选中的选项添加到徽章区域
+            Array.from(statesSelect.options).forEach(option => {
+                if (option.selected) {
+                    addBadge(option.value, option.text);
+                }
+            });
+        
+            // 添加徽章的函数
+            function addBadge(stateId, stateName) {
+                if (!selectedStatesDiv.querySelector(`.state-badge[data-id="${stateId}"]`)) {
+                    const badge = document.createElement('span');
+                    badge.className = 'badge bg-primary text-white state-badge';
+                    badge.dataset.id = stateId;
+                    badge.innerHTML = `${stateName} <button type="button" class="btn-close btn-close-white remove-state" aria-label="Close" data-id="${stateId}"></button>`;
+                    selectedStatesDiv.appendChild(badge);
+                }
+            }
+        
+            // 删除徽章的函数
+            function removeBadge(stateId) {
+                const badge = selectedStatesDiv.querySelector(`.state-badge[data-id="${stateId}"]`);
+                if (badge) {
+                    badge.remove();
+                }
+            }
+        
+            // 实时处理多选框：支持单击切换选中状态
+            statesSelect.addEventListener('mousedown', function (event) {
+                event.preventDefault(); // 禁止默认拖动选择行为
+        
+                const option = event.target;
+                if (option.tagName === 'OPTION') {
+                    // 切换选中状态
+                    option.selected = !option.selected;
+        
+                    // 手动触发 change 事件以更新徽章显示
+                    statesSelect.dispatchEvent(new Event('change'));
+                }
+            });
+        
+            // 处理多选框 change 事件：同步徽章显示
+            statesSelect.addEventListener('change', function () {
+                // 获取所有选中的选项
+                const selectedIds = Array.from(statesSelect.selectedOptions).map(option => option.value);
+        
+                // 添加选中的州为徽章
+                Array.from(statesSelect.options).forEach(option => {
+                    if (option.selected) {
+                        addBadge(option.value, option.text);
+                    } else {
+                        removeBadge(option.value); // 移除未选中的州的徽章
+                    }
+                });
+            });
+        
+            // 点击删除按钮时，同步移除徽章和下拉框选中状态
+            selectedStatesDiv.addEventListener('click', function (event) {
+                if (event.target.classList.contains('remove-state')) {
+                    const stateId = event.target.getAttribute('data-id');
+        
+                    // 从显示区域移除徽章
+                    removeBadge(stateId);
+        
+                    // 在下拉框中取消选中
+                    const optionToDeselect = statesSelect.querySelector(`option[value="${stateId}"]`);
+                    if (optionToDeselect) {
+                        optionToDeselect.selected = false;
+        
+                        // 手动触发多选框的 change 事件
+                        statesSelect.dispatchEvent(new Event('change'));
+                    }
+                }
+            });
+        });
+        
+      </script>     
     <!-- latest jquery-->
     <script src="{% static 'js/jquery.min.js' %}"></script>
     <!-- Bootstrap js-->
@@ -172,5 +318,6 @@
     <script src="{% static 'js/script.js' %}"></script>
     <script src="{% static 'js/theme-customizer/customizer.js' %}"></script>
     <!-- Plugin used-->
+     
   </body>
 </html>
