@@ -159,22 +159,40 @@
                             </div>
 
                                                     
-                          <!-- 第二组：Tax Lien 和 Tax Deed -->
-                          <div>
-                            <p><strong>Auction Type:</strong></p>
-                            <div style="display: flex; flex-wrap: wrap; gap: 5px;">
-                                <div style="width: 48%;">
-                                    <input type="radio" id="tax_lien" name="auction_type" value="tax lien" 
-                                        {% if user_criteria.auction_type == 'tax lien' %}checked{% endif %}>
-                                    <label for="tax_lien">Tax Lien</label>
-                                </div>
-                                <div style="width: 48%;">
-                                    <input type="radio" id="tax_deed" name="auction_type" value="tax deed" 
-                                        {% if user_criteria.auction_type == 'tax deed' %}checked{% endif %}>
-                                    <label for="tax_deed">Tax Deed</label>
+                            <!-- 第一组：Auction Type (Tax Lien 和 Tax Deed) -->
+                            <div>
+                                <p><strong>Auction Type:</strong></p>
+                                <div style="display: flex; flex-wrap: wrap; gap: 5px;">
+                                    <div style="width: 48%;">
+                                        <input type="radio" id="tax_lien" name="auction_type" value="tax lien" 
+                                            {% if user_criteria.auction_type == 'tax lien' %}checked{% endif %}>
+                                        <label for="tax_lien">Tax Lien</label>
+                                    </div>
+                                    <div style="width: 48%;">
+                                        <input type="radio" id="tax_deed" name="auction_type" value="tax deed" 
+                                            {% if user_criteria.auction_type == 'tax deed' %}checked{% endif %}>
+                                        <label for="tax_deed">Tax Deed</label>
+                                    </div>
                                 </div>
                             </div>
-                          </div>         
+
+                            <!-- 第二组：Auction Mode (Online 和 In-person) -->
+                            <div>
+                                <p><strong>Auction Mode:</strong></p>
+                                <div style="display: flex; flex-wrap: wrap; gap: 5px;">
+                                    <div style="width: 48%;">
+                                        <input type="radio" id="online" name="is_online" value="online" 
+                                            {% if user_criteria.is_online == 'online' %}checked{% endif %}>
+                                        <label for="online">Online</label>
+                                    </div>
+                                    <div style="width: 48%;">
+                                        <input type="radio" id="in_person" name="is_online" value="in-person" 
+                                            {% if user_criteria.is_online == 'in-person' %}checked{% endif %}>
+                                        <label for="in_person">In-person</label>
+                                    </div>
+                                </div>
+                            </div>
+                                
                       
                           <!-- 市场价值范围 -->
                           <div class="mb-3">
