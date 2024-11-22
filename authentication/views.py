@@ -21,7 +21,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
 from django.db import transaction
-
+from property.models import Property
 # 注册页面
 def register(request):
     if request.method == 'POST':
@@ -275,9 +275,7 @@ def reset_password(request, uidb64, token):
 def dashboard(request):
     return render(request, 'dashboard.html')
 
-@login_required
-def datatable(request):
-    return render(request, 'datatable.html')
+
 
 @login_required
 def footer_light(request):
@@ -296,20 +294,18 @@ def criterion(request):
     all_states = States.objects.all()  # 获取所有州
 
     if request.method == 'POST':
-        # 更新目标（单选）
-        goal = request.POST.get('goal')
-        if goal:
-            user_criteria.goal = goal
-
-        # 更新 Property Type（单选）
-        property_type = request.POST.get('property_type')
-        if property_type:
-            user_criteria.auction_type = property_type
+        # 更新 Property Type（多选）
+        property_types = request.POST.getlist('property_type')  # 获取所有选中的 property_type
+        if property_types:
+            user_criteria.property_type = property_types  # 假设 property_type 是 ArrayField
+        else:
+            user_criteria.property_type = []  # 如果没有选中，清空列表
 
         # 更新 Auction Type（单选）
-        auction_mode = request.POST.get('auction_mode')
-        if auction_mode:
-            user_criteria.is_online = auction_mode
+        auction_type = request.POST.get('auction_type')
+        if auction_type:
+            user_criteria.auction_type = auction_type
+
 
         # 更新市场价值范围
         market_value_min = request.POST.get('market_value_min', None)
@@ -323,13 +319,15 @@ def criterion(request):
         user_criteria.face_value_min = face_value_min if face_value_min else None
         user_criteria.face_value_max = face_value_max if face_value_max else None
 
+        # 更新选中的州
         state_ids = request.POST.getlist('states')  # 获取选中的州 ID
-        if state_ids:  # 确保有选中州
+        if state_ids:
             selected_states = States.objects.filter(id__in=state_ids)
             user_criteria.states.set(selected_states)  # 更新多对多关系
         else:
             user_criteria.states.clear()  # 如果没有选择任何州，清空关联
 
+        # 保存用户偏好
         user_criteria.save()
 
         # 添加成功消息
@@ -341,6 +339,39 @@ def criterion(request):
         "all_states": all_states,
     })
 
+@login_required
+def datatable(request):
+    # 从 GET 请求中获取筛选关键词
+    city = request.GET.get('city', '').strip()
+    state = request.GET.get('state', '').strip()
+    price_min = request.GET.get('price_min', '')
+    price_max = request.GET.get('price_max', '')
+    property_type = request.GET.get('property_type', '').strip()
+
+    # 根据筛选条件过滤数据
+    filtered_properties = Property.objects.all()
+
+    if city:
+        filtered_properties = filtered_properties.filter(city__icontains=city)
+    if state:
+        filtered_properties = filtered_properties.filter(state__icontains=state)
+    if property_type:
+        filtered_properties = filtered_properties.filter(property_type__icontains=property_type)
+    if price_min:
+        filtered_properties = filtered_properties.filter(price__gte=price_min)
+    if price_max:
+        filtered_properties = filtered_properties.filter(price__lte=price_max)
+
+    # 将筛选结果返回给前端
+    if request.is_ajax():
+        data = list(filtered_properties.values(
+            'address', 'city', 'state', 'property_type', 'is_online', 
+            'auction_type', 'amount_in_sale', 'deposit_deadline', 'foreclose_score'
+        ))
+        return JsonResponse({'data': data})
+
+    # 渲染模板时传递筛选数据
+    return render(request, 'datatable.html', {'filtered_properties': filtered_properties})
 
 @login_required
 def report(request):
