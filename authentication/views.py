@@ -22,6 +22,8 @@ from django.views.decorators.csrf import csrf_exempt
 import json
 from django.db import transaction
 from property.models import Property, Auction
+import datetime
+import ast
 # 注册页面
 def register(request):
     if request.method == 'POST':
@@ -81,6 +83,7 @@ def error_503(request):
     return render(request, 'error-503.html')
 
 
+
 def signup_wizard(request):
     if request.method == 'POST':
         # 获取用户提交的表单数据
@@ -89,8 +92,8 @@ def signup_wizard(request):
         confirm_password = request.POST.get('confirm_password', '').strip()
 
         # 获取其他字段
-        auction_type = request.POST.get('auction_type', '').strip()  # 获取 auction_type
-        is_online = request.POST.get('is_online', '').strip()  # 获取 is_online
+        auction_types = request.POST.getlist('auction_type')  # 获取 auction_type 的多选列表
+        is_online_modes = request.POST.getlist('is_online')  # 获取 is_online 的多选列表
         investment_purpose = request.POST.get('investment_purpose', '').strip()
         property_types = request.POST.getlist('property_type')  # 获取选择字段列表
         market_value_min = request.POST.get('market_value_min', '').strip()
@@ -102,8 +105,8 @@ def signup_wizard(request):
         # 初始化上下文以保留已填写数据
         context = {
             'email': email,
-            'auction_type': auction_type,
-            'is_online': is_online,
+            'auction_type': auction_types,  # 保留 auction_type 的多选值
+            'is_online': is_online_modes,  # 保留 is_online 的多选值
             'investment_purpose': investment_purpose,
             'property_type': property_types,  # 保留选择值
             'market_value_min': market_value_min,
@@ -153,19 +156,29 @@ def signup_wizard(request):
                 # 保存 Criterion 信息
                 criterion = Criterion.objects.create(
                     user=user,
-                    auction_type=auction_type,  # 存储 auction_type
-                    is_online=is_online,  # 存储 is_online
                     market_value_min=market_value_min or None,
                     market_value_max=market_value_max or None,
                     face_value_min=face_value_min or None,
                     face_value_max=face_value_max or None,
                 )
 
-                # 保存 Property Type 信息
-                if property_types:  # 如果有选中的 property_types
-                    criterion.property_type = property_types
+                # 保存 Auction Type 信息
+                if auction_types:
+                    criterion.auction_type = auction_types  # 多选存储为列表形式
                 else:
-                    criterion.property_type = []  # 清空列表
+                    criterion.auction_type = []  # 如果未选择，清空列表
+
+                # 保存 Auction Mode 信息
+                if is_online_modes:
+                    criterion.is_online = is_online_modes  # 多选存储为列表形式
+                else:
+                    criterion.is_online = []  # 如果未选择，清空列表
+
+                # 保存 Property Type 信息
+                if property_types:
+                    criterion.property_type = property_types  # 多选存储为列表形式
+                else:
+                    criterion.property_type = []  # 如果未选择，清空列表
 
                 # 获取选中的 States
                 if selected_states:
@@ -304,15 +317,19 @@ def criterion(request):
         else:
             user_criteria.property_type = []  # 如果没有选中，清空列表
 
-        # 更新 Auction Type（单选）
-        auction_type = request.POST.get('auction_type')
-        if auction_type:
-            user_criteria.auction_type = auction_type
+        # 更新 Auction Type（多选）
+        auction_types = request.POST.getlist('auction_type')  # 获取所有选中的 auction_type
+        if auction_types:
+            user_criteria.auction_type = auction_types  # 假设 auction_type 是 ArrayField
+        else:
+            user_criteria.auction_type = []  # 如果没有选中，清空列表
 
-        # 更新 Auction Mode（单选）
-        auction_mode = request.POST.get('is_online')
-        if auction_mode:
-            user_criteria.is_online = auction_mode
+        # 更新 Auction Mode（多选）
+        is_online_modes = request.POST.getlist('is_online')  # 获取所有选中的 is_online
+        if is_online_modes:
+            user_criteria.is_online = is_online_modes  # 假设 is_online 是 ArrayField
+        else:
+            user_criteria.is_online = []  # 如果没有选中，清空列表
 
         # 更新市场价值范围
         market_value_min = request.POST.get('market_value_min', None)
@@ -346,9 +363,114 @@ def criterion(request):
         "all_states": all_states,
     })
 
+
+from django.db.models import Q
+
 @login_required
 def datatable(request):
-    return render(request, 'datatable.html')
+    PROPERTY_TYPE_MAPPING = {
+        "single_family_residential": "Single-Family",
+        "multi_family_residential": "Multi-Family",
+        "other_residential": "Other Residential",
+        "commercial": "Commercial",
+        "vacant_land": "Vacant Land",
+        "industrial": "Industrial",
+        "agricultural": "Agricultural",
+        "miscellaneous": "Miscellaneous",
+    }
+
+    AUCTION_TYPE_MAPPING = {
+        "tax lien": "tax lien",
+        "tax deed": "tax deed",
+    }
+
+    IS_ONLINE_MAPPING = {
+        "online": "online",
+        "in-person": "in-person",
+    }
+
+    # 获取当前用户的筛选条件
+    user_criteria = Criterion.objects.filter(user=request.user).first()
+
+    # 初始查询集
+    auctions = Auction.objects.select_related('property').all()
+
+    # 如果用户有筛选条件
+    if user_criteria:
+        # 1. 按 states 筛选
+        if user_criteria.states.exists():
+            state_ids = user_criteria.states.values_list('id', flat=True)
+            abbreviations = States.objects.filter(id__in=state_ids).values_list('abbreviation', flat=True)
+            auctions = auctions.filter(property__state__in=abbreviations)
+
+        # 2. 按 property_type 筛选
+        if user_criteria.property_type:
+            try:
+                selected_property_types = ast.literal_eval(user_criteria.property_type)
+                mapped_classes = [
+                    PROPERTY_TYPE_MAPPING.get(pt)
+                    for pt in selected_property_types
+                    if PROPERTY_TYPE_MAPPING.get(pt)
+                ]
+                if mapped_classes:
+                    auctions = auctions.filter(property__property_class__in=mapped_classes)
+            except (ValueError, SyntaxError):
+                pass
+
+        # 3. 按 is_online 筛选
+        if user_criteria.is_online:
+            try:
+                selected_online_modes = ast.literal_eval(user_criteria.is_online)
+                mapped_modes = [
+                    IS_ONLINE_MAPPING.get(mode)
+                    for mode in selected_online_modes
+                    if IS_ONLINE_MAPPING.get(mode)
+                ]
+                if mapped_modes:
+                    auctions = auctions.filter(is_online__in=mapped_modes)
+            except (ValueError, SyntaxError):
+                pass
+
+        # 4. 按 auction_type 筛选
+        if user_criteria.auction_type:
+            try:
+                selected_auction_types = ast.literal_eval(user_criteria.auction_type)
+                mapped_types = [
+                    AUCTION_TYPE_MAPPING.get(atype)
+                    for atype in selected_auction_types
+                    if AUCTION_TYPE_MAPPING.get(atype)
+                ]
+                if mapped_types:
+                    auctions = auctions.filter(auction_type__in=mapped_types)
+            except (ValueError, SyntaxError):
+                pass
+
+        # 5. 按 market_value 筛选
+        if user_criteria.market_value_min is not None:
+            auctions = auctions.filter(property__market_value__gte=user_criteria.market_value_min)
+        if user_criteria.market_value_max is not None:
+            auctions = auctions.filter(property__market_value__lte=user_criteria.market_value_max)
+
+    # 构造数据供模板渲染
+    data = []
+    for auction in auctions:
+        data.append({
+            "city": auction.property.city,
+            "state": auction.property.state,
+            "property_type": auction.property.property_class,
+            "is_online": auction.is_online,
+            "auction_type": auction.auction_type,
+            "amount_in_sale": auction.face_value,
+            "deposit_deadline": auction.deposit_deadline,
+            "foreclose_score": auction.property.foreclose_score,
+        })
+
+    return render(request, "datatable.html", {
+        "data": data,
+        "user_criteria": user_criteria,  # 传递筛选条件，便于前端显示或调试
+    })
+
+
 
 @login_required
 def report(request):
