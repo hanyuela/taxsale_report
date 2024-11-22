@@ -151,19 +151,21 @@ def signup_wizard(request):
                 )
 
                 # 保存 Criterion 信息
-                property_types_str = ",".join(property_types)  # 将列表转换为存储格式
-
                 criterion = Criterion.objects.create(
                     user=user,
                     auction_type=auction_type,  # 存储 auction_type
                     is_online=is_online,  # 存储 is_online
-                    
-                    property_type=property_types_str,  # 存储选择字段的值
                     market_value_min=market_value_min or None,
                     market_value_max=market_value_max or None,
                     face_value_min=face_value_min or None,
                     face_value_max=face_value_max or None,
                 )
+
+                # 保存 Property Type 信息
+                if property_types:  # 如果有选中的 property_types
+                    criterion.property_type = property_types
+                else:
+                    criterion.property_type = []  # 清空列表
 
                 # 获取选中的 States
                 if selected_states:
@@ -185,6 +187,7 @@ def signup_wizard(request):
     # GET 请求：渲染表单页面并提供所有州数据
     states = States.objects.all()
     return render(request, 'sign-up-wizard.html', {'states': states})
+
 
 
 @csrf_exempt  # 允许不经过 CSRF 验证，前端已提供 CSRF token
