@@ -306,6 +306,10 @@ def criterion(request):
         if auction_type:
             user_criteria.auction_type = auction_type
 
+        # 更新 Auction Mode（单选）
+        auction_mode = request.POST.get('is_online')
+        if auction_mode:
+            user_criteria.is_online = auction_mode
 
         # 更新市场价值范围
         market_value_min = request.POST.get('market_value_min', None)
