@@ -164,13 +164,13 @@
                                 <p><strong>Auction Type:</strong></p>
                                 <div style="display: flex; flex-wrap: wrap; gap: 5px;">
                                     <div style="width: 48%;">
-                                        <input type="radio" id="tax_lien" name="auction_type" value="tax lien" 
-                                            {% if user_criteria.auction_type == 'tax lien' %}checked{% endif %}>
+                                        <input type="checkbox" id="tax_lien" name="auction_type" value="tax lien" 
+                                            {% if 'tax lien' in user_criteria.auction_type %}checked{% endif %}>
                                         <label for="tax_lien">Tax Lien</label>
                                     </div>
                                     <div style="width: 48%;">
-                                        <input type="radio" id="tax_deed" name="auction_type" value="tax deed" 
-                                            {% if user_criteria.auction_type == 'tax deed' %}checked{% endif %}>
+                                        <input type="checkbox" id="tax_deed" name="auction_type" value="tax deed" 
+                                            {% if 'tax deed' in user_criteria.auction_type %}checked{% endif %}>
                                         <label for="tax_deed">Tax Deed</label>
                                     </div>
                                 </div>
@@ -181,17 +181,18 @@
                                 <p><strong>Auction Mode:</strong></p>
                                 <div style="display: flex; flex-wrap: wrap; gap: 5px;">
                                     <div style="width: 48%;">
-                                        <input type="radio" id="online" name="is_online" value="online" 
-                                            {% if user_criteria.is_online == 'online' %}checked{% endif %}>
+                                        <input type="checkbox" id="online" name="is_online" value="online" 
+                                            {% if 'online' in user_criteria.is_online %}checked{% endif %}>
                                         <label for="online">Online</label>
                                     </div>
                                     <div style="width: 48%;">
-                                        <input type="radio" id="in_person" name="is_online" value="in-person" 
-                                            {% if user_criteria.is_online == 'in-person' %}checked{% endif %}>
+                                        <input type="checkbox" id="in_person" name="is_online" value="in-person" 
+                                            {% if 'in-person' in user_criteria.is_online %}checked{% endif %}>
                                         <label for="in_person">In-person</label>
                                     </div>
                                 </div>
                             </div>
+
                                 
                       
                           <!-- 市场价值范围 -->
