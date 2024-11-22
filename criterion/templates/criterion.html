@@ -95,7 +95,7 @@
                         <form method="post">
                           {% csrf_token %}
                       
-                          <!-- 投资目的 -->
+                          <!-- 
                           <div class="mb-3">
                               <label class="form-label">My main purpose for investing in tax sales?</label>
                               <div>
@@ -109,40 +109,72 @@
                                   <label for="foreclosure">Foreclose on properties</label>
                               </div>
                           </div>
-                      
-                           <!-- 第一组：Tax Lien 和 Tax Deed -->
+                            -->
+
+                          <!-- Property Type (多选) -->
+                            <div>
+                                <p><strong>Property Type:</strong></p>
+                                <div style="display: flex; flex-wrap: wrap; gap: 5px;">
+                                    <div style="width: 48%;">
+                                        <input type="checkbox" id="single_family_residential" name="property_type" value="single_family_residential" 
+                                            {% if 'single_family_residential' in user_criteria.property_type %}checked{% endif %}>
+                                        <label for="single_family_residential">Single-Family Residential</label>
+                                    </div>
+                                    <div style="width: 48%;">
+                                        <input type="checkbox" id="multi_family_residential" name="property_type" value="multi_family_residential" 
+                                            {% if 'multi_family_residential' in user_criteria.property_type %}checked{% endif %}>
+                                        <label for="multi_family_residential">Multi-Family Residential</label>
+                                    </div>
+                                    <div style="width: 48%;">
+                                        <input type="checkbox" id="other_residential" name="property_type" value="other_residential" 
+                                            {% if 'other_residential' in user_criteria.property_type %}checked{% endif %}>
+                                        <label for="other_residential">Other Residential</label>
+                                    </div>
+                                    <div style="width: 48%;">
+                                        <input type="checkbox" id="commercial" name="property_type" value="commercial" 
+                                            {% if 'commercial' in user_criteria.property_type %}checked{% endif %}>
+                                        <label for="commercial">Commercial</label>
+                                    </div>
+                                    <div style="width: 48%;">
+                                        <input type="checkbox" id="vacant_land" name="property_type" value="vacant_land" 
+                                            {% if 'vacant_land' in user_criteria.property_type %}checked{% endif %}>
+                                        <label for="vacant_land">Vacant Land</label>
+                                    </div>
+                                    <div style="width: 48%;">
+                                        <input type="checkbox" id="industrial" name="property_type" value="industrial" 
+                                            {% if 'industrial' in user_criteria.property_type %}checked{% endif %}>
+                                        <label for="industrial">Industrial</label>
+                                    </div>
+                                    <div style="width: 48%;">
+                                        <input type="checkbox" id="agricultural" name="property_type" value="agricultural" 
+                                            {% if 'agricultural' in user_criteria.property_type %}checked{% endif %}>
+                                        <label for="agricultural">Agricultural</label>
+                                    </div>
+                                    <div style="width: 48%;">
+                                        <input type="checkbox" id="miscellaneous" name="property_type" value="miscellaneous" 
+                                            {% if 'miscellaneous' in user_criteria.property_type %}checked{% endif %}>
+                                        <label for="miscellaneous">Miscellaneous</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                                                    
+                          <!-- 第二组：Tax Lien 和 Tax Deed -->
                           <div>
-                            <p><strong>Property Type:</strong></p>
+                            <p><strong>Auction Type:</strong></p>
                             <div style="display: flex; flex-wrap: wrap; gap: 5px;">
                                 <div style="width: 48%;">
-                                    <input type="radio" id="tax_lien" name="property_type" value="tax lien" 
+                                    <input type="radio" id="tax_lien" name="auction_type" value="tax lien" 
                                         {% if user_criteria.auction_type == 'tax lien' %}checked{% endif %}>
                                     <label for="tax_lien">Tax Lien</label>
                                 </div>
                                 <div style="width: 48%;">
-                                    <input type="radio" id="tax_deed" name="property_type" value="tax deed" 
+                                    <input type="radio" id="tax_deed" name="auction_type" value="tax deed" 
                                         {% if user_criteria.auction_type == 'tax deed' %}checked{% endif %}>
                                     <label for="tax_deed">Tax Deed</label>
                                 </div>
                             </div>
-                        </div>
-
-                        <!-- 第二组：Online Auction 和 In Person -->
-                        <div>
-                            <p><strong>Auction Type:</strong></p>
-                            <div style="display: flex; flex-wrap: wrap; gap: 5px;">
-                                <div style="width: 48%;">
-                                    <input type="radio" id="online" name="auction_mode" value="online" 
-                                        {% if user_criteria.is_online == 'online' %}checked{% endif %}>
-                                    <label for="online">Online Auction</label>
-                                </div>
-                                <div style="width: 48%;">
-                                    <input type="radio" id="in_person" name="auction_mode" value="in person" 
-                                        {% if user_criteria.is_online == 'in person' %}checked{% endif %}>
-                                    <label for="in_person">In Person</label>
-                                </div>
-                            </div>
-                        </div>                   
+                          </div>         
                       
                           <!-- 市场价值范围 -->
                           <div class="mb-3">
