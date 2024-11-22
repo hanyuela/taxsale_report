@@ -21,7 +21,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
 from django.db import transaction
-from property.models import Property
+from property.models import Property, Auction
 # 注册页面
 def register(request):
     if request.method == 'POST':
@@ -92,7 +92,7 @@ def signup_wizard(request):
         auction_type = request.POST.get('auction_type', '').strip()  # 获取 auction_type
         is_online = request.POST.get('is_online', '').strip()  # 获取 is_online
         investment_purpose = request.POST.get('investment_purpose', '').strip()
-        property_types = request.POST.getlist('property_type')
+        property_types = request.POST.getlist('property_type')  # 获取选择字段列表
         market_value_min = request.POST.get('market_value_min', '').strip()
         market_value_max = request.POST.get('market_value_max', '').strip()
         face_value_min = request.POST.get('face_value_min', '').strip()
@@ -105,7 +105,7 @@ def signup_wizard(request):
             'auction_type': auction_type,
             'is_online': is_online,
             'investment_purpose': investment_purpose,
-            'property_type': property_types,
+            'property_type': property_types,  # 保留选择值
             'market_value_min': market_value_min,
             'market_value_max': market_value_max,
             'face_value_min': face_value_min,
@@ -147,17 +147,18 @@ def signup_wizard(request):
                     last_name=request.POST.get('last_name', '').strip(),
                     phone_number=request.POST.get('phone_number', '').strip(),
                     investment_amount=request.POST.get('investment_amount', '').strip() or None,
+                    goal=investment_purpose,
                 )
 
                 # 保存 Criterion 信息
-                property_types_str = ",".join(property_types)
+                property_types_str = ",".join(property_types)  # 将列表转换为存储格式
 
                 criterion = Criterion.objects.create(
                     user=user,
                     auction_type=auction_type,  # 存储 auction_type
                     is_online=is_online,  # 存储 is_online
-                    goal=investment_purpose,
-                    property_type=property_types_str,
+                    
+                    property_type=property_types_str,  # 存储选择字段的值
                     market_value_min=market_value_min or None,
                     market_value_max=market_value_max or None,
                     face_value_min=face_value_min or None,
@@ -184,7 +185,6 @@ def signup_wizard(request):
     # GET 请求：渲染表单页面并提供所有州数据
     states = States.objects.all()
     return render(request, 'sign-up-wizard.html', {'states': states})
-
 
 
 @csrf_exempt  # 允许不经过 CSRF 验证，前端已提供 CSRF token
@@ -345,37 +345,52 @@ def criterion(request):
 
 @login_required
 def datatable(request):
-    # 从 GET 请求中获取筛选关键词
-    city = request.GET.get('city', '').strip()
-    state = request.GET.get('state', '').strip()
-    price_min = request.GET.get('price_min', '')
-    price_max = request.GET.get('price_max', '')
-    property_type = request.GET.get('property_type', '').strip()
+    # 获取当前用户的筛选条件
+    user_criteria = Criterion.objects.filter(user=request.user).first()
 
-    # 根据筛选条件过滤数据
-    filtered_properties = Property.objects.all()
+    # 初始查询集
+    properties = Property.objects.all()
+    auctions = Auction.objects.all()
 
-    if city:
-        filtered_properties = filtered_properties.filter(city__icontains=city)
-    if state:
-        filtered_properties = filtered_properties.filter(state__icontains=state)
-    if property_type:
-        filtered_properties = filtered_properties.filter(property_type__icontains=property_type)
-    if price_min:
-        filtered_properties = filtered_properties.filter(price__gte=price_min)
-    if price_max:
-        filtered_properties = filtered_properties.filter(price__lte=price_max)
+    # 筛选条件
+    if user_criteria:
+        # 1. 按 `property_type` 筛选（针对 Property 表的 property_class 字段）
+        if user_criteria.property_type:
+            properties = properties.filter(property_class__in=user_criteria.property_type)
 
-    # 将筛选结果返回给前端
-    if request.is_ajax():
-        data = list(filtered_properties.values(
-            'address', 'city', 'state', 'property_type', 'is_online', 
-            'auction_type', 'amount_in_sale', 'deposit_deadline', 'foreclose_score'
-        ))
-        return JsonResponse({'data': data})
+        # 2. 按 `auction_type` 筛选（针对 Auction 表的 auction_type 字段）
+        if user_criteria.auction_type:
+            auctions = auctions.filter(auction_type=user_criteria.auction_type)
 
-    # 渲染模板时传递筛选数据
-    return render(request, 'datatable.html', {'filtered_properties': filtered_properties})
+        # 3. 按 `is_online` 筛选（针对 Auction 表的 is_online 字段）
+        if user_criteria.is_online:
+            auctions = auctions.filter(is_online=user_criteria.is_online)
+
+        # 4. 按市场价值范围筛选（针对 Property 表的 market_value 字段）
+        if user_criteria.market_value_min:
+            properties = properties.filter(market_value__gte=user_criteria.market_value_min)
+        if user_criteria.market_value_max:
+            properties = properties.filter(market_value__lte=user_criteria.market_value_max)
+
+        # 5. 按面值范围筛选（针对 Auction 表的 face_value 字段）
+        if user_criteria.face_value_min:
+            auctions = auctions.filter(face_value__gte=user_criteria.face_value_min)
+        if user_criteria.face_value_max:
+            auctions = auctions.filter(face_value__lte=user_criteria.face_value_max)
+
+        # 6. 按选中州筛选（针对 Property 表的 state 字段）
+        if user_criteria.states.exists():
+            state_names = user_criteria.states.values_list('state', flat=True)
+            properties = properties.filter(state__in=state_names)
+
+    # 将 Auction 和 Property 结果进行关联
+    auctioned_properties = properties.filter(auction__in=auctions)
+
+    # 返回筛选结果到前端
+    return render(request, "property_filter.html", {
+        "properties": auctioned_properties,
+        "user_criteria": user_criteria,
+    })
 
 @login_required
 def report(request):
