@@ -140,41 +140,39 @@
                     <div class="table-responsive">
                       <table class="display" id="keytable">
                         <thead>
-                          <tr>
-                            <th>Address</th>
-                            <th>City</th>
-                            <th>State</th>
-                            <th>Property Type</th>
-                            <th>Is Online</th>
-                            <th>Auction Type</th>
-                            <th>Amount In Sale</th>
-                            <th>Deposit Deadline</th>
-                            <th>Foreclose Score</th>
-                            <th>Action</th>
-                          </tr>
+                            <tr>
+                                <th>City</th>
+                                <th>State</th>
+                                <th>Property Type</th>
+                                <th>Is Online</th>
+                                <th>Auction Type</th>
+                                <th>Amount In Sale</th>
+                                <th>Deposit Deadline</th>
+                                <th>Foreclose Score</th>
+                                <th>Action</th>
+                            </tr>
                         </thead>
                         <tbody>
-                          <tr>
-                            <td>Tiger Nixon</td>
-                            <td>System Architect</td>
-                            <td>Tata Co.</td>
-                            <td>#AS61</td>
-                            <td><i class="icofont icofont-arrow-up me-1">1.4%</i></td>
-                            <td>2011/04/25</td>
-                            <td>$20,800.00</td>
-                            <td>$320,800.00</td>
-                            <td><span class="badge badge-light-warning">5</span></td>
-                            <td>
-                              <ul class="action">
-                                <li class="edit"><a href="#"><i class="icon-pencil-alt"></i></a></li>
-                                <li class="delete"><a href="#"><i class="icon-eye"></i></a></li>
-                              </ul>
-                            </td>
-                          </tr>
-                          
+                            {% for item in data %}
+                            <tr>
+                                <td>{{ item.city }}</td>
+                                <td>{{ item.state }}</td>
+                                <td>{{ item.property_type }}</td>
+                                <td>{{ item.is_online }}</td>
+                                <td>{{ item.auction_type }}</td>
+                                <td>${{ item.amount_in_sale }}</td>
+                                <td>{% if item.deposit_deadline %}{{ item.deposit_deadline }}{% else %}N/A{% endif %}</td>
+                                <td><span class="badge badge-light-warning">{{ item.foreclose_score }}</span></td>
+                                <td>
+                                    <ul class="action">
+                                        <li class="edit"><a href="#"><i class="icon-pencil-alt"></i></a></li>
+                                        <li class="delete"><a href="#"><i class="icon-eye"></i></a></li>
+                                    </ul>
+                                </td>
+                            </tr>
+                            {% endfor %}
                         </tbody>
-                        
-                      </table>
+                    </table>
                     </div>
                   </div>
                 </div>
@@ -184,7 +182,7 @@
         </div>
         {% include 'footer-light.html' %}
       </div>
-    </div>   
+    </div>     
     <script src="{% static 'js/jquery.min.js' %}"></script>
     <!-- Bootstrap js-->
     <script src="{% static 'js/bootstrap/bootstrap.bundle.min.js' %}"></script>
