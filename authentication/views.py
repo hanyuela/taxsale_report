@@ -348,52 +348,7 @@ def criterion(request):
 
 @login_required
 def datatable(request):
-    # 获取当前用户的筛选条件
-    user_criteria = Criterion.objects.filter(user=request.user).first()
-
-    # 初始查询集
-    properties = Property.objects.all()
-    auctions = Auction.objects.all()
-
-    # 筛选条件
-    if user_criteria:
-        # 1. 按 `property_type` 筛选（针对 Property 表的 property_class 字段）
-        if user_criteria.property_type:
-            properties = properties.filter(property_class__in=user_criteria.property_type)
-
-        # 2. 按 `auction_type` 筛选（针对 Auction 表的 auction_type 字段）
-        if user_criteria.auction_type:
-            auctions = auctions.filter(auction_type=user_criteria.auction_type)
-
-        # 3. 按 `is_online` 筛选（针对 Auction 表的 is_online 字段）
-        if user_criteria.is_online:
-            auctions = auctions.filter(is_online=user_criteria.is_online)
-
-        # 4. 按市场价值范围筛选（针对 Property 表的 market_value 字段）
-        if user_criteria.market_value_min:
-            properties = properties.filter(market_value__gte=user_criteria.market_value_min)
-        if user_criteria.market_value_max:
-            properties = properties.filter(market_value__lte=user_criteria.market_value_max)
-
-        # 5. 按面值范围筛选（针对 Auction 表的 face_value 字段）
-        if user_criteria.face_value_min:
-            auctions = auctions.filter(face_value__gte=user_criteria.face_value_min)
-        if user_criteria.face_value_max:
-            auctions = auctions.filter(face_value__lte=user_criteria.face_value_max)
-
-        # 6. 按选中州筛选（针对 Property 表的 state 字段）
-        if user_criteria.states.exists():
-            state_names = user_criteria.states.values_list('state', flat=True)
-            properties = properties.filter(state__in=state_names)
-
-    # 将 Auction 和 Property 结果进行关联
-    auctioned_properties = properties.filter(auction__in=auctions)
-
-    # 返回筛选结果到前端
-    return render(request, "property_filter.html", {
-        "properties": auctioned_properties,
-        "user_criteria": user_criteria,
-    })
+    return render(request, 'datatable.html')
 
 @login_required
 def report(request):
