@@ -204,7 +204,7 @@
                                 <span>Market value range: </span>
                                 <input type="number" id="market_value_min" name="market_value_min" class="form-control" placeholder="Min $" 
                                     value="{{ user_criteria.market_value_min }}" style="width: 150px;">
-                                <span>;</span>
+                                <span>|</span>
                                 <input type="number" id="market_value_max" name="market_value_max" class="form-control" placeholder="Max $" 
                                     value="{{ user_criteria.market_value_max }}" style="width: 150px;">
                             </div>
@@ -219,7 +219,7 @@
                                 <span>Face value range: </span>
                                 <input type="number" id="face_value_min" name="face_value_min" class="form-control" placeholder="Min $" 
                                     value="{{ user_criteria.face_value_min }}" style="width: 150px;">
-                                <span>;</span>
+                                <span>|</span>
                                 <input type="number" id="face_value_max" name="face_value_max" class="form-control" placeholder="Max $" 
                                     value="{{ user_criteria.face_value_max }}" style="width: 150px;">
                             </div>
@@ -240,7 +240,7 @@
                       
                           <!-- 选择州 -->
                           <div class="mb-3">
-                            <label class="form-label" for="states">Select States</label>
+                            <label class="form-label" for="states" style="font-weight: bold;">Select States</label>
                             <select id="states" name="states" class="form-control" multiple style="height: 200px;">
                                 {% for state in all_states %}
                                 <option value="{{ state.id }}" 
