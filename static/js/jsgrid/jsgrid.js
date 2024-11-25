@@ -11,19 +11,69 @@
         pageSize: 15,
         pageButtonCount: 5,
         deleteConfirm: "Do you really want to delete the client?",
-        controller: db,
+        controller: {
+            loadData: function (filter) {
+                return $.grep(db.clients, function (client) {
+                    return (!filter.Label || client.Label === filter.Label) &&
+                           (!filter["Full Address"] || client["Full Address"].indexOf(filter["Full Address"]) > -1) &&
+                           (!filter.State || client.State.indexOf(filter.State) > -1) &&
+                           (!filter["Auction Authority"] || client["Auction Authority"].indexOf(filter["Auction Authority"]) > -1);
+                });
+            }
+        },
         fields: [
-            { name: "Task", type: "text", width: 150 },
-            { name: "Email", type: "text", width: 200 },
-            { name: "Phone", type: "text", width: 150 },
-            { name: "Assign", type: "text", width: 160 },
-            { name: "Date", type: "text", width: 150 },
-            { name: "Price", type: "text", width: 100 },
-            { name: "Status", type: "html", width: 150 },
-            { name: "Progress", type: "text", width: 100 },
-            { type: "control" , width: 80 },
-        ]
+            { name: "Full Address", type: "text", width: 150 },
+            { name: "Auction Authority", type: "text", width: 150 },
+            { name: "State", type: "text", width: 100 },
+            { name: "Amount In Sale", type: "text", width: 120 },
+            { name: "Deposit Deadline", type: "text", width: 150 },
+            { name: "Auction Start", type: "text", width: 150 },
+            { name: "Auction End", type: "text", width: 150 },
+            { name: "My Bid", type: "text", width: 100 },
+            {
+                name: "Label",
+                title: "Status",
+                width: 120,
+                headerTemplate: function () {
+                    const $header = $("<div>").text("Status");
+                    const $select = $("<select>")
+                        .addClass("status-filter form-select form-select-sm ms-2") // 给筛选下拉框添加独立的 class
+                        .append($("<option>").val("All").text("All")) // 默认选项
+                        .append($("<option>").val("Bid").text("Bid"))
+                        .append($("<option>").val("Won").text("Won"))
+                        .append($("<option>").val("Foreclosed").text("Foreclosed"))
+                        .on("change", function () {
+                            const selectedValue = $(this).val();
+                            if (selectedValue === "All") {
+                                // 清除筛选条件，显示所有数据
+                                $("#basicScenario").jsGrid("loadData", { Label: "" });
+                            } else {
+                                // 按选择的值筛选数据
+                                $("#basicScenario").jsGrid("loadData", { Label: selectedValue });
+                            }
+                        });
+    
+                    $select.val("All"); // 设置默认值为 "All"
+                    return $("<div>").append($header).append($select);
+                },
+            },
+            { type: "control", width: 80 },
+        ],
     });
+    
+    // 初始化加载所有数据
+    $("#basicScenario").jsGrid("loadData", {});
+    
+    // 防止下拉框冲突逻辑
+    $(".status-filter").on("click", function (event) {
+        event.stopPropagation(); // 阻止事件冒泡到父元素，避免干扰其他功能
+    });
+    
+    
+    // 确保加载初始数据
+    $("#basicScenario").jsGrid("loadData", {});
+    
+
     $("#sorting-table").jsGrid({
         height:"400px",
         width: "100%",
