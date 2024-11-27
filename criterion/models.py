@@ -41,7 +41,7 @@ class States(models.Model):
             {"state": "Montana", "abbreviation": "MT"},
             {"state": "Nebraska", "abbreviation": "NE"},
             {"state": "Nevada", "abbreviation": "NV"},
-            {"state": "New Hampshire", "abbreviation": "NH"},  # no tax sales
+            # {"state": "New Hampshire", "abbreviation": "NH"},  # no tax sales
             {"state": "New Jersey", "abbreviation": "NJ"},
             {"state": "New Mexico", "abbreviation": "NM"},
             {"state": "New York", "abbreviation": "NY"},
