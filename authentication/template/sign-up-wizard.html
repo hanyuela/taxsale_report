@@ -160,7 +160,16 @@
                                         </div>
                                         <div class="form-group mb-3">
                                             <label for="investment_amount">How much are you planning to invest in tax sales?</label>
-                                            <input class="form-control" id="investment_amount" type="number" name="investment_amount" placeholder="Investment amount" required>
+                                            <input 
+                                                class="form-control" 
+                                                id="investment_amount" 
+                                                type="number" 
+                                                name="investment_amount" 
+                                                placeholder="Investment amount" 
+                                                required 
+                                                max="1000000000" 
+                                                oninput="adjustMaxValue(this)"
+                                            >
                                         </div>
                                         <!-- Buttons moved here -->
                                         <div class="form-group button-group" style="display: flex; justify-content: space-between;">
@@ -427,6 +436,14 @@
         // 绑定事件监听
         passwordField.addEventListener('input', checkPasswordsMatch);
         confirmPasswordField.addEventListener('input', checkPasswordsMatch);
+        </script>
+        <script>
+            function adjustMaxValue(input) {
+                const max = 1000000000; // 最大值
+                if (input.value > max) {
+                    input.value = max; // 超过最大值时自动调整为最大值
+                }
+            }
         </script>
     </div>
   </body>
