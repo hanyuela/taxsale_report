@@ -203,10 +203,14 @@
                             <div style="display: flex; align-items: center; gap: 10px;">
                                 <span>Market value range: </span>
                                 <input type="number" id="market_value_min" name="market_value_min" class="form-control" placeholder="Min $" 
-                                    value="{{ user_criteria.market_value_min }}" style="width: 150px;">
-                                <span>|</span>
+                                    value="{{ user_criteria.market_value_min|floatformat:0 }}" style="width: 150px;" 
+                                    min="0" max="1000000000" step="1" 
+                                    oninput="validateMinMaxRange()">
+                                <span>~</span>
                                 <input type="number" id="market_value_max" name="market_value_max" class="form-control" placeholder="Max $" 
-                                    value="{{ user_criteria.market_value_max }}" style="width: 150px;">
+                                    value="{{ user_criteria.market_value_max|floatformat:0 }}" style="width: 150px;" 
+                                    min="0" max="1000000000" step="1" 
+                                    oninput="validateMinMaxRange()">
                             </div>
                           </div>
 
@@ -218,10 +222,14 @@
                             <div style="display: flex; align-items: center; gap: 10px;">
                                 <span>Face value range: </span>
                                 <input type="number" id="face_value_min" name="face_value_min" class="form-control" placeholder="Min $" 
-                                    value="{{ user_criteria.face_value_min }}" style="width: 150px;">
-                                <span>|</span>
+                                    value="{{ user_criteria.face_value_min|floatformat:0 }}" style="width: 150px;" 
+                                    min="0" max="1000000000" step="1" 
+                                    oninput="validateMinMaxRange()">
+                                <span>~</span>
                                 <input type="number" id="face_value_max" name="face_value_max" class="form-control" placeholder="Max $" 
-                                    value="{{ user_criteria.face_value_max }}" style="width: 150px;">
+                                    value="{{ user_criteria.face_value_max|floatformat:0 }}" style="width: 150px;" 
+                                    min="0" max="1000000000" step="1" 
+                                    oninput="validateMinMaxRange()">
                             </div>
                           </div>
                       
@@ -262,7 +270,49 @@
         
         <!-- footer start-->
         {% include 'footer-light.html' %}
-
+        <script>
+            function validateMinMaxRange() {
+                // 获取市场价值的最小值和最大值输入框
+                let minInputs = document.querySelectorAll('[id$="_min"]');
+                let maxInputs = document.querySelectorAll('[id$="_max"]');
+        
+                minInputs.forEach((minInput, index) => {
+                    let maxInput = maxInputs[index]; // 对应的最大值输入框
+        
+                    // 获取输入框的值
+                    let minValue = minInput.value ? parseInt(minInput.value) : null;
+                    let maxValue = maxInput.value ? parseInt(maxInput.value) : null;
+        
+                    // 如果最小值存在并且大于最大限制
+                    if (minValue !== null && minValue > 1000000000) {
+                        minInput.setCustomValidity('Minimum value must be less than or equal to 1,000,000,000!');
+                        maxInput.setCustomValidity(''); // 清除对应最大值的错误提示
+                    } 
+                    // 如果最大值存在并且大于最大限制
+                    else if (maxValue !== null && maxValue > 1000000000) {
+                        maxInput.setCustomValidity('Maximum value must be less than or equal to 1,000,000,000!');
+                        minInput.setCustomValidity(''); // 清除对应最小值的错误提示
+                    } 
+                    // 如果最小值大于最大值，触发错误提示
+                    else if (minValue !== null && maxValue !== null && minValue > maxValue) {
+                        minInput.setCustomValidity('Minimum value must not exceed the maximum value!');
+                        maxInput.setCustomValidity('Minimum value must not exceed the maximum value!');
+                    } 
+                    // 如果输入不是整数
+                    else if (minInput.value !== "" && !Number.isInteger(Number(minInput.value))) {
+                        minInput.setCustomValidity('Please enter a valid integer!');
+                    } 
+                    else if (maxInput.value !== "" && !Number.isInteger(Number(maxInput.value))) {
+                        maxInput.setCustomValidity('Please enter a valid integer!');
+                    }
+                    // 输入合法，清除所有提示
+                    else {
+                        minInput.setCustomValidity('');
+                        maxInput.setCustomValidity('');
+                    }
+                });
+            }
+        </script>   
         <script>
           document.addEventListener('DOMContentLoaded', function () {
             const selectedStatesDiv = document.getElementById('selected-states');
