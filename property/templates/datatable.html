@@ -113,6 +113,17 @@
           display: flex;
           justify-content: flex-end;
       }
+      #confirm-modal {
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: white;
+        padding: 20px;
+        border-radius: 5px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
     </style>
     <body>
     {% if messages %}
@@ -157,17 +168,21 @@
                             <tr>
                                 <td>{{ item.city }}</td>
                                 <td>{{ item.state }}</td>
-                                <td>{{ item.property_type }}</td>
+                                <td>{{ item.state }}</td>
                                 <td>{{ item.is_online }}</td>
                                 <td>{{ item.auction_type }}</td>
                                 <td>${{ item.amount_in_sale }}</td>
                                 <td>{% if item.deposit_deadline %}{{ item.deposit_deadline }}{% else %}N/A{% endif %}</td>
                                 <td><span class="badge badge-light-warning">{{ item.foreclose_score }}</span></td>
                                 <td>
-                                    <ul class="action">
-                                        <li class="edit"><a href="#"><i class="icon-pencil-alt"></i></a></li>
-                                        <li class="delete"><a href="#"><i class="icon-eye"></i></a></li>
-                                    </ul>
+                                      <ul class="action">
+                                          <li class="edit"><a href="#"><i class="icon-pencil-alt"></i></a></li>
+                                          <li class="delete">
+                                            <a href="#" data-property-id="{{ item.property_id }}" data-user-id="{{ user.id }}">
+                                                <i class="icon-eye"></i>
+                                            </a>
+                                          </li>
+                                      </ul>
                                 </td>
                             </tr>
                             {% endfor %}
@@ -180,9 +195,20 @@
             </div>
           </div>
         </div>
+         <!-- 弹出框 -->
+        <div id="confirm-modal" style="display: none;">
+          <div class="modal-content">
+              <p>您确定要查看此报告吗？</p>
+              <button id="agree-button">同意</button>
+              <button id="cancel-button">取消</button>
+          </div>
+        </div>
         {% include 'footer-light.html' %}
-      </div>
-    </div>     
+          </div>
+        </div> 
+    <!-- 弹出窗口 -->
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>   
     <script src="{% static 'js/jquery.min.js' %}"></script>
     <!-- Bootstrap js-->
     <script src="{% static 'js/bootstrap/bootstrap.bundle.min.js' %}"></script>
@@ -246,6 +272,80 @@
           $(".dataTables_filter").detach().appendTo(".card-header");
       });
     </script>
-       
+    <script>
+      $(document).ready(function() {
+          // 绑定眼睛图标的点击事件
+          $('.delete a').click(function(e) {
+              e.preventDefault();  // 阻止默认行为
+              console.log('眼睛图标被点击');
+  
+              var propertyId = $(this).data('property-id'); // 获取property_id
+              var userId = $(this).data('user-id'); // 获取user_id
+  
+              if (!propertyId) {
+                  console.log("property_id 未获取到！");
+                  alert("未获取到 property_id，请检查！");
+                  return;  // 如果没有获取到 property_id，直接返回
+              }
+  
+              console.log("获取到的 property_id: " + propertyId);  // 检查是否成功获取 property_id
+  
+              $('#confirm-modal').fadeIn();  // 显示弹出框
+              
+              // 保存到全局变量
+              window.selectedProperty = propertyId;
+              window.selectedUser = userId;
+          });
+  
+          // 点击同意按钮后发送AJAX请求
+          $('#agree-button').click(function() {
+              var propertyId = window.selectedProperty;
+              var userId = window.selectedUser;
+  
+              if (!propertyId || !userId) {
+                  console.log("property_id 或 user_id 缺失！");
+                  alert("缺少必要的参数，请重试！");
+                  return;  // 如果没有获取到必要的参数，直接返回
+              }
+  
+              console.log("发送的请求参数 - property_id: " + propertyId + ", user_id: " + userId);  // 调试输出
+  
+              $.ajax({
+                  url: '/agree-to-view/',  // 后端处理URL
+                  method: 'POST',
+                  data: {
+                      property_id: propertyId,
+                      user_id: userId,
+                      csrfmiddlewaretoken: '{{ csrf_token }}'  // 防止跨站请求伪造
+                  },
+                  success: function(response) {
+                      if (response.success) {
+                          alert("用户同意操作成功！");  // 弹出提示框
+                          $('#confirm-modal').fadeOut();  // 关闭弹出框
+  
+                          // 打开报告页面在新窗口
+                          //var reportUrl = '/report/?property_id=' + propertyId + '&user_id=' + userId;  // 根据你的需求调整报告页面的URL
+                          var reportUrl = '/report';  // 根据你的需求调整报告页面的URL
+                          window.open(reportUrl, '_blank');  // 在新窗口打开报告页面
+                      } else {
+                          console.log('用户已同意过或发生错误');
+                          alert("发生错误：用户已同意过或其他问题。");  // 弹出错误提示
+                      }
+                  },
+                  error: function(xhr, status, error) {
+                      console.log("请求失败: " + error);
+                      alert("请求失败，请稍后重试。");  // 请求失败提示
+                  }
+              });
+          });
+  
+          // 点击取消按钮后关闭弹出框
+          $('#cancel-button').click(function() {
+              $('#confirm-modal').fadeOut();  // 关闭弹出框
+          });
+      });
+  </script>
+  
+  </script>  
   </body>
 </html>
