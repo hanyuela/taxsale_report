@@ -1,5 +1,5 @@
 from django.db import models
-
+from django.contrib.auth.models import User
 # Create your models here.
 
 class Property(models.Model):
@@ -45,6 +45,7 @@ class Property(models.Model):
     )  # 新增字段：允许的值为 0~5，默认值为 0
 
     owners = models.ManyToManyField('Owner', related_name='properties')
+    users = models.ManyToManyField(User, related_name='properties')  # 关联用户表
 
     def __str__(self):
         return self.street_address
@@ -62,15 +63,15 @@ class Auction(models.Model):
         max_length=20,
         choices=[('online', 'Online'), ('in-person', 'In-person')]
     )
-    auction_tax_year = models.IntegerField()
+    auction_tax_year = models.IntegerField(null=True, blank=True)
     batch_number = models.CharField(max_length=50)
     sort_no = models.CharField(max_length=50)
     bankruptcy_flag = models.BooleanField(default=False)
-    deposit_deadline = models.DateField()  # Date field for the deposit deadline
-    auction_start = models.DateField()  # Date field for the auction start
-    auction_end = models.DateField()  # Date field for the auction end
-    redemption_period = models.IntegerField()  # Integer field for the redemption period in years
-    foreclosure_date = models.DateField()  # Date field for the foreclosure date
+    deposit_deadline = models.DateField(null=True, blank=True)   # Date field for the deposit deadline
+    auction_start = models.DateField(null=True, blank=True)  # Date field for the auction start
+    auction_end = models.DateField(null=True, blank=True)  # Date field for the auction end
+    redemption_period = models.IntegerField(null=True, blank=True)  # Integer field for the redemption period in years
+    foreclosure_date = models.DateField(null=True, blank=True)  # Date field for the foreclosure date
     authority_name = models.CharField(max_length=255)  # Name of the authority hosting the tax sale auction, e.g., County or City.
     def __str__(self):
         return f"Auction {self.batch_number} - {self.sort_no}"
