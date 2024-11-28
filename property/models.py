@@ -60,7 +60,7 @@ class PropertyUserAgreement(models.Model):
 
 
 class Auction(models.Model):
-    property = models.ForeignKey('Property', on_delete=models.CASCADE)  # Foreign key to Property
+    property = models.ForeignKey(Property, on_delete=models.CASCADE, related_name='auctions')
     face_value = models.DecimalField(max_digits=10, decimal_places=2)
     auction_type = models.CharField(
         max_length=20,
@@ -112,3 +112,117 @@ class Owner(models.Model):
 
     def __str__(self):
         return f"{self.phone_1} - {self.email_1}"
+    
+# property/models.py
+
+def import_sample_data():
+    # 创建一些示例 Property 数据
+    property1 = Property.objects.create(
+        street_address="1234 Main St",
+        city="City",
+        state="State",
+        zip="12345",
+        parcel_number="0001",
+        property_class="Residential",
+        tax_overdue=False,
+        accessed_land_value=100000.00,  # 确保给这个字段赋值
+        accessed_improvement_value=50000.00,
+        total_assessed_value=150000.00,
+        tax_amount_annual=1500.00,
+        market_value=200000.00,
+        year_built=1990,
+        lot_size_sqft=5000.00,
+        lot_size_acres=0.1,
+        building_size_sqft=2500.00,
+        bedroom_number=3,
+        bathroom_number=2,
+        latest_sale_date="2022-01-01",
+        latest_sale_price=180000.00
+    )
+    
+    property2 = Property.objects.create(
+        street_address="5678 Oak St",
+        city="Another City",
+        state="Another State",
+        zip="67890",
+        parcel_number="0002",
+        property_class="Commercial",
+        tax_overdue=True,
+        accessed_land_value=200000.00,
+        accessed_improvement_value=100000.00,
+        total_assessed_value=300000.00,
+        tax_amount_annual=3000.00,
+        market_value=350000.00,
+        year_built=2000,
+        lot_size_sqft=10000.00,
+        lot_size_acres=0.2,
+        building_size_sqft=5000.00,
+        bedroom_number=0,  # Commercial property
+        bathroom_number=4,
+        latest_sale_date="2023-01-01",
+        latest_sale_price=280000.00
+    )
+
+    property3 = Property.objects.create(
+        street_address="9101 Pine St",
+        city="New City",
+        state="New State",
+        zip="98765",
+        parcel_number="0003",
+        property_class="Residential",
+        tax_overdue=False,
+        accessed_land_value=150000.00,
+        accessed_improvement_value=75000.00,
+        total_assessed_value=225000.00,
+        tax_amount_annual=2250.00,
+        market_value=250000.00,
+        year_built=2010,
+        lot_size_sqft=6000.00,
+        lot_size_acres=0.14,
+        building_size_sqft=3000.00,
+        bedroom_number=4,
+        bathroom_number=3,
+        latest_sale_date="2022-06-15",
+        latest_sale_price=230000.00
+    )
+
+    # 创建一些示例 Auction 数据
+    auction1 = Auction.objects.create(
+        property=property1,
+        face_value=200000.00,
+        auction_type="lien",
+        is_online="online",
+        batch_number="A123",
+        sort_no="S001",
+        authority_name="County Tax Authority",
+        auction_start="2023-01-01",
+        auction_end="2023-01-02"
+    )
+
+    auction2 = Auction.objects.create(
+        property=property2,
+        face_value=300000.00,
+        auction_type="deed",
+        is_online="in-person",
+        batch_number="A124",
+        sort_no="S002",
+        authority_name="City Tax Authority",
+        auction_start="2023-02-15",
+        auction_end="2023-02-16"
+    )
+
+    auction3 = Auction.objects.create(
+        property=property3,
+        face_value=250000.00,
+        auction_type="lien",
+        is_online="online",
+        batch_number="A125",
+        sort_no="S003",
+        authority_name="State Tax Authority",
+        auction_start="2023-03-10",
+        auction_end="2023-03-11"
+    )
+
+    print("Sample Property and Auction data has been imported.")
+
+    
