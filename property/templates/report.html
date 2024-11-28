@@ -117,22 +117,37 @@
                         <td><a href="#" target="_blank">View Listing</a></td>
                         <th>Zestimate</th>
                         <td>$200,000</td>
+                        <th>Building size/sqft</th>
+                        <td>1234 sqft</td> 
                       </tr>
                       <tr>
                         <th>Year Built</th>
                         <td>1995</td>
-                        <th>Lot</th>
+                        <th>Lot size</th>
                         <td>5000 sqft</td>
+                        <th>Sort No / advnum</th>
+                        <td>1</td>
                       </tr>
                       <tr>
                         <th>Nearby Schools</th>
                         <td colspan="3">School A, School B, School C</td>
                       </tr>
+                      <!-- Loan Information -->
+                      <tr>
+                        <th>Loan Amount</th>
+                        <td>$455,200</td>
+                        <th>Loan Due Date</th>
+                        <td>10/01/2020 - D</td>
+                        <th>Loan Type</th>
+                        <td>Mortgage</td>
+                      </tr>
                     </table>
 
                     <!-- Score Chart Example -->
                     <h3>Score Chart</h3>
-                    <canvas id="scoreChart"></canvas>
+                    <div style="width: 60%; margin-left:0 ;">
+                      <canvas id="scoreChart"></canvas>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -149,7 +164,7 @@
       // Example Chart
       const ctx = document.getElementById('scoreChart').getContext('2d');
       new Chart(ctx, {
-        type: 'bar',
+        type: 'bar', // Chart type
         data: {
           labels: ['Walk Score', 'Transit Score', 'Bike Score'],
           datasets: [{
@@ -163,10 +178,17 @@
           }]
         },
         options: {
+          indexAxis: 'y', // Horizontal bar chart
           responsive: true,
+          maintainAspectRatio: false, // Prevent aspect ratio constraints
           scales: {
-            y: {
+            x: {
               beginAtZero: true
+            }
+          },
+          plugins: {
+            legend: {
+              display: false // Hide legend if not needed
             }
           }
         }
