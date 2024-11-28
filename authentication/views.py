@@ -21,9 +21,10 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
 from django.db import transaction
-from property.models import Property, Auction
+from property.models import Property, Auction, PropertyUserAgreement
 import datetime
 import ast
+from django.shortcuts import render, get_object_or_404
 # 注册页面
 def register(request):
     if request.method == 'POST':
@@ -463,6 +464,7 @@ def datatable(request):
             "amount_in_sale": auction.face_value,
             "deposit_deadline": auction.deposit_deadline,
             "foreclose_score": auction.property.foreclose_score,
+            "property_id":auction.property_id
         })
 
     return render(request, "datatable.html", {
@@ -475,3 +477,59 @@ def datatable(request):
 @login_required
 def report(request):
     return render(request, 'report.html')
+
+@login_required
+def agree_to_view(request):
+    if request.method == "POST":
+        # 获取传递的 property_id 和 user_id
+        property_id = request.POST.get('property_id')  # 从 POST 数据中获取 property_id
+        user_id = request.POST.get('user_id')  # 从 POST 数据中获取 user_id
+
+        print(f"Received POST request with property_id: {property_id}, user_id: {user_id}")
+
+        # 输入验证
+        if not property_id:
+            return JsonResponse({"error": "Missing property_id."})  # 如果没有传递 property_id
+
+        if not user_id:
+            return JsonResponse({"error": "Missing user_id."})  # 如果没有传递 user_id
+
+        try:
+            # 查找对应的 Property 和 User
+            property = Property.objects.get(id=property_id)  # 使用传递过来的 property_id 查找 Property
+            user = User.objects.get(id=user_id)  # 使用传递过来的 user_id 查找 User
+
+            print(f"Found Property: {property}, Found User: {user}")
+
+            # 创建或更新 PropertyUserAgreement 记录
+            agreement, created = PropertyUserAgreement.objects.get_or_create(
+                property=property,
+                user=user,  # 确保传递 user 对象
+                defaults={"agreed": True}  # 标记用户已同意
+            )
+
+            # 如果已存在记录，则返回错误消息
+            if not created:
+                print("Property has already agreed.")
+                return JsonResponse({"error": "Property has already been agreed."})
+
+            print("Successfully created PropertyUserAgreement record.")
+            return JsonResponse({"success": True})
+
+        except Property.DoesNotExist:
+            print(f"Property with id {property_id} not found.")
+            return JsonResponse({"error": "Property not found."})
+
+        except User.DoesNotExist:
+            print(f"User with id {user_id} not found.")
+            return JsonResponse({"error": "User not found."})
+
+        except Exception as e:
+            print(f"An error occurred: {str(e)}")
+            return JsonResponse({"error": f"An unexpected error occurred: {str(e)}"})
+
+    # 如果不是 POST 请求，返回错误
+    print("Invalid request method.")
+    return JsonResponse({"error": "Invalid request method. Only POST requests are allowed."})
+
+

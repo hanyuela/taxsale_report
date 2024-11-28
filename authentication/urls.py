@@ -19,4 +19,5 @@ urlpatterns = [
     path('criterion/', views.criterion, name='criterion'),
     path('check-email/', views.check_email, name='check_email'),
     path('report/', views.report, name='report'),
+    path('agree-to-view/', views.agree_to_view, name='agree_to_view'),
 ]
