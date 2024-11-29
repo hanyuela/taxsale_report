@@ -3,7 +3,7 @@
     $("#basicScenario").jsGrid({
         width: "100%",
         filtering: true,
-        editing: true,
+        editing: true,    // 启用编辑功能
         inserting: true,
         sorting: true,
         paging: true,
@@ -15,9 +15,9 @@
             loadData: function (filter) {
                 return $.grep(db.clients, function (client) {
                     return (!filter.Label || client.Label === filter.Label) &&
-                           (!filter["Full Address"] || client["Full Address"].indexOf(filter["Full Address"]) > -1) &&
-                           (!filter.State || client.State.indexOf(filter.State) > -1) &&
-                           (!filter["Auction Authority"] || client["Auction Authority"].indexOf(filter["Auction Authority"]) > -1);
+                        (!filter["Full Address"] || client["Full Address"].indexOf(filter["Full Address"]) > -1) &&
+                        (!filter.State || client.State.indexOf(filter.State) > -1) &&
+                        (!filter["Auction Authority"] || client["Auction Authority"].indexOf(filter["Auction Authority"]) > -1);
                 });
             }
         },
@@ -30,6 +30,7 @@
             { name: "Auction Start", type: "text", width: 150 },
             { name: "Auction End", type: "text", width: 150 },
             { name: "My Bid", type: "text", width: 100 },
+            
             {
                 name: "Label",
                 title: "Status",
@@ -37,26 +38,44 @@
                 headerTemplate: function () {
                     const $header = $("<div>").text("Status");
                     const $select = $("<select>")
-                        .addClass("status-filter form-select form-select-sm ms-2") // 给筛选下拉框添加独立的 class
-                        .append($("<option>").val("All").text("All")) // 默认选项
+                        .addClass("status-filter form-select form-select-sm ms-2")
+                        .append($("<option>").val("All").text("All"))
                         .append($("<option>").val("Bid").text("Bid"))
                         .append($("<option>").val("Won").text("Won"))
                         .append($("<option>").val("Foreclosed").text("Foreclosed"))
                         .on("change", function () {
                             const selectedValue = $(this).val();
                             if (selectedValue === "All") {
-                                // 清除筛选条件，显示所有数据
                                 $("#basicScenario").jsGrid("loadData", { Label: "" });
                             } else {
-                                // 按选择的值筛选数据
                                 $("#basicScenario").jsGrid("loadData", { Label: selectedValue });
                             }
                         });
-    
                     $select.val("All"); // 设置默认值为 "All"
                     return $("<div>").append($header).append($select);
                 },
+                // 编辑时显示下拉框
+                editTemplate: function (value) {
+                    const $select = $("<select>").addClass("form-select form-select-sm");
+                    const options = ["Bid", "Won", "Foreclosed"];
+                    options.forEach(function (option) {
+                        const $option = $("<option>").val(option).text(option);
+                        if (option === value) {
+                            $option.prop("selected", true); // 设置默认值
+                        }
+                        $select.append($option);
+                    });
+    
+                    // 将下拉框保存到 this.$select 中
+                    this.$select = $select;
+                    return $select;
+                },
+                // 返回编辑时的值
+                editValue: function () {
+                    return this.$select.val();  // 获取当前选中的值
+                }
             },
+    
             { type: "control", width: 80 },
         ],
     });
@@ -68,11 +87,6 @@
     $(".status-filter").on("click", function (event) {
         event.stopPropagation(); // 阻止事件冒泡到父元素，避免干扰其他功能
     });
-    
-    
-    // 确保加载初始数据
-    $("#basicScenario").jsGrid("loadData", {});
-    
 
     $("#sorting-table").jsGrid({
         height:"400px",
