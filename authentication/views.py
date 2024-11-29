@@ -25,6 +25,7 @@ from property.models import Property, Auction, PropertyUserAgreement
 import datetime
 import ast
 from django.shortcuts import render, get_object_or_404
+from holdings.models import Holding
 # 注册页面
 def register(request):
     if request.method == 'POST':
@@ -483,26 +484,30 @@ def agree_to_view(request):
     if request.method == "POST":
         # 获取传递的 property_id 和 user_id
         property_id = request.POST.get('property_id')  # 从 POST 数据中获取 property_id
-        user_id = request.POST.get('user_id')  # 从 POST 数据中获取 user_id
         default = request.POST.get('default') == 'true'  # 获取是否选择默认同意付费
 
-        print(f"Received POST request with property_id: {property_id}, user_id: {user_id}, default: {default}")
+        # 获取竞标金额、竞标百分比、备注字段的值
+        my_bid = request.POST.get('my_bid')  # 竞标金额
+        my_bid_percentage = request.POST.get('my_bid_percentage')  # 竞标百分比
+        note = request.POST.get('note')  # 备注
+
+        print(f"Received POST request with property_id: {property_id}, default: {default}")
+        print(f"Bid details: my_bid={my_bid}, my_bid_percentage={my_bid_percentage}, note={note}")
 
         # 输入验证
-        if not property_id or not user_id:
-            return JsonResponse({"error": "Missing property_id or user_id."})
+        if not property_id:
+            return JsonResponse({"error": "Missing property_id."})
 
         try:
-            # 查找对应的 Property 和 User
+            # 查找对应的 Property
             property = Property.objects.get(id=property_id)
-            user = User.objects.get(id=user_id)
 
-            print(f"Found Property: {property}, Found User: {user}")
+            print(f"Found Property: {property}")
 
             # 创建或更新 PropertyUserAgreement 记录
             agreement, created = PropertyUserAgreement.objects.get_or_create(
                 property=property,
-                user=user,
+                user=request.user,  # 使用当前登录的用户
                 defaults={"default": default}  # 如果选择默认付费，存储为 True
             )
 
@@ -510,15 +515,34 @@ def agree_to_view(request):
                 print("Agreement already exists.")
                 return JsonResponse({"error": "Agreement already exists."})
 
+            # 处理 Holding 记录（仅根据 property_id 和当前用户创建）
+            try:
+                holding, holding_created = Holding.objects.get_or_create(
+                    property=property,
+                    defaults={
+                        "status": "Bid",  # 默认状态
+                        "my_bid": my_bid if my_bid else 0.00,  # 如果没有提供竞标金额，默认为 0.00
+                        "my_bid_percentage": my_bid_percentage if my_bid_percentage else 0.00,  # 默认为 0.00
+                        "note": note if note else "",  # 默认为空备注
+                    }
+                )
+
+                if holding_created:
+                    print("Successfully created Holding record.")
+                else:
+                    print("Holding record already exists.")
+            except Exception as e:
+                print(f"Error while creating Holding record: {str(e)}")
+                return JsonResponse({"error": f"Error while creating Holding record: {str(e)}"})
+
             print("Successfully created PropertyUserAgreement record.")
             return JsonResponse({"success": True})
 
         except Property.DoesNotExist:
             return JsonResponse({"error": "Property not found."})
-        except User.DoesNotExist:
-            return JsonResponse({"error": "User not found."})
         except Exception as e:
             return JsonResponse({"error": f"Unexpected error: {str(e)}"})
 
     return JsonResponse({"error": "Invalid request method."})
+
 
