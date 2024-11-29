@@ -39,7 +39,17 @@
         <link id="color" rel="stylesheet" href="{% static 'css/color-1.css' %}" media="screen">
         <!-- Responsive css-->
         <link rel="stylesheet" type="text/css" href="{% static 'css/responsive.css' %}">
-    </head>    
+    </head>  
+    <style>
+      /* 针对 jsgrid-control-field 的样式 */
+      .jsgrid .jsgrid-cell.jsgrid-control-field.jsgrid-align-center {
+          position: sticky; /* 固定列 */
+          right: 0; /* 固定在右侧 */
+          z-index: 2; /* 确保它显示在其他列的上面 */
+          background-color: #fff; /* 背景颜色，防止被覆盖 */
+          box-shadow: -2px 0 5px rgba(0, 0, 0, 0.2); /* 给固定列添加阴影效果 */
+      }
+    </style>  
   <body> 
     <!-- Loader Section -->
 <div class="loader-wrapper">
