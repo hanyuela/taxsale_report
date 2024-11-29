@@ -53,7 +53,7 @@ class Property(models.Model):
 class PropertyUserAgreement(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     property = models.ForeignKey(Property, on_delete=models.CASCADE)
-    agreed = models.BooleanField(default=False)  # 是否同意字段
+    default = models.BooleanField(default=False)  # 是否默认同意付费，无需再次提示
 
     class Meta:
         unique_together = ('user', 'property')  # 保证每个用户在同一个房产下只能有一个记录
