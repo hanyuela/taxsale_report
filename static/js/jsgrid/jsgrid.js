@@ -30,7 +30,7 @@
             { name: "Auction Start", type: "text", width: 150 },
             { name: "Auction End", type: "text", width: 150 },
             { name: "My Bid", type: "text", width: 100 },
-            
+    
             {
                 name: "Label",
                 title: "Status",
@@ -43,12 +43,19 @@
                         .append($("<option>").val("Bid").text("Bid"))
                         .append($("<option>").val("Won").text("Won"))
                         .append($("<option>").val("Foreclosed").text("Foreclosed"))
+                        .append($("<optgroup>").attr("label", "------"))  // 虚线分隔符
+                        .append($("<option>").val("Archived").text("Archived")) // 添加 Archived 选项
                         .on("change", function () {
                             const selectedValue = $(this).val();
                             if (selectedValue === "All") {
                                 $("#basicScenario").jsGrid("loadData", { Label: "" });
+                                $(".archived-row").hide(); // 隐藏所有 Archived 行
+                            } else if (selectedValue === "Archived") {
+                                $("#basicScenario").jsGrid("loadData", { Label: "Archived" });
+                                $(".archived-row").show(); // 显示所有 Archived 行
                             } else {
                                 $("#basicScenario").jsGrid("loadData", { Label: selectedValue });
+                                $(".archived-row").hide(); // 隐藏 Archived 行
                             }
                         });
                     $select.val("All"); // 设置默认值为 "All"
@@ -57,7 +64,7 @@
                 // 编辑时显示下拉框
                 editTemplate: function (value) {
                     const $select = $("<select>").addClass("form-select form-select-sm");
-                    const options = ["Bid", "Won", "Foreclosed"];
+                    const options = ["Bid", "Won", "Foreclosed", "Archived"];
                     options.forEach(function (option) {
                         const $option = $("<option>").val(option).text(option);
                         if (option === value) {
@@ -80,13 +87,9 @@
         ],
     });
     
-    // 初始化加载所有数据
-    $("#basicScenario").jsGrid("loadData", {});
+    // 给 Archived 行添加虚线边框
+    $(".archived-row").css("border-bottom", "1px dashed #ccc");
     
-    // 防止下拉框冲突逻辑
-    $(".status-filter").on("click", function (event) {
-        event.stopPropagation(); // 阻止事件冒泡到父元素，避免干扰其他功能
-    });
 
     $("#sorting-table").jsGrid({
         height:"400px",
