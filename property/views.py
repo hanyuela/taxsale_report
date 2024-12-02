@@ -5,7 +5,7 @@ from property.models import Property, Auction, PropertyUserAgreement
 import ast
 from django.http import JsonResponse
 from holdings.models import Holding
-
+from datetime import datetime
 # Create your views here.
 @login_required
 def datatable(request):
@@ -34,7 +34,9 @@ def datatable(request):
     user_criteria = Criterion.objects.filter(user=request.user).first()
 
     # 初始查询集
-    auctions = Auction.objects.select_related('property').all()
+    # 初始查询集：筛选 Auction 表中 auction_end 晚于今天的数据
+    today = datetime.now()
+    auctions = Auction.objects.select_related('property').filter(auction_end__gt=today)
 
     # 如果用户有筛选条件
     if user_criteria:
