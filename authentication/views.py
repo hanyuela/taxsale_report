@@ -21,11 +21,8 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
 from django.db import transaction
-from property.models import Property, Auction, PropertyUserAgreement
-import datetime
-import ast
 from django.shortcuts import render, get_object_or_404
-from holdings.models import Holding
+
 # 注册页面
 def register(request):
     if request.method == 'POST':
@@ -72,12 +69,6 @@ def index(request):
 @login_required
 def edit_profile(request):
     return render(request, 'edit-profile.html')
-
-# 数据表页面
-@login_required
-def datatable(request):
-    return render(request, 'datatable.html')
-
 
 
 # 错误页面
@@ -289,260 +280,12 @@ def reset_password(request, uidb64, token):
         messages.error(request, 'Invalid or expired reset link.')
         return redirect('request_password_reset')
 
-@login_required
-def dashboard(request):
-    return render(request, 'dashboard.html')
-
 
 
 @login_required
 def footer_light(request):
     return render(request, 'footer-light.html')
-@login_required
-
-def holdings(request):
-    return render(request, 'holdings.html')
 
 
-
-@login_required
-def criterion(request):
-    # 获取或创建当前用户的投资偏好
-    user_criteria, created = Criterion.objects.get_or_create(user=request.user)
-    all_states = States.objects.all()  # 获取所有州
-
-    if request.method == 'POST':
-        # 更新 Property Type（多选）
-        property_types = request.POST.getlist('property_type')  # 获取所有选中的 property_type
-        if property_types:
-            user_criteria.property_type = property_types  # 假设 property_type 是 ArrayField
-        else:
-            user_criteria.property_type = []  # 如果没有选中，清空列表
-
-        # 更新 Auction Type（多选）
-        auction_types = request.POST.getlist('auction_type')  # 获取所有选中的 auction_type
-        if auction_types:
-            user_criteria.auction_type = auction_types  # 假设 auction_type 是 ArrayField
-        else:
-            user_criteria.auction_type = []  # 如果没有选中，清空列表
-
-        # 更新 Auction Mode（多选）
-        is_online_modes = request.POST.getlist('is_online')  # 获取所有选中的 is_online
-        if is_online_modes:
-            user_criteria.is_online = is_online_modes  # 假设 is_online 是 ArrayField
-        else:
-            user_criteria.is_online = []  # 如果没有选中，清空列表
-
-        # 更新市场价值范围
-        market_value_min = request.POST.get('market_value_min', None)
-        market_value_max = request.POST.get('market_value_max', None)
-        user_criteria.market_value_min = market_value_min if market_value_min else None
-        user_criteria.market_value_max = market_value_max if market_value_max else None
-
-        # 更新面值范围
-        face_value_min = request.POST.get('face_value_min', None)
-        face_value_max = request.POST.get('face_value_max', None)
-        user_criteria.face_value_min = face_value_min if face_value_min else None
-        user_criteria.face_value_max = face_value_max if face_value_max else None
-
-        # 更新选中的州
-        state_ids = request.POST.getlist('states')  # 获取选中的州 ID
-        if state_ids:
-            selected_states = States.objects.filter(id__in=state_ids)
-            user_criteria.states.set(selected_states)  # 更新多对多关系
-        else:
-            user_criteria.states.clear()  # 如果没有选择任何州，清空关联
-
-        # 保存用户偏好
-        user_criteria.save()
-
-        # 添加成功消息
-        messages.success(request, "Preferences updated successfully!")
-        return redirect("criterion")  # 重定向到当前页面
-
-    return render(request, "criterion.html", {
-        "user_criteria": user_criteria,
-        "all_states": all_states,
-    })
-
-
-from django.db.models import Q
-
-@login_required
-def datatable(request):
-    PROPERTY_TYPE_MAPPING = {
-        "single_family_residential": "Single-Family",
-        "multi_family_residential": "Multi-Family",
-        "other_residential": "Other Residential",
-        "commercial": "Commercial",
-        "vacant_land": "Vacant Land",
-        "industrial": "Industrial",
-        "agricultural": "Agricultural",
-        "miscellaneous": "Miscellaneous",
-    }
-
-    AUCTION_TYPE_MAPPING = {
-        "tax lien": "tax lien",
-        "tax deed": "tax deed",
-    }
-
-    IS_ONLINE_MAPPING = {
-        "online": "online",
-        "in-person": "in-person",
-    }
-
-    # 获取当前用户的筛选条件
-    user_criteria = Criterion.objects.filter(user=request.user).first()
-
-    # 初始查询集
-    auctions = Auction.objects.select_related('property').all()
-
-    # 如果用户有筛选条件
-    if user_criteria:
-        # 1. 按 states 筛选
-        if user_criteria.states.exists():
-            state_ids = user_criteria.states.values_list('id', flat=True)
-            abbreviations = States.objects.filter(id__in=state_ids).values_list('abbreviation', flat=True)
-            auctions = auctions.filter(property__state__in=abbreviations)
-
-        # 2. 按 property_type 筛选
-        if user_criteria.property_type:
-            try:
-                selected_property_types = ast.literal_eval(user_criteria.property_type)
-                mapped_classes = [
-                    PROPERTY_TYPE_MAPPING.get(pt)
-                    for pt in selected_property_types
-                    if PROPERTY_TYPE_MAPPING.get(pt)
-                ]
-                if mapped_classes:
-                    auctions = auctions.filter(property__property_class__in=mapped_classes)
-            except (ValueError, SyntaxError):
-                pass
-
-        # 3. 按 is_online 筛选
-        if user_criteria.is_online:
-            try:
-                selected_online_modes = ast.literal_eval(user_criteria.is_online)
-                mapped_modes = [
-                    IS_ONLINE_MAPPING.get(mode)
-                    for mode in selected_online_modes
-                    if IS_ONLINE_MAPPING.get(mode)
-                ]
-                if mapped_modes:
-                    auctions = auctions.filter(is_online__in=mapped_modes)
-            except (ValueError, SyntaxError):
-                pass
-
-        # 4. 按 auction_type 筛选
-        if user_criteria.auction_type:
-            try:
-                selected_auction_types = ast.literal_eval(user_criteria.auction_type)
-                mapped_types = [
-                    AUCTION_TYPE_MAPPING.get(atype)
-                    for atype in selected_auction_types
-                    if AUCTION_TYPE_MAPPING.get(atype)
-                ]
-                if mapped_types:
-                    auctions = auctions.filter(auction_type__in=mapped_types)
-            except (ValueError, SyntaxError):
-                pass
-
-        # 5. 按 market_value 筛选
-        if user_criteria.market_value_min is not None:
-            auctions = auctions.filter(property__market_value__gte=user_criteria.market_value_min)
-        if user_criteria.market_value_max is not None:
-            auctions = auctions.filter(property__market_value__lte=user_criteria.market_value_max)
-
-    # 构造数据供模板渲染
-    data = []
-    for auction in auctions:
-        data.append({
-            "city": auction.property.city,
-            "state": auction.property.state,
-            "property_type": auction.property.property_class,
-            "is_online": auction.is_online,
-            "auction_type": auction.auction_type,
-            "amount_in_sale": auction.face_value,
-            "deposit_deadline": auction.deposit_deadline,
-            "foreclose_score": auction.property.foreclose_score,
-            "property_id":auction.property_id
-        })
-
-    return render(request, "datatable.html", {
-        "data": data,
-        "user_criteria": user_criteria,  # 传递筛选条件，便于前端显示或调试
-    })
-
-
-
-@login_required
-def report(request):
-    return render(request, 'report.html')
-
-@login_required
-def agree_to_view(request):
-    if request.method == "POST":
-        # 获取传递的 property_id 和 user_id
-        property_id = request.POST.get('property_id')  # 从 POST 数据中获取 property_id
-        default = request.POST.get('default') == 'true'  # 获取是否选择默认同意付费
-
-        # 获取竞标金额、竞标百分比、备注字段的值
-        my_bid = request.POST.get('my_bid')  # 竞标金额
-        my_bid_percentage = request.POST.get('my_bid_percentage')  # 竞标百分比
-        note = request.POST.get('note')  # 备注
-
-        print(f"Received POST request with property_id: {property_id}, default: {default}")
-        print(f"Bid details: my_bid={my_bid}, my_bid_percentage={my_bid_percentage}, note={note}")
-
-        # 输入验证
-        if not property_id:
-            return JsonResponse({"error": "Missing property_id."})
-
-        try:
-            # 查找对应的 Property
-            property = Property.objects.get(id=property_id)
-
-            print(f"Found Property: {property}")
-
-            # 创建或更新 PropertyUserAgreement 记录
-            agreement, created = PropertyUserAgreement.objects.get_or_create(
-                property=property,
-                user=request.user,  # 使用当前登录的用户
-                defaults={"default": default}  # 如果选择默认付费，存储为 True
-            )
-
-            if not created:
-                print("Agreement already exists.")
-                return JsonResponse({"error": "Agreement already exists."})
-
-            # 处理 Holding 记录（仅根据 property_id 和当前用户创建）
-            try:
-                holding, holding_created = Holding.objects.get_or_create(
-                    property=property,
-                    defaults={
-                        "status": "Bid",  # 默认状态
-                        "my_bid": my_bid if my_bid else 0.00,  # 如果没有提供竞标金额，默认为 0.00
-                        "my_bid_percentage": my_bid_percentage if my_bid_percentage else 0.00,  # 默认为 0.00
-                        "note": note if note else "",  # 默认为空备注
-                    }
-                )
-
-                if holding_created:
-                    print("Successfully created Holding record.")
-                else:
-                    print("Holding record already exists.")
-            except Exception as e:
-                print(f"Error while creating Holding record: {str(e)}")
-                return JsonResponse({"error": f"Error while creating Holding record: {str(e)}"})
-
-            print("Successfully created PropertyUserAgreement record.")
-            return JsonResponse({"success": True})
-
-        except Property.DoesNotExist:
-            return JsonResponse({"error": "Property not found."})
-        except Exception as e:
-            return JsonResponse({"error": f"Unexpected error: {str(e)}"})
-
-    return JsonResponse({"error": "Invalid request method."})
 
 
