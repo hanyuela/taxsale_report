@@ -23,6 +23,6 @@ urlpatterns = [
     path('holdings/', holdings_views.holdings, name='holdings'),    # 更新为 holdings app 的视图
     path('criterion/', criterion_views.criterion, name='criterion'),
     path('check-email/', views.check_email, name='check_email'),
-    path('report/', property_views.report, name='report'),  # 更新为 property app 的视图
+    path('report/<int:property_id>/', property_views.report, name='report'),  # 更新为 property app 的视图
     path('agree-to-view/', property_views.agree_to_view, name='agree_to_view'),  # 更新为 property app 的视图
 ]
