@@ -6,6 +6,7 @@ import ast
 from django.http import JsonResponse
 from holdings.models import Holding
 from datetime import datetime
+from django.http import Http404
 # Create your views here.
 @login_required
 def datatable(request):
@@ -106,7 +107,8 @@ def datatable(request):
             "amount_in_sale": auction.face_value,
             "deposit_deadline": auction.deposit_deadline,
             "foreclose_score": auction.property.foreclose_score,
-            "property_id":auction.property_id
+            "property_id":auction.property_id,
+            "property_class":auction.property.property_class
         })
 
     return render(request, "datatable.html", {
@@ -116,9 +118,53 @@ def datatable(request):
 
 
 
+
 @login_required
-def report(request):
-    return render(request, 'report.html')
+def report(request, property_id):
+    # 获取指定 property_id 的 Property 对象
+    try:
+        property = Property.objects.get(id=property_id)
+    except Property.DoesNotExist:
+        raise Http404("Property not found")
+
+    # 获取 Property 对象的相关数据
+    data = {
+        'street_address': property.street_address,
+        'city': property.city,
+        'state': property.state,
+        'zip': property.zip,
+        'parcel_number': property.parcel_number,
+        'property_class': property.property_class,
+        'tax_overdue': property.tax_overdue,
+        'accessed_land_value': property.accessed_land_value,
+        'accessed_improvement_value': property.accessed_improvement_value,
+        'total_assessed_value': property.total_assessed_value,
+        'tax_amount_annual': property.tax_amount_annual,
+        'zillow_link': property.zillow_link,
+        'redfin_link': property.redfin_link,
+        'market_value': property.market_value,
+        'year_built': property.year_built,
+        'lot_size_sqft': property.lot_size_sqft,
+        'lot_size_acres': property.lot_size_acres,
+        'building_size_sqft': property.building_size_sqft,
+        'bedroom_number': property.bedroom_number,
+        'bathroom_number': property.bathroom_number,
+        'nearby_schools': property.nearby_schools,
+        'walk_score': property.walk_score,
+        'transit_score': property.transit_score,
+        'bike_score': property.bike_score,
+        'environmental_hazard_status': property.environmental_hazard_status,
+        'flood_status': property.flood_status,
+        'flood_risk': property.flood_risk,
+        'latest_sale_date': property.latest_sale_date,
+        'latest_sale_price': property.latest_sale_price,
+        'foreclose_score': property.foreclose_score,
+        'owners': property.owners.all(),  # 获取所有的 owners
+        'users': property.users.all(),    # 获取所有的 users
+    }
+
+    # 渲染模板并传递数据
+    return render(request, 'report.html', {'data': data})
 
 @login_required
 def agree_to_view(request):
