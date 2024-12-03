@@ -53,111 +53,124 @@
 
     <!-- Page Wrapper -->
     
-        <div class="page-body">
-          <div class="container-fluid">
-            <div class="row">
-              <!-- Example Data Section -->
-              <div class="col-12 mt-3">
-                <div class="card">
-                  <div class="card-header">
-                    <h1 class="f-w-700">Example Data</h1>
-                  </div>
-                  <div class="card-body">
-                    <!-- Auction Information Example -->
-                    <h3>Auction Information</h3>
-                    <table class="table table-bordered">
-                      <tr>
-                        <th>Property Street Address</th>
-                        <td>123 Main Street</td>
-                      </tr>
-                      <tr>
-                        <th>Parcel Number</th>
-                        <td>456-789-123</td>
-                      </tr>
-                      <tr>
-                        <th>Batch Number</th>
-                        <td>001</td>
-                      </tr>
-                      <tr>
-                        <th>Face Value / Amount in sale </th>
-                        <td>$100,000</td>
-                      </tr>
-                      <tr>
-                        <th>Auction Type</th>
-                        <td>Lien</td>
-                      </tr>
-                      <tr>
-                        <th>Auction Mode</th>
-                        <td>online</td>
-                      </tr>
-                      <tr>
-                        <th>Auction Tax Year</th>
-                        <td>2022</td>
-                      </tr>
-                    </table>
-
-                    <!-- Government Data Example -->
-                    <h3>Government Official Data</h3>
-                    <table class="table table-bordered">
-                      <tr>
-                        <th>Property Class</th>
-                        <td>Residential</td>
-                        <th>Owner Name</th>
-                        <td>John Doe</td>
-                      </tr>
-                      <tr>
-                        <th>Accessed Land Value</th>
-                        <td>$50,000</td>
-                        <th>Accessed Improvement Value</th>
-                        <td>$150,000</td>
-                      </tr>
-                    </table>
-
-                    <!-- Market Data Example -->
-                    <h3>Market Data</h3>
-                    <table class="table table-bordered">
-                      <tr>
-                        <th>Zillow Link</th>
-                        <td><a href="#" target="_blank">View Listing</a></td>
-                        <th>Zestimate</th>
-                        <td>$200,000</td>
-                        <th>Building size/sqft</th>
-                        <td>1234 sqft</td> 
-                      </tr>
-                      <tr>
-                        <th>Year Built</th>
-                        <td>1995</td>
-                        <th>Lot size</th>
-                        <td>5000 sqft</td>
-                        <th>Sort No / advnum</th>
-                        <td>1</td>
-                      </tr>
-                      <tr>
-                        <th>Nearby Schools</th>
-                        <td colspan="3">School A, School B, School C</td>
-                      </tr>
-                      <!-- Loan Information -->
-                      <tr>
-                        <th>Loan Amount</th>
-                        <td>$455,200</td>
-                        <th>Loan Due Date</th>
-                        <td>10/01/2020 - D</td>
-                        <th>Loan Type</th>
-                        <td>Mortgage</td>
-                      </tr>
-                    </table>
-
-                    <!-- Score Chart Example -->
-                    <h3>Score Chart</h3>
-                    <div style="width: 60%; margin-left:0 ;">
-                      <canvas id="scoreChart"></canvas>
-                    </div>
-                  </div>
+    <div class="page-body">
+      <div class="container-fluid">
+        <div class="row">
+          <!-- Example Data Section -->
+          <div class="col-12 mt-3">
+            <div class="card">
+              <div class="card-header">
+                <h1 class="f-w-700">Property Report</h1>
+              </div>
+              <div class="card-body">
+                <!-- Auction Information Example (replace with Property data) -->
+                <h3>Auction Information</h3>
+                <table class="table table-bordered">
+                  <tr>
+                    <th>Property Street Address</th>
+                    <td>{{ data.street_address }}</td>
+                  </tr>
+                  <tr>
+                    <th>Parcel Number</th>
+                    <td>{{ data.parcel_number }}</td>
+                  </tr>
+                  <tr>
+                    <th>Batch Number</th>
+                    <td>{{ data.id }}</td> <!-- Assuming `id` as batch number or property identifier -->
+                  </tr>
+                  <tr>
+                    <th>Face Value / Amount in Sale</th>
+                    <td>${{ data.tax_amount_annual }}</td>
+                  </tr>
+                  <tr>
+                    <th>Auction Type</th>
+                    <td>{{ data.property_class }}</td> <!-- Assuming property class as auction type -->
+                  </tr>
+                  <tr>
+                    <th>Auction Mode</th>
+                    <td>Online</td> <!-- Static value for now, can be customized later -->
+                  </tr>
+                  <tr>
+                    <th>Auction Tax Year</th>
+                    <td>{{ data.latest_sale_date.year }}</td> <!-- Assuming sale year is auction tax year -->
+                  </tr>
+                </table>
+    
+                <!-- Government Data Example (replace with Property data) -->
+                <h3>Government Official Data</h3>
+                <table class="table table-bordered">
+                  <tr>
+                    <th>Property Class</th>
+                    <td>{{ data.property_class }}</td>
+                    <th>Owner Name</th>
+                    <td>
+                      {% for owner in data.owners %}
+                        {{ owner.name }}{% if not forloop.last %}, {% endif %}
+                      {% empty %}
+                        No owner found
+                      {% endfor %}
+                    </td>
+                    
+                  </tr>
+                  <tr>
+                    <th>Accessed Land Value</th>
+                    <td>${{ data.accessed_land_value }}</td>
+                    <th>Accessed Improvement Value</th>
+                    <td>${{ data.accessed_improvement_value }}</td>
+                  </tr>
+                </table>
+    
+                <!-- Market Data Example (replace with Property data) -->
+                <h3>Market Data</h3>
+                <table class="table table-bordered">
+                  <tr>
+                    <th>Zillow Link</th>
+                    <td>
+                      {% if data.zillow_link %}
+                        <a href="{{ data.zillow_link }}" target="_blank">View Listing</a>
+                      {% else %}
+                        N/A
+                      {% endif %}
+                    </td>
+                    <th>Zestimate</th>
+                    <td>${{ data.market_value }}</td>
+                    <th>Building Size (sqft)</th>
+                    <td>{{ data.building_size_sqft }}</td> 
+                  </tr>
+                  <tr>
+                    <th>Year Built</th>
+                    <td>{{ data.year_built }}</td>
+                    <th>Lot Size</th>
+                    <td>{{ data.lot_size_sqft }} sqft</td>
+                    <th>Sort No / Advnum</th>
+                    <td>1</td> <!-- Static value for now -->
+                  </tr>
+                  <tr>
+                    <th>Nearby Schools</th>
+                    <td colspan="3">{{ data.nearby_schools }}</td>
+                  </tr>
+                  <tr>
+                    <th>Loan Amount</th>
+                    <td>${{ data.tax_amount_annual }}</td>
+                    <th>Loan Due Date</th>
+                    <td>{{ data.latest_sale_date|date:"m/d/Y" }} - D</td> <!-- Example date format -->
+                    <th>Loan Type</th>
+                    <td>Mortgage</td>
+                  </tr>
+                </table>
+    
+                <!-- Score Chart Example -->
+                <h3>Score Chart</h3>
+                <div style="width: 60%; margin-left:0 ;">
+                  <canvas id="scoreChart"></canvas>
                 </div>
               </div>
             </div>
           </div>
         </div>
+      </div>
+    </div>
+    
         
       </div>
     </div>
@@ -173,7 +186,7 @@
           labels: ['Walk Score', 'Transit Score', 'Bike Score'],
           datasets: [{
             label: 'Scores',
-            data: [85, 70, 90],
+            data: [{{ data.walk_score }}, {{ data.transit_score }}, {{ data.bike_score }}],
             backgroundColor: [
               'rgba(75, 192, 192, 0.6)',
               'rgba(255, 99, 132, 0.6)',

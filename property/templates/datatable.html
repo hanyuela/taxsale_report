@@ -168,7 +168,7 @@
                             <tr>
                                 <td>{{ item.city }}</td>
                                 <td>{{ item.state }}</td>
-                                <td>{{ item.state }}</td>
+                                <td>{{ item.property_class }}</td>
                                 <td>{{ item.is_online }}</td>
                                 <td>{{ item.auction_type }}</td>
                                 <td>${{ item.amount_in_sale }}</td>
@@ -328,7 +328,7 @@
                     if (response.success) {
                         alert("用户同意操作成功！");
                         $('#confirm-modal').fadeOut();  // 关闭弹出框
-                        var reportUrl = '/report';  // 根据需求调整报告页面URL
+                        var reportUrl = '/report/' + propertyId + '/';  // 根据需求调整报告页面URL
                         window.open(reportUrl, '_blank');
                     } else {
                         console.log('用户已同意过或发生错误');
