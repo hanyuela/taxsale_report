@@ -20,9 +20,12 @@ urlpatterns = [
     path('request_password_reset/', views.request_password_reset, name='request_password_reset'),
     path('reset/<uidb64>/<token>/', views.reset_password, name='reset_password'),
     path('footer-light', views.footer_light, name='footer-light'),
-    path('holdings/', holdings_views.holdings, name='holdings'),    # 更新为 holdings app 的视图
+    path('holdings/', holdings_views.holdings, name='holdings'),    # 更新为 holdings app 的视图 
+    path('update_holding_status/', holdings_views.update_holding_status, name='update_holding_status'),
+    path('holdings_data/', holdings_views.holdings_data, name='holdings_data'),
     path('criterion/', criterion_views.criterion, name='criterion'),
     path('check-email/', views.check_email, name='check_email'),
     path('report/<int:property_id>/', property_views.report, name='report'),  # 更新为 property app 的视图
     path('agree-to-view/', property_views.agree_to_view, name='agree_to_view'),  # 更新为 property app 的视图
+    
 ]
