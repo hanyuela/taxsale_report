@@ -13,11 +13,51 @@
         deleteConfirm: "Do you really want to delete the client?",
         controller: {
             loadData: function (filter) {
-                return $.grep(db.clients, function (client) {
-                    return (!filter.Label || client.Label === filter.Label) &&
-                        (!filter["Full Address"] || client["Full Address"].indexOf(filter["Full Address"]) > -1) &&
-                        (!filter.State || client.State.indexOf(filter.State) > -1) &&
-                        (!filter["Auction Authority"] || client["Auction Authority"].indexOf(filter["Auction Authority"]) > -1);
+                console.log("Filter:", filter);
+                return $.ajax({
+                    url: '/holdings_data/',  // 后端API的URL
+                    method: 'GET',
+                    data: filter,  // 传递过滤条件
+                    dataType: 'json',
+                    success: function (response) {
+                        console.log("Data from server:", response);
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("AJAX error:", error);
+                    }
+                }).then(function (response) {
+                    return response.data || [];  // 如果响应格式正确，返回数据
+                }).catch(function (xhr, status, error) {
+                    console.error("Failed to load data", error);
+                    return [];  // 请求失败时返回空数组
+                });
+            },
+            updateItem: function (item) {
+                console.log("Sending data to server:", {
+                    property_id: item.property_id,  // 传递要更新的 property_id
+                    label: item.Label  // 只更新 Label 字段
+                });
+            
+                return $.ajax({
+                    url: '/update_holding_status/',  // 后端更新数据的URL
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        property_id: item.property_id,  // 传递要更新的 property_id
+                        Label: item.Label  // 只更新 Label 字段
+                    }),
+                    dataType: 'json',
+                    success: function (response) {
+                        console.log("Update success:", response);
+            
+                        // 成功后重新加载数据
+                        $("#basicScenario").jsGrid("loadData");  // 重新加载数据
+                        // 或者手动刷新指定行（如果你只想更新单行）
+                        // $("#basicScenario").jsGrid("updateItem", item);  // 这会更新当前行
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("Update error:", error);
+                    }
                 });
             }
         },
@@ -30,7 +70,8 @@
             { name: "Auction Start", type: "text", width: 150 },
             { name: "Auction End", type: "text", width: 150 },
             { name: "My Bid", type: "text", width: 100 },
-    
+            // 隐藏的字段，不显示在表格中
+            { name: "property_user_agreement_id", type: "text", width: 150, editing: false, visible: false },
             {
                 name: "Label",
                 title: "Status",
@@ -72,7 +113,7 @@
                         }
                         $select.append($option);
                     });
-    
+        
                     // 将下拉框保存到 this.$select 中
                     this.$select = $select;
                     return $select;
@@ -82,13 +123,14 @@
                     return this.$select.val();  // 获取当前选中的值
                 }
             },
-    
             { type: "control", width: 80 },
         ],
     });
     
+    
     // 给 Archived 行添加虚线边框
     $(".archived-row").css("border-bottom", "1px dashed #ccc");
+    
     
 
     $("#sorting-table").jsGrid({
