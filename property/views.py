@@ -7,6 +7,7 @@ from django.http import JsonResponse
 from holdings.models import Holding
 from datetime import datetime
 from django.http import Http404
+from .models import Property, Owner, PropertyUserAgreement, User
 # Create your views here.
 @login_required
 def datatable(request):
@@ -119,9 +120,7 @@ def datatable(request):
 
 
 
-from django.db import models
-from django.shortcuts import render
-from django.http import Http404
+
 from .models import Property, Owner, PropertyUserAgreement
 
 @login_required
@@ -184,8 +183,8 @@ def report(request, property_id):
 def agree_to_view(request):
     if request.method == "POST":
         # 获取传递的 property_id 和 user_id
-        property_id = request.POST.get('property_id')  # 从 POST 数据中获取 property_id
-        default = request.POST.get('default') == 'true'  # 获取是否选择默认同意付费
+        property_id = request.POST.get('property_id')
+        default = request.POST.get('default') == 'true'
 
         # 获取竞标金额、竞标百分比、备注字段的值
         my_bid = request.POST.get('my_bid')  # 竞标金额
@@ -205,7 +204,23 @@ def agree_to_view(request):
 
             print(f"Found Property: {property}")
 
-            # 创建或更新 PropertyUserAgreement 记录
+            # 尝试获取已存在的 PropertyUserAgreement 记录
+            agreement = PropertyUserAgreement.objects.filter(
+                property=property,
+                user=request.user,  # 使用当前登录的用户
+            ).first()
+
+            if agreement:
+                print("Agreement already exists. Directly opening report.")
+                # 如果同意记录已存在，直接返回报告 URL
+                report_url = f"/report/{property_id}/"
+                return JsonResponse({
+                    "success": True,
+                    "report_url": report_url,  # 返回报告的 URL
+                    "agreement_exists": True,  # 标识同意记录已存在
+                })
+
+            # 创建新的 PropertyUserAgreement 记录
             agreement, created = PropertyUserAgreement.objects.get_or_create(
                 property=property,
                 user=request.user,  # 使用当前登录的用户
@@ -213,8 +228,9 @@ def agree_to_view(request):
             )
 
             if not created:
-                print("Agreement already exists.")
-                return JsonResponse({"error": "Agreement already exists."})
+                print("Agreement already exists. Updating the agreement.")
+                agreement.default = default
+                agreement.save()
 
             # 处理 Holding 记录（仅根据 property_id 和当前用户创建）
             try:
@@ -231,13 +247,17 @@ def agree_to_view(request):
                 if holding_created:
                     print("Successfully created Holding record.")
                 else:
-                    print("Holding record already exists.")
+                    print("Holding record already exists. No update required.")
             except Exception as e:
                 print(f"Error while creating Holding record: {str(e)}")
                 return JsonResponse({"error": f"Error while creating Holding record: {str(e)}"})
 
-            print("Successfully created PropertyUserAgreement record.")
-            return JsonResponse({"success": True})
+            print("Successfully created/updated PropertyUserAgreement record.")
+            return JsonResponse({
+                "success": True,
+                "agreement_created": created,  # 是否是新创建的记录
+                "holding_created": holding_created  # 是否是新创建的 Holding 记录
+            })
 
         except Property.DoesNotExist:
             return JsonResponse({"error": "Property not found."})
@@ -247,3 +267,44 @@ def agree_to_view(request):
     return JsonResponse({"error": "Invalid request method."})
 
 
+@login_required
+def check_agreement(request):
+    if request.method == "GET":
+        # 获取传递的 property_id 和 user_id
+        property_id = request.GET.get('property_id')
+        user_id = request.GET.get('user_id')
+
+        print(f"Checking agreement for property_id: {property_id}, user_id: {user_id}")
+
+        # 输入验证
+        if not property_id or not user_id:
+            return JsonResponse({"error": "Missing property_id or user_id."})
+
+        try:
+            # 查找对应的 Property
+            property = Property.objects.get(id=property_id)
+            user = User.objects.get(id=user_id)
+
+            print(f"Found Property: {property}, User: {user}")
+
+            # 查找是否存在同意记录
+            agreement = PropertyUserAgreement.objects.filter(
+                property=property,
+                user=user,
+            ).exists()
+
+            print(f"Agreement exists: {agreement}")
+
+            return JsonResponse({
+                "success": True,
+                "agreement_exists": agreement,  # 返回是否已存在同意记录
+            })
+
+        except Property.DoesNotExist:
+            return JsonResponse({"error": "Property not found."})
+        except User.DoesNotExist:
+            return JsonResponse({"error": "User not found."})
+        except Exception as e:
+            return JsonResponse({"error": f"Unexpected error: {str(e)}"})
+
+    return JsonResponse({"error": "Invalid request method."})
