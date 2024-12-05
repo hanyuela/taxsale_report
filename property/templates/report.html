@@ -104,11 +104,11 @@
                     <td>{{ data.property_class }}</td>
                     <th>Owner Name</th>
                     <td>
-                      {% for owner in data.owners %}
-                        {{ owner.name }}{% if not forloop.last %}, {% endif %}
-                      {% empty %}
-                        No owner found
-                      {% endfor %}
+                      <ul>
+                        {% for owner in data.owners %}
+                            <li>{{ owner.name }}</li>
+                        {% endfor %}
+                    </ul>
                     </td>
                     
                   </tr>
