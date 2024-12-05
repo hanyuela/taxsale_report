@@ -119,6 +119,11 @@ def datatable(request):
 
 
 
+from django.db import models
+from django.shortcuts import render
+from django.http import Http404
+from .models import Property, Owner, PropertyUserAgreement
+
 @login_required
 def report(request, property_id):
     # 获取指定 property_id 的 Property 对象
@@ -159,12 +164,21 @@ def report(request, property_id):
         'latest_sale_date': property.latest_sale_date,
         'latest_sale_price': property.latest_sale_price,
         'foreclose_score': property.foreclose_score,
-        'owners': property.owners.all(),  # 获取所有的 owners
         'users': property.users.all(),    # 获取所有的 users
     }
 
+    # 手动查询 PropertyUserAgreement 中的关联记录
+    property_owner_ids = property.owners.values_list('id', flat=True)
+
+    # 根据 owner_id 获取 Owner 的详细信息
+    owners = Owner.objects.filter(id__in=property_owner_ids)
+
+    # 将 owners 添加到 data 中
+    data['owners'] = owners
+
     # 渲染模板并传递数据
     return render(request, 'report.html', {'data': data})
+
 
 @login_required
 def agree_to_view(request):
