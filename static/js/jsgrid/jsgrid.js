@@ -123,7 +123,29 @@
                     return this.$select.val();  // 获取当前选中的值
                 }
             },
-            { type: "control", width: 80 },
+            { 
+                type: "control", 
+                width: 150, 
+                itemTemplate: function (value, item) {
+                    // 创建打开报告的按钮，替代 delete 按钮
+                    const $reportButton = $("<button>")
+                        .addClass("jsgrid")
+                        .attr("type", "button")
+                        .on("click", function () {
+                            // 点击按钮时打开报告页面
+                            window.open(`/report/${item.property_id}`, '_blank');
+                        });
+    
+                    // 添加自定义的图标到按钮中
+                    $reportButton.append($("<i>").addClass("fa fa-book")); // 使用 Font Awesome 图标
+    
+                    // 需要保留编辑按钮
+                    const $editButton = this._createEditButton(item);
+    
+                    // 返回按钮集合，包含编辑按钮和打开报告按钮
+                    return $("<div>").append($editButton).append($reportButton);
+                }
+            },
         ],
     });
     
