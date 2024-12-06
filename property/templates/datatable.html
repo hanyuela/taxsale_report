@@ -179,7 +179,7 @@
                                           <li class="edit"><a href="#"><i class="icon-pencil-alt"></i></a></li>
                                           <li class="delete">
                                             <a href="#" data-property-id="{{ item.property_id }}" data-user-id="{{ user.id }}">
-                                                <i class="icon-eye"></i>
+                                                <i class="fa fa-shopping-cart"></i>
                                             </a>
                                           </li>
                                       </ul>
@@ -300,7 +300,7 @@
   
                           // 更新图标为√
                           var icon = $('.delete a[data-property-id="' + propertyId + '"] i');
-                          icon.removeClass('icon-eye').addClass('icon-check');  // 更新图标为√
+                          icon.removeClass('fa fa-shopping-cart').addClass('icon-eye');  // 更新图标为√
                       }
                   },
                   error: function(xhr, status, error) {
@@ -338,7 +338,7 @@
   
                           // 更新图标为√
                           var icon = $('.delete a[data-property-id="' + propertyId + '"] i');
-                          icon.removeClass('icon-eye').addClass('icon-check');
+                          icon.removeClass('fa fa-shopping-cart').addClass('icon-eye');
                       } else {
                           // 如果没有同意记录，显示同意弹窗
                           $('#confirm-modal').fadeIn();
