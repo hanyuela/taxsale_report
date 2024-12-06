@@ -49,6 +49,16 @@
           background-color: #fff; /* 背景颜色，防止被覆盖 */
           box-shadow: -2px 0 5px rgba(0, 0, 0, 0.2); /* 给固定列添加阴影效果 */
       }
+      .archived-row {
+        border-bottom: 1px dashed #ccc;
+      }
+      /* 隐藏 jsGrid 默认的删除按钮 */
+      .jsgrid-button.jsgrid-delete-button {
+          display: none !important;
+      }
+      .jsgrid .jsgrid-insert-mode-button{
+        display: none !important;
+      }
     </style>  
   <body> 
     <!-- Loader Section -->
