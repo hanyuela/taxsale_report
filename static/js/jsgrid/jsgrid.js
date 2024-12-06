@@ -137,7 +137,7 @@
                         });
     
                     // 添加自定义的图标到按钮中
-                    $reportButton.append($("<i>").addClass("fa fa-book")); // 使用 Font Awesome 图标
+                    $reportButton.append($("<i>").addClass("fa fa-eye")); // 使用 Font Awesome 图标
     
                     // 需要保留编辑按钮
                     const $editButton = this._createEditButton(item);
