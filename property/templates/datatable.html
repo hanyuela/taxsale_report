@@ -152,6 +152,7 @@
                       <table class="display" id="keytable">
                         <thead>
                             <tr>
+                                <th>street address</th>
                                 <th>City</th>
                                 <th>State</th>
                                 <th>Property Type</th>
@@ -166,6 +167,7 @@
                         <tbody>
                             {% for item in data %}
                             <tr>
+                                <td>{{ item.street_address}}
                                 <td>{{ item.city }}</td>
                                 <td>{{ item.state }}</td>
                                 <td>{{ item.property_class }}</td>
