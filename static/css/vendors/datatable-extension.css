@@ -1035,12 +1035,13 @@ div.dt-autofill-background {
 
 /*autofill datatable css*/
 /*keytable css*/
+/*
 table.dataTable th.focus,
 table.dataTable td.focus {
   outline: 3px solid #0275d8;
   outline-offset: -1px;
 }
-
+*/
 /*keytable css*/
 /*select datatable css*/
 table.dataTable tbody > tr.selected,
