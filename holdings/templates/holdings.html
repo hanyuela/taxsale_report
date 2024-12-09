@@ -59,6 +59,20 @@
       .jsgrid .jsgrid-insert-mode-button{
         display: none !important;
       }
+      .jsgrid {
+        background: transparent;  /* 设置按钮背景透明 */
+        border: none;              /* 去除按钮的默认边框 */
+        cursor: pointer;           /* 使按钮看起来像点击区域 */
+        padding: 5px 10px;         /* 可选：添加内边距 */
+      }
+      
+      .jsgrid:focus {
+        outline: none;  /* 去除焦点框 */
+      }
+      /* 设置图标颜色为灰色 */
+      .jsgrid .fa-eye {
+        color: gray;  /* 改为灰色 */
+      }
     </style>  
   <body> 
     <!-- Loader Section -->
