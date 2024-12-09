@@ -109,7 +109,8 @@ def datatable(request):
             "deposit_deadline": auction.deposit_deadline,
             "foreclose_score": auction.property.foreclose_score,
             "property_id":auction.property_id,
-            "property_class":auction.property.property_class
+            "property_class":auction.property.property_class,
+            "street_address":auction.property.street_address
         })
 
     return render(request, "datatable.html", {
