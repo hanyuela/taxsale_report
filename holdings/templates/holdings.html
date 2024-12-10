@@ -73,6 +73,27 @@
       .jsgrid .fa-eye {
         color: gray;  /* 改为灰色 */
       }
+      #columnOptions {
+        display: none; /* 默认隐藏 */
+        position: fixed; /* 固定位置 */
+        top: 50%; /* 距顶部 50% */
+        left: 50%; /* 距左侧 50% */
+        transform: translate(-50%, -50%); /* 中心对齐 */
+        z-index: 1000; /* 确保在其他元素上方 */
+        background: #fff; /* 背景颜色 */
+        padding: 20px; /* 内边距 */
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2); /* 添加阴影效果 */
+        border-radius: 8px; /* 圆角边框 */
+        width: 300px; /* 弹窗宽度 */
+        max-width: 80%; /* 保持弹窗在小屏幕上的适配 */
+        max-height: 80vh; /* 设置最大高度为视口高度的 80% */
+        overflow-y: auto; /* 超出内容时显示滚动条 */
+        text-align: left; /* 文本左对齐 */
+      }
+      .jsgrid-header-row {
+        padding-right: 20px; /* 根据需要增加右边距 */
+      }
+    
     </style>  
   <body> 
     <!-- Loader Section -->
@@ -111,6 +132,7 @@
           </div>
   
           <!-- Container Section -->
+           
           <div class="container-fluid">
             <div class="row">
               <div class="col-sm-12">
@@ -118,6 +140,11 @@
                   <div class="card-header pb-0">
                     <h4 class="mb-3">Basic Scenario</h4>
                     <span>Grid with filtering, editing, inserting, deleting, sorting, and paging. Data provided by controller.</span>
+                  </div>
+                  <div class="column-control">
+                    <button id="columnSettings" class="btn btn-primary">
+                        <i class="fa fa-cog"></i> Configure Columns
+                    </button>
                   </div>
                   <div class="card-body">
                     <div class="basic_table" id="basicScenario"></div>
@@ -129,13 +156,70 @@
         </div>
       </div>
     </div>
+
+    <!-- 弹窗 -->
+    <div id="columnOptions" class="modal">
+      <h4>Manage Columns</h4>
+      <ul id="columnSettingsList">
+        <li><label><input type="checkbox" class="column-toggle" data-column="Full Address" checked> Full Address</label></li>
+        <li><label><input type="checkbox" class="column-toggle" data-column="Auction Authority" checked> Auction Authority</label></li>
+        <li><label><input type="checkbox" class="column-toggle" data-column="State" checked> State</label></li>
+        <li><label><input type="checkbox" class="column-toggle" data-column="Amount In Sale" checked> Amount In Sale</label></li>
+        <li><label><input type="checkbox" class="column-toggle" data-column="Deposit Deadline" checked> Deposit Deadline</label></li>
+        <li><label><input type="checkbox" class="column-toggle" data-column="Auction Start" checked> Auction Start</label></li>
+        <li><label><input type="checkbox" class="column-toggle" data-column="Auction End" checked> Auction End</label></li>
+        <li><label><input type="checkbox" class="column-toggle" data-column="My Bid" checked> My Bid</label></li>
+        <li><label><input type="checkbox" class="column-toggle" data-column="Label" checked> Status</label></li>
+      </ul>    
+      <button id="saveColumnSettings" class="btn btn-success">Save</button>
+      <button id="closeColumnSettings" class="btn btn-secondary">Cancel</button>
+    </div>
+
   
     <!-- Footer -->
     
       {% include 'footer-light.html' %}
     
-  </div>
-  
+    </div>
+    <script>
+    // 点击配置列按钮，显示弹窗
+    document.getElementById("columnSettings").addEventListener("click", function () {
+      const modal = document.getElementById("columnOptions");
+      modal.style.display = "block"; // 显示弹窗
+    });
+
+    // 点击取消按钮，隐藏弹窗
+    document.getElementById("closeColumnSettings").addEventListener("click", function () {
+      const modal = document.getElementById("columnOptions");
+      modal.style.display = "none"; // 隐藏弹窗
+    });
+
+    // 点击保存按钮，保存设置并更新表格
+    document.getElementById("saveColumnSettings").addEventListener("click", function () {
+      const grid = $("#basicScenario").data("JSGrid");
+
+      // 遍历复选框，更新字段的显示状态
+      document.querySelectorAll(".column-toggle").forEach(function (checkbox) {
+          const columnName = checkbox.dataset.column;
+          const isVisible = checkbox.checked;
+
+          const fieldIndex = grid.fields.findIndex(field => field.name === columnName);
+          if (fieldIndex >= 0) {
+              grid.fields[fieldIndex].visible = isVisible; // 更新字段的 visible 属性
+          }
+      });
+
+      // 更新表格字段并刷新
+      $("#basicScenario").jsGrid("option", "fields", grid.fields);
+      $("#basicScenario").jsGrid("refresh");
+
+      // 隐藏弹窗
+      const modal = document.getElementById("columnOptions");
+      modal.style.display = "none";
+    });
+
+
+    </script> 
     <!-- latest jquery-->
     <script src="{% static 'js/jquery.min.js' %}"></script>
     <!-- Bootstrap js-->
