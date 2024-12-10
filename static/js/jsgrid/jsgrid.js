@@ -127,25 +127,35 @@
                 type: "control", 
                 width: 150, 
                 itemTemplate: function (value, item) {
-                    // 创建打开报告的按钮，替代 delete 按钮
+                    // 创建打开报告的按钮
                     const $reportButton = $("<button>")
                         .addClass("jsgrid")
                         .attr("type", "button")
-                        .on("click", function () {
+                        .on("click", function (e) {
+                            e.stopPropagation(); // 阻止事件冒泡，防止触发表格行选择或编辑
                             // 点击按钮时打开报告页面
                             window.open(`/report/${item.property_id}`, '_blank');
+                        })
+                        .on("mouseover", function () {
+                            // 鼠标悬停时添加视觉效果
+                            $(this).css("background-color", "#f0f0f0");
+                        })
+                        .on("mouseout", function () {
+                            // 鼠标移开时恢复原样
+                            $(this).css("background-color", "");
                         });
-    
+            
                     // 添加自定义的图标到按钮中
                     $reportButton.append($("<i>").addClass("fa fa-eye")); // 使用 Font Awesome 图标
-    
-                    // 需要保留编辑按钮
+            
+                    // 保留编辑按钮
                     const $editButton = this._createEditButton(item);
-    
+            
                     // 返回按钮集合，包含编辑按钮和打开报告按钮
                     return $("<div>").append($editButton).append($reportButton);
                 }
-            },
+            }
+            
         ],
     });
     
