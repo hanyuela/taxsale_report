@@ -11,7 +11,7 @@ class Property(models.Model):
     zip = models.CharField(max_length=20)
     parcel_number = models.CharField(max_length=50)
     property_class = models.CharField(max_length=255)
-    tax_overdue = models.BooleanField(default=False)
+    tax_overdue = models.DecimalField(max_digits=12, decimal_places=2)
     accessed_land_value = models.DecimalField(max_digits=12, decimal_places=2)
     accessed_improvement_value = models.DecimalField(max_digits=12, decimal_places=2)
     total_assessed_value = models.DecimalField(max_digits=12, decimal_places=2)

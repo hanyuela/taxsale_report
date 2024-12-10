@@ -120,24 +120,22 @@ def datatable(request):
 
 
 
-
-
-from .models import Property, Owner, PropertyUserAgreement
-
 @login_required
 def report(request, property_id):
     # 获取指定 property_id 的 Property 对象
     try:
-        property = Property.objects.get(id=property_id)
+        property = Property.objects.select_related().get(id=property_id)
     except Property.DoesNotExist:
         raise Http404("Property not found")
-
-    # 获取 Property 对象的相关数据
+    
+    # 计算 Full Address
+    full_address = f"{property.street_address}, {property.city}, {property.state} {property.zip}"
+    # 确定显示的链接
+    primary_link = property.zillow_link if property.zillow_link else property.redfin_link
+    # 构造 Property 数据
+    lot_size = f"{property.lot_size_sqft} sqft" if property.lot_size_sqft else f"{property.lot_size_acres} acres"
     data = {
-        'street_address': property.street_address,
-        'city': property.city,
-        'state': property.state,
-        'zip': property.zip,
+        'full_address': full_address,
         'parcel_number': property.parcel_number,
         'property_class': property.property_class,
         'tax_overdue': property.tax_overdue,
@@ -145,12 +143,11 @@ def report(request, property_id):
         'accessed_improvement_value': property.accessed_improvement_value,
         'total_assessed_value': property.total_assessed_value,
         'tax_amount_annual': property.tax_amount_annual,
-        'zillow_link': property.zillow_link,
+        'lot_size': lot_size,
+        'primary_link': primary_link,  # 添加主链接字段
         'redfin_link': property.redfin_link,
         'market_value': property.market_value,
         'year_built': property.year_built,
-        'lot_size_sqft': property.lot_size_sqft,
-        'lot_size_acres': property.lot_size_acres,
         'building_size_sqft': property.building_size_sqft,
         'bedroom_number': property.bedroom_number,
         'bathroom_number': property.bathroom_number,
@@ -164,20 +161,63 @@ def report(request, property_id):
         'latest_sale_date': property.latest_sale_date,
         'latest_sale_price': property.latest_sale_price,
         'foreclose_score': property.foreclose_score,
-        'users': property.users.all(),    # 获取所有的 users
     }
 
-    # 手动查询 PropertyUserAgreement 中的关联记录
-    property_owner_ids = property.owners.values_list('id', flat=True)
+    # 获取与 Property 关联的 Auction 数据
+    auction_data = [
+        {
+            "auction_type": auction.auction_type,
+            "face_value": auction.face_value,
+            "is_online": auction.is_online,
+            "deposit_deadline": auction.deposit_deadline,
+            "batch_number": auction.batch_number,
+            "sort_no": auction.sort_no,
+            "authority_name": auction.authority_name,
+            "auction_start": auction.auction_start,
+            "auction_end": auction.auction_end,
+            "redemption_period": auction.redemption_period,
+            "foreclosure_date": auction.foreclosure_date,
+            "bankruptcy_flag": auction.bankruptcy_flag,
+            "auction_tax_year": auction.auction_tax_year,
+        }
+        for auction in property.auctions.all()
+    ]
 
-    # 根据 owner_id 获取 Owner 的详细信息
-    owners = Owner.objects.filter(id__in=property_owner_ids)
+    # 添加 Auction 数据
+    data['auctions'] = auction_data
 
-    # 将 owners 添加到 data 中
-    data['owners'] = owners
+    # 获取关联的 Owners 数据
+    owner_data = [
+        {
+            "name": owner.name,
+            "phone_1": owner.phone_1,
+            "email_1": owner.email_1,
+            "primary_address": owner.primary_address,
+        }
+        for owner in property.owners.all()
+    ]
 
+    # 添加 Owner 数据
+    data['owners'] = owner_data
+
+    # 获取 Loans 数据
+    loans = property.loans.all()
+    loan_data = [
+        {
+            "loan_amount": loan.loan_amount,
+            "loan_due_date": loan.loan_due_date,
+            "loan_type": loan.loan_type,
+        }
+        for loan in loans
+    ]
+
+    # 添加 Loan 数据到 data
+    data['loans'] = loan_data
+    
     # 渲染模板并传递数据
     return render(request, 'report.html', {'data': data})
+
+
 
 
 @login_required
