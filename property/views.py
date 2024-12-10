@@ -277,6 +277,7 @@ def agree_to_view(request):
             try:
                 holding, holding_created = Holding.objects.get_or_create(
                     property=property,
+                    user=request.user,  # 将当前用户 ID 存入 Holding 记录
                     defaults={
                         "status": "Bid",  # 默认状态
                         "my_bid": my_bid if my_bid else 0.00,  # 如果没有提供竞标金额，默认为 0.00
@@ -306,6 +307,7 @@ def agree_to_view(request):
             return JsonResponse({"error": f"Unexpected error: {str(e)}"})
 
     return JsonResponse({"error": "Invalid request method."})
+
 
 
 @login_required
