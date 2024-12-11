@@ -8,6 +8,7 @@ from holdings.models import Holding
 from datetime import datetime
 from django.http import Http404
 from .models import Property, Owner, PropertyUserAgreement, User
+from authentication.models import UserProfile
 # Create your views here.
 @login_required
 def datatable(request):
@@ -223,9 +224,9 @@ def report(request, property_id):
 @login_required
 def agree_to_view(request):
     if request.method == "POST":
-        # 获取传递的 property_id 和 user_id
+        # 获取传递的 property_id 和 default
         property_id = request.POST.get('property_id')
-        default = request.POST.get('default') == 'true'
+        default = request.POST.get('default') == 'true'  # 转换为布尔值
 
         # 获取竞标金额、竞标百分比、备注字段的值
         my_bid = request.POST.get('my_bid')  # 竞标金额
@@ -241,9 +242,17 @@ def agree_to_view(request):
 
         try:
             # 查找对应的 Property
-            property = Property.objects.get(id=property_id)
+            try:
+                property = Property.objects.get(id=property_id)
+                print(f"Found Property: {property}")
+            except Property.DoesNotExist:
+                return JsonResponse({"error": "Property not found."})
 
-            print(f"Found Property: {property}")
+            # 确保用户的 UserProfile 存在
+            user_profile, created = UserProfile.objects.get_or_create(user=request.user)
+            user_profile.default = default  # 更新 default 值
+            user_profile.save()  # 保存更改
+            print(f"UserProfile default updated to: {default} (Created: {created})")
 
             # 尝试获取已存在的 PropertyUserAgreement 记录
             agreement = PropertyUserAgreement.objects.filter(
@@ -265,13 +274,7 @@ def agree_to_view(request):
             agreement, created = PropertyUserAgreement.objects.get_or_create(
                 property=property,
                 user=request.user,  # 使用当前登录的用户
-                defaults={"default": default}  # 如果选择默认付费，存储为 True
             )
-
-            if not created:
-                print("Agreement already exists. Updating the agreement.")
-                agreement.default = default
-                agreement.save()
 
             # 处理 Holding 记录（仅根据 property_id 和当前用户创建）
             try:
@@ -301,9 +304,8 @@ def agree_to_view(request):
                 "holding_created": holding_created  # 是否是新创建的 Holding 记录
             })
 
-        except Property.DoesNotExist:
-            return JsonResponse({"error": "Property not found."})
         except Exception as e:
+            print(f"Unexpected error: {str(e)}")
             return JsonResponse({"error": f"Unexpected error: {str(e)}"})
 
     return JsonResponse({"error": "Invalid request method."})
@@ -324,11 +326,20 @@ def check_agreement(request):
             return JsonResponse({"error": "Missing property_id or user_id."})
 
         try:
-            # 查找对应的 Property
+            # 查找对应的 Property 和 User
             property = Property.objects.get(id=property_id)
             user = User.objects.get(id=user_id)
 
             print(f"Found Property: {property}, User: {user}")
+
+            # 检查 UserProfile 的 default 值
+            try:
+                user_profile = UserProfile.objects.get(user=user)
+                default = user_profile.default  # 获取 default 值
+                print(f"User default agreement: {default}")
+            except UserProfile.DoesNotExist:
+                default = False  # 如果 UserProfile 不存在，则认为默认值为 False
+                print("UserProfile not found for the user. Default set to False.")
 
             # 查找是否存在同意记录
             agreement = PropertyUserAgreement.objects.filter(
@@ -340,7 +351,9 @@ def check_agreement(request):
 
             return JsonResponse({
                 "success": True,
+                "default": default,  # 返回用户的 default 状态
                 "agreement_exists": agreement,  # 返回是否已存在同意记录
+                "report_url": f"/report/{property_id}/"  # 生成报告的 URL
             })
 
         except Property.DoesNotExist:
