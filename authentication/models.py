@@ -11,6 +11,7 @@ class UserProfile(models.Model):
     first_name = models.CharField(max_length=50, blank=True, null=True)  # 名（可为空）
     last_name = models.CharField(max_length=50, blank=True, null=True)  # 姓（可为空）
     phone_number = models.CharField(max_length=15, blank=True, null=True)  # 手机号码（可为空）
+    default = models.BooleanField(default=False)  # 是否默认同意付费，无需再次提示s
     investment_amount = models.DecimalField(
         max_digits=12,
         decimal_places=2,
