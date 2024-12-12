@@ -1,14 +1,15 @@
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from criterion.models import Criterion, States
-from property.models import Property, Auction, PropertyUserAgreement
+from property.models import Property, Auction
 import ast
 from django.http import JsonResponse
 from holdings.models import Holding
 from datetime import datetime
 from django.http import Http404
-from .models import Property, Owner, PropertyUserAgreement, User
+from .models import Property, User
 from authentication.models import UserProfile
+from holdings.models import Holding
 # Create your views here.
 @login_required
 def datatable(request):
@@ -254,8 +255,8 @@ def agree_to_view(request):
             user_profile.save()  # 保存更改
             print(f"UserProfile default updated to: {default} (Created: {created})")
 
-            # 尝试获取已存在的 PropertyUserAgreement 记录
-            agreement = PropertyUserAgreement.objects.filter(
+            # 尝试获取已存在的 holding 记录
+            agreement = Holding.objects.filter(
                 property=property,
                 user=request.user,  # 使用当前登录的用户
             ).first()
@@ -270,11 +271,6 @@ def agree_to_view(request):
                     "agreement_exists": True,  # 标识同意记录已存在
                 })
 
-            # 创建新的 PropertyUserAgreement 记录
-            agreement, created = PropertyUserAgreement.objects.get_or_create(
-                property=property,
-                user=request.user,  # 使用当前登录的用户
-            )
 
             # 处理 Holding 记录（仅根据 property_id 和当前用户创建）
             try:
@@ -297,7 +293,7 @@ def agree_to_view(request):
                 print(f"Error while creating Holding record: {str(e)}")
                 return JsonResponse({"error": f"Error while creating Holding record: {str(e)}"})
 
-            print("Successfully created/updated PropertyUserAgreement record.")
+            print("Successfully created/updated Holding record.")
             return JsonResponse({
                 "success": True,
                 "agreement_created": created,  # 是否是新创建的记录
@@ -342,7 +338,7 @@ def check_agreement(request):
                 print("UserProfile not found for the user. Default set to False.")
 
             # 查找是否存在同意记录
-            agreement = PropertyUserAgreement.objects.filter(
+            agreement = Holding.objects.filter(
                 property=property,
                 user=user,
             ).exists()

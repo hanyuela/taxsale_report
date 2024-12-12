@@ -47,18 +47,9 @@ class Property(models.Model):
     )  # 新增字段：允许的值为 0~5，默认值为 0
 
     owners = models.ManyToManyField('Owner', related_name='properties')
-    users = models.ManyToManyField(User, related_name='properties', through='PropertyUserAgreement')
 
     def __str__(self):
         return self.street_address
-
-class PropertyUserAgreement(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    property = models.ForeignKey(Property, on_delete=models.CASCADE)
-    
-
-    class Meta:
-        unique_together = ('user', 'property')  # 保证每个用户在同一个房产下只能有一个记录
 
 
 class Auction(models.Model):
