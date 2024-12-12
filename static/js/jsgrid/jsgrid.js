@@ -34,26 +34,28 @@
             },
             updateItem: function (item) {
                 console.log("Sending data to server:", {
-                    property_id: item.property_id,  // 传递要更新的 property_id
-                    label: item.Label  // 只更新 Label 字段
+                    property_id: item.property_id,
+                    Label: item.Label,
+                    Note: item.Note,
+                    MyBid: item["My Bid"]
                 });
-            
+    
                 return $.ajax({
-                    url: '/update_holding_status/',  // 后端更新数据的URL
+                    url: '/update_holding_status/',
                     method: 'POST',
                     contentType: 'application/json',
                     data: JSON.stringify({
-                        property_id: item.property_id,  // 传递要更新的 property_id
-                        Label: item.Label  // 只更新 Label 字段
+                        property_id: item.property_id,
+                        Label: item.Label,
+                        Note: item.Note,
+                        "My Bid": item["My Bid"]
                     }),
                     dataType: 'json',
                     success: function (response) {
                         console.log("Update success:", response);
-            
+    
                         // 成功后重新加载数据
-                        $("#basicScenario").jsGrid("loadData");  // 重新加载数据
-                        // 或者手动刷新指定行（如果你只想更新单行）
-                        // $("#basicScenario").jsGrid("updateItem", item);  // 这会更新当前行
+                        $("#basicScenario").jsGrid("loadData");
                     },
                     error: function (xhr, status, error) {
                         console.error("Update error:", error);
@@ -70,6 +72,67 @@
             { name: "Auction Start", type: "text", width: 150 },
             { name: "Auction End", type: "text", width: 150 },
             { name: "My Bid", type: "text", width: 100 },
+            {
+                name: "Note",
+                type: "text",
+                width: 100,
+                itemTemplate: function (value, item) {
+                    const truncatedValue = value
+                        ? value.length > 12
+                            ? value.substring(0, 12) + "..."
+                            : value
+                        : ""; // 如果长度超过12，截取并加"..."
+                    const $cell = $("<div>")
+                        .text(truncatedValue)
+                        .css("cursor", "pointer") // 设置鼠标为手型
+                        .attr("title", "Click to edit note") // 鼠标悬停时显示提示
+                        .on("click", function (e) {
+                            e.stopPropagation(); // 阻止事件冒泡，避免触发表格编辑模式
+            
+                            // 创建弹出框
+                            const $popup = $("<div>")
+                                .css({
+                                    position: "fixed",
+                                    top: "50%",
+                                    left: "50%",
+                                    transform: "translate(-50%, -50%)",
+                                    backgroundColor: "white",
+                                    padding: "20px",
+                                    boxShadow: "0px 0px 10px rgba(0,0,0,0.5)",
+                                    zIndex: 1000
+                                });
+            
+                            const $textarea = $("<textarea>")
+                                .css({ width: "100%", height: "100px" })
+                                .val(value || "");
+            
+                            const $saveButton = $("<button>")
+                                .text("Save")
+                                .css({ marginRight: "10px" })
+                                .on("click", function () {
+                                    const newValue = $textarea.val();
+                                    item.Note = newValue; // 更新表格数据
+                                    $cell.text(newValue.substring(0, 12) + "..."); // 更新单元格显示内容
+                                    $popup.remove(); // 移除弹出框
+            
+                                    // 调用 jsGrid 的 updateItem 方法同步更新数据
+                                    $("#basicScenario").jsGrid("updateItem", item);
+                                });
+            
+                            const $cancelButton = $("<button>")
+                                .text("Cancel")
+                                .on("click", function () {
+                                    $popup.remove(); // 移除弹出框
+                                });
+            
+                            $popup.append($textarea, $("<div>").append($saveButton, $cancelButton));
+                            $("body").append($popup); // 添加到页面
+                        });
+            
+                    return $cell;
+                },
+                editing: true // 保持编辑功能
+            },             
             // 隐藏的字段，不显示在表格中
             { name: "property_user_agreement_id", type: "text", width: 150, editing: false, visible: false },
             {
