@@ -174,7 +174,51 @@
                         <th colspan="2"></th> <!-- 留空占位 -->
                     </tr>
                 </table>
-    
+
+                <!-- Government Data Example (replace with Property data) -->
+                <h3>Government Data</h3>
+                <table class="table table-bordered">
+                    <tr>
+                        <th>Property Class</th>
+                        <td>{{ data.property_class }}</td>
+                        <th>Owner Name</th>
+                        <td>
+                            <ul>
+                                {% for owner in data.owners %}
+                                    <li>{{ owner.name }}</li>
+                                {% endfor %}
+                            </ul>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Owner Primary Address</th>
+                        <td colspan="3">
+                            <ul>
+                                {% for owner in data.owners %}
+                                    <li>{{ owner.primary_address }}</li>
+                                {% endfor %}
+                            </ul>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Accessed Land Value</th>
+                        <td>${{ data.accessed_land_value }}</td>
+                        <th>Accessed Improvement Value</th>
+                        <td>${{ data.accessed_improvement_value }}</td>
+                    </tr>
+                    <tr>
+                        <th>Total Assessed Value</th>
+                        <td>${{ data.total_assessed_value }}</td>
+                        <th>Tax Amount Annual</th>
+                        <td>${{ data.tax_amount_annual }}</td>
+                    </tr>
+                    <tr>
+                        <th>Tax Overdue</th>
+                        <td>${{ data.tax_overdue }}</td>
+                        <th colspan="2"></th> <!-- 留空的单元格 -->
+                    </tr>
+                </table>
+
                 <!-- Market Data Example (replace with Property data) -->
                 <h3>Market Data</h3>
                 <table class="table table-bordered">
@@ -187,7 +231,7 @@
                         N/A
                       {% endif %}
                     </td>
-                    <th>Zestimate</th>
+                    <th>Market Value</th>
                     <td>${{ data.market_value }}</td>
                     <th>Building Size (sqft)</th>
                     <td>{{ data.building_size_sqft }}</td> 
