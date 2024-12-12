@@ -28,5 +28,6 @@ urlpatterns = [
     path('report/<int:property_id>/', property_views.report, name='report'),  # 更新为 property app 的视图
     path('agree-to-view/', property_views.agree_to_view, name='agree_to_view'),  # 更新为 property app 的视图
     path('check-agreement/', property_views.check_agreement, name='check_agreement'),
+    path('save_user_input/',holdings_views.save_user_input, name='save_user_input'),
     
 ]
