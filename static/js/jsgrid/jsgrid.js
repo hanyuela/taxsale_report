@@ -33,44 +33,196 @@
                 });
             },
             updateItem: function (item) {
-                console.log("Sending data to server:", {
-                    property_id: item.property_id,
-                    Label: item.Label,
-                    Note: item.Note,
-                    MyBid: item["My Bid"]
-                });
-    
-                return $.ajax({
-                    url: '/update_holding_status/',
-                    method: 'POST',
-                    contentType: 'application/json',
-                    data: JSON.stringify({
-                        property_id: item.property_id,
-                        Label: item.Label,
-                        Note: item.Note,
-                        "My Bid": item["My Bid"]
-                    }),
-                    dataType: 'json',
-                    success: function (response) {
-                        console.log("Update success:", response);
-    
-                        // 成功后重新加载数据
-                        $("#basicScenario").jsGrid("loadData");
-                    },
-                    error: function (xhr, status, error) {
-                        console.error("Update error:", error);
+                // 获取原始数据
+                const originalItem = $("#basicScenario").jsGrid("option", "data").find(i => i.property_id === item.property_id);
+            
+                // 找出被修改的字段
+                const modifiedFields = {};
+                Object.keys(item).forEach(key => {
+                    if (item[key] !== originalItem[key]) {
+                        modifiedFields[key] = item[key];
                     }
                 });
-            }
+            
+                // 如果没有修改任何字段，直接返回
+                if (Object.keys(modifiedFields).length === 0) {
+                    console.log("No changes detected");
+                    return Promise.resolve();
+                }
+            
+                // 添加 `property_id` 到修改的字段中，作为标识符
+                modifiedFields.property_id = item.property_id;
+            
+                console.log("Modified fields:", modifiedFields);
+            
+                // 原始字段的数据提交
+                if (modifiedFields.Label || modifiedFields.Note || modifiedFields["My Bid"]) {
+                    console.log("Sending data to update_holding_status:", {
+                        property_id: item.property_id,
+                        Label: modifiedFields.Label,
+                        Note: modifiedFields.Note,
+                        MyBid: modifiedFields["My Bid"]
+                    });
+            
+                    $.ajax({
+                        url: '/update_holding_status/', // 原接口
+                        method: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify({
+                            property_id: item.property_id,
+                            Label: modifiedFields.Label,
+                            Note: modifiedFields.Note,
+                            "My Bid": modifiedFields["My Bid"]
+                        }),
+                        dataType: 'json',
+                        success: function (response) {
+                            console.log("Update holding status success:", response);
+            
+                            // 成功后重新加载数据
+                            $("#basicScenario").jsGrid("loadData");
+                        },
+                        error: function (xhr, status, error) {
+                            console.error("Update holding status error:", error);
+                        }
+                    });
+                }
+            
+                // 保存新增字段到 /save_user_input/，仅提交修改的字段
+                const saveUserInputFields = ["Full Address", "Auction Authority", "State", "Amount In Sale", "Deposit Deadline", "Auction Start", "Auction End"];
+                const userInputData = { property_id: item.property_id };
+            
+                saveUserInputFields.forEach(field => {
+                    if (modifiedFields[field] !== undefined) {
+                        userInputData[field.toLowerCase().replace(/ /g, "_")] = modifiedFields[field];
+                    }
+                });
+            
+                if (Object.keys(userInputData).length > 1) { // 确保除了 property_id 外有其他字段
+                    console.log("Sending data to save_user_input:", userInputData);
+            
+                    return $.ajax({
+                        url: '/save_user_input/', // 新接口
+                        method: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify(userInputData),
+                        dataType: 'json',
+                        success: function (response) {
+                            console.log("Save user input success:", response);
+            
+                            // 成功后重新加载数据
+                            $("#basicScenario").jsGrid("loadData");
+                        },
+                        error: function (xhr, status, error) {
+                            console.error("Save user input error:", error);
+                        }
+                    });
+                } else {
+                    console.log("No fields to save for user input");
+                    return Promise.resolve();
+                }
+            }            
         },
         fields: [
-            { name: "Full Address", type: "text", width: 150 },
-            { name: "Auction Authority", type: "text", width: 150 },
-            { name: "State", type: "text", width: 100 },
-            { name: "Amount In Sale", type: "text", width: 120 },
-            { name: "Deposit Deadline", type: "text", width: 150 },
-            { name: "Auction Start", type: "text", width: 150 },
-            { name: "Auction End", type: "text", width: 150 },
+            {
+                name: "Full Address",
+                type: "text",
+                width: 150,
+                itemTemplate: function(value, item) {
+                    // 检查当前字段是否来自 user_input
+                    const isUserInput = item.is_user_input && item.is_user_input["Full Address"];
+                    const color = isUserInput ? "#2b5f60" : ""; // 根据字段标志设置颜色
+                    const $cell = $("<div>")
+                        .text(value)
+                        .css("background-color", color)  // 设置背景色
+                        .css("color", color ? "#fff" : ""); // 如果有背景色，设置字体颜色为白色
+                    return $cell;
+                }
+            },
+            {
+                name: "Auction Authority",
+                type: "text",
+                width: 150,
+                itemTemplate: function(value, item) {
+                    const isUserInput = item.is_user_input && item.is_user_input["Auction Authority"];
+                    const color = isUserInput ? "#2b5f60" : "";
+                    const $cell = $("<div>")
+                        .text(value)
+                        .css("background-color", color)
+                        .css("color", color ? "#fff" : "");
+                    return $cell;
+                }
+            },
+            {
+                name: "State",
+                type: "text",
+                width: 100,
+                itemTemplate: function(value, item) {
+                    // 仅针对当前字段检查是否来自 user_input
+                    const isUserInput = item.is_user_input && item.is_user_input["State"];
+                    const color = isUserInput ? "#2b5f60" : "";
+                    const $cell = $("<div>")
+                        .text(value)
+                        .css("background-color", color) // 设置背景色
+                        .css("color", color ? "#fff" : ""); // 如果有背景色，设置字体颜色为白色
+                    return $cell;
+                }
+            },
+            {
+                name: "Amount In Sale",
+                type: "text",
+                width: 120,
+                itemTemplate: function(value, item) {
+                    const isUserInput = item.is_user_input && item.is_user_input["Amount In Sale"];
+                    const color = isUserInput ? "#2b5f60" : "";
+                    const $cell = $("<div>")
+                        .text(value)
+                        .css("background-color", color)
+                        .css("color", color ? "#fff" : "");
+                    return $cell;
+                }
+            },
+            {
+                name: "Deposit Deadline",
+                type: "text",
+                width: 150,
+                itemTemplate: function(value, item) {
+                    const isUserInput = item.is_user_input && item.is_user_input["Deposit Deadline"];
+                    const color = isUserInput ? "#2b5f60" : "";
+                    const $cell = $("<div>")
+                        .text(value)
+                        .css("background-color", color)
+                        .css("color", color ? "#fff" : "");
+                    return $cell;
+                }
+            },
+            {
+                name: "Auction Start",
+                type: "text",
+                width: 150,
+                itemTemplate: function(value, item) {
+                    const isUserInput = item.is_user_input && item.is_user_input["Auction Start"];
+                    const color = isUserInput ? "#2b5f60" : "";
+                    const $cell = $("<div>")
+                        .text(value)
+                        .css("background-color", color)
+                        .css("color", color ? "#fff" : "");
+                    return $cell;
+                }
+            },
+            {
+                name: "Auction End",
+                type: "text",
+                width: 150,
+                itemTemplate: function(value, item) {
+                    const isUserInput = item.is_user_input && item.is_user_input["Auction End"];
+                    const color = isUserInput ? "#2b5f60" : "";
+                    const $cell = $("<div>")
+                        .text(value)
+                        .css("background-color", color)
+                        .css("color", color ? "#fff" : "");
+                    return $cell;
+                }
+            },
             { name: "My Bid", type: "text", width: 100 },
             {
                 name: "Note",
