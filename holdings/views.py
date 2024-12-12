@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from property.models import Property,Auction
 from django.http import JsonResponse
-from holdings.models import Holding
+from holdings.models import Holding,UserInput
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from django.shortcuts import render
@@ -30,45 +30,54 @@ def holdings(request):
 def holdings_data(request):
     # 获取当前登录用户
     user = request.user
- 
+
+    # 获取用户相关的 Holdings 数据
     agreements = Holding.objects.filter(user=user)
 
+    # 获取与这些 Holdings 相关的 Properties
     properties = Property.objects.filter(id__in=[agreement.property_id for agreement in agreements])
 
-    # 获取与这些 Property 相关的 Auction 数据
-    auctions = Auction.objects.filter(property__in=properties)
-
-    # 使用 select_related 来优化查询并获取关联数据
-    auctions = auctions.select_related('property')
+    # 获取与这些 Properties 相关的 Auction 数据
+    auctions = Auction.objects.filter(property__in=properties).select_related('property')
 
     # 构造数据列表
     properties_list = []
     for auction in auctions:
-        # 获取与此 Auction 相关的所有 Holding 条目
+        # 获取与此 Auction 相关的 Holdings 条目
         holdings = Holding.objects.filter(property=auction.property)
+        holding = holdings.first() if holdings.exists() else None
 
-        # 假设您需要获取第一个 Holding 的状态（如果有多个 Holding，可以根据需要处理）
-        holding_status = holdings.first().status if holdings.exists() else "No Bid"
-        holding_note = holdings.first().note if holdings.exists() else "No Note"
-        holding_My_Bid= holdings.first().my_bid if holdings.exists() else "No My Bid"
-        # 构造数据
+        # 获取 UserInput 数据（优先显示 UserInput 中的数据）
+        user_input = UserInput.objects.filter(property=auction.property, user=user).first()
+
+        # 构造数据，优先使用 UserInput 表中的值
         properties_list.append({
-            'Full Address': auction.property.street_address,
-            'Auction Authority': auction.authority_name,
-            'State': auction.property.state,
-            'Amount In Sale': auction.face_value,
-            'Deposit Deadline': auction.deposit_deadline,
-            'Auction Start': auction.auction_start,
-            'Auction End': auction.auction_end,
-            'My Bid': holding_My_Bid,  # 如果有出价信息，可以填入
-            'Label': holding_status,  # 从相关的 Holding 获取状态
-            'property_id': auction.property.id ,
-            'Note': holding_note,
-            
+            'Full Address': user_input.full_address if user_input and user_input.full_address else auction.property.street_address,
+            'Auction Authority': user_input.auction_authority if user_input and user_input.auction_authority else auction.authority_name,
+            'State': user_input.state if user_input and user_input.state else auction.property.state,
+            'Amount In Sale': user_input.amount_in_sale if user_input and user_input.amount_in_sale else auction.face_value,
+            'Deposit Deadline': user_input.deposit_deadline if user_input and user_input.deposit_deadline else auction.deposit_deadline,
+            'Auction Start': user_input.auction_start if user_input and user_input.auction_start else auction.auction_start,
+            'Auction End': user_input.auction_end if user_input and user_input.auction_end else auction.auction_end,
+            'My Bid': holding.my_bid if holding else "No My Bid",  # Holding 的 My Bid
+            'Label': holding.status if holding else "No Bid",  # Holding 的状态
+            'Note': holding.note if holding else "No Note",  # Holding 的备注
+            'is_user_input': {
+                'Full Address': bool(user_input and user_input.full_address),
+                'Auction Authority': bool(user_input and user_input.auction_authority),
+                'State': bool(user_input and user_input.state),
+                'Amount In Sale': bool(user_input and user_input.amount_in_sale),
+                'Deposit Deadline': bool(user_input and user_input.deposit_deadline),
+                'Auction Start': bool(user_input and user_input.auction_start),
+                'Auction End': bool(user_input and user_input.auction_end),
+            },
+            'property_id': auction.property.id,
         })
 
     # 返回 JSON 格式的数据
     return JsonResponse({'data': properties_list})
+
+
 
 
 @login_required
@@ -121,3 +130,64 @@ def update_holding_status(request):
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)})
 
+@csrf_exempt
+@login_required
+def save_user_input(request):
+    if request.method == "POST":
+        try:
+            # 解析请求数据
+            data = json.loads(request.body)
+
+            # 获取用户和 property_id
+            property_id = data.get("property_id")
+            user = request.user
+
+            # 查找或创建 UserInput
+            user_input, created = UserInput.objects.get_or_create(
+                property_id=property_id,
+                user=user
+            )
+
+            # 更新字段，只更新用户传递且修改过的字段
+            updated_fields = []
+            
+            if "full_address" in data and data["full_address"] != user_input.full_address:
+                user_input.full_address = data["full_address"]
+                updated_fields.append("full_address")
+            
+            if "auction_authority" in data and data["auction_authority"] != user_input.auction_authority:
+                user_input.auction_authority = data["auction_authority"]
+                updated_fields.append("auction_authority")
+            
+            if "state" in data and data["state"] != user_input.state:
+                user_input.state = data["state"]
+                updated_fields.append("state")
+            
+            if "amount_in_sale" in data and data["amount_in_sale"] != str(user_input.amount_in_sale):
+                user_input.amount_in_sale = float(data["amount_in_sale"])
+                updated_fields.append("amount_in_sale")
+            
+            if "deposit_deadline" in data and data["deposit_deadline"] != str(user_input.deposit_deadline):
+                user_input.deposit_deadline = data["deposit_deadline"]
+                updated_fields.append("deposit_deadline")
+            
+            if "auction_start" in data and data["auction_start"] != str(user_input.auction_start):
+                user_input.auction_start = data["auction_start"]
+                updated_fields.append("auction_start")
+            
+            if "auction_end" in data and data["auction_end"] != str(user_input.auction_end):
+                user_input.auction_end = data["auction_end"]
+                updated_fields.append("auction_end")
+
+            # 如果有更新字段才保存
+            if updated_fields:
+                user_input.save()
+                print(f"Updated fields: {updated_fields}")
+
+            return JsonResponse({"status": "success", "message": "Data saved successfully."})
+        except Exception as e:
+            print(f"Error: {e}")
+            return JsonResponse({"status": "error", "message": str(e)})
+
+    return JsonResponse({"status": "error", "message": "Invalid request."})
+    return JsonResponse({"status": "error", "message": "Invalid request"})

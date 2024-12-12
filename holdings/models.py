@@ -25,3 +25,26 @@ class Holding(models.Model):
     class Meta:
         verbose_name = 'Holding'
         verbose_name_plural = 'Holdings'
+
+
+
+
+class UserInput(models.Model):
+    
+    property = models.ForeignKey(Property, on_delete=models.CASCADE, related_name='user_inputs')  # 引用 Property 表
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_inputs')  # 引用 User 表
+    full_address = models.CharField(max_length=255, blank=True)  # 完整地址
+    auction_authority = models.CharField(max_length=255, blank=True)  # 拍卖方
+    state = models.CharField(max_length=50, blank=True)  # 所属州
+    amount_in_sale = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)  # 售卖金额
+    deposit_deadline = models.DateField(null=True, blank=True)  # 定金截止日期
+    auction_start = models.DateField(null=True, blank=True)  # 拍卖开始日期
+    auction_end = models.DateField(null=True, blank=True)  # 拍卖结束日期
+
+
+    def __str__(self):
+        return f"{self.property.name} - {self.user.username}"
+
+    class Meta:
+        verbose_name = 'User Input'
+        verbose_name_plural = 'User Inputs'
