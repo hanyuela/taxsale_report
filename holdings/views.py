@@ -1,11 +1,12 @@
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
-from property.models import PropertyUserAgreement,Property,Auction
+from property.models import Property,Auction
 from django.http import JsonResponse
 from holdings.models import Holding
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from django.shortcuts import render
+from holdings.models import Holding
 import json
 
 @login_required
@@ -13,10 +14,8 @@ def holdings(request):
     # 获取当前登录用户
     user = request.user
 
-    # 查询用户在 PropertyUserAgreement 模型中的所有关联条目
-    agreements = PropertyUserAgreement.objects.filter(user=user)
+    agreements = Holding.objects.filter(user=user)
 
-    # 获取与这些 PropertyUserAgreement 关联的所有 Property 数据
     properties = Property.objects.filter(id__in=[agreement.property_id for agreement in agreements])
 
     # 获取与这些 Property 相关的 Auction 数据
@@ -32,11 +31,9 @@ def holdings(request):
 def holdings_data(request):
     # 获取当前登录用户
     user = request.user
+ 
+    agreements = Holding.objects.filter(user=user)
 
-    # 查询用户在 PropertyUserAgreement 模型中的所有关联条目
-    agreements = PropertyUserAgreement.objects.filter(user=user)
-
-    # 获取与这些 PropertyUserAgreement 关联的所有 Property 数据
     properties = Property.objects.filter(id__in=[agreement.property_id for agreement in agreements])
 
     # 获取与这些 Property 相关的 Auction 数据
