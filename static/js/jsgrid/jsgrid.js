@@ -88,7 +88,7 @@
                 }
             
                 // 保存新增字段到 /save_user_input/，仅提交修改的字段
-                const saveUserInputFields = ["Full Address", "Auction Authority", "State", "Amount In Sale", "Deposit Deadline", "Auction Start", "Auction End"];
+                const saveUserInputFields = ["Full Address", "Auction Authority", "State", "Amount In Sale", "Deposit Deadline", "Auction Start", "Auction End", "City", "Zip"];
                 const userInputData = { property_id: item.property_id };
             
                 saveUserInputFields.forEach(field => {
@@ -124,17 +124,44 @@
         },
         fields: [
             {
-                name: "Full Address",
+                name: "Address",
                 type: "text",
                 width: 150,
                 itemTemplate: function(value, item) {
-                    // 检查当前字段是否来自 user_input
                     const isUserInput = item.is_user_input && item.is_user_input["Full Address"];
-                    const color = isUserInput ? "#2b5f60" : ""; // 根据字段标志设置颜色
+                    const color = isUserInput ? "#2b5f60" : ""; // 如果是用户输入，设置文本颜色为绿色
                     const $cell = $("<div>")
                         .text(value)
-                        .css("background-color", color)  // 设置背景色
-                        .css("color", color ? "#fff" : ""); // 如果有背景色，设置字体颜色为白色
+                        .css("color", color)  // 仅设置文本颜色
+                        .css("background-color", ""); // 保持背景色为白色或默认色
+                    return $cell;
+                }
+            },
+            {
+                name: "City",
+                type: "text",
+                width: 150,
+                itemTemplate: function(value, item) {
+                    const isUserInput = item.is_user_input && item.is_user_input["City"];
+                    const color = isUserInput ? "#2b5f60" : "";
+                    const $cell = $("<div>")
+                        .text(value)
+                        .css("color", color)  // 仅设置文本颜色
+                        .css("background-color", ""); // 保持背景色为白色或默认色
+                    return $cell;
+                }
+            },
+            {
+                name: "Zip",
+                type: "text",
+                width: 150,
+                itemTemplate: function(value, item) {
+                    const isUserInput = item.is_user_input && item.is_user_input["Zip"];
+                    const color = isUserInput ? "#2b5f60" : "";
+                    const $cell = $("<div>")
+                        .text(value)
+                        .css("color", color)  // 仅设置文本颜色
+                        .css("background-color", ""); // 保持背景色为白色或默认色
                     return $cell;
                 }
             },
@@ -147,8 +174,8 @@
                     const color = isUserInput ? "#2b5f60" : "";
                     const $cell = $("<div>")
                         .text(value)
-                        .css("background-color", color)
-                        .css("color", color ? "#fff" : "");
+                        .css("color", color)  // 仅设置文本颜色
+                        .css("background-color", ""); // 保持背景色为白色或默认色
                     return $cell;
                 }
             },
@@ -157,13 +184,12 @@
                 type: "text",
                 width: 100,
                 itemTemplate: function(value, item) {
-                    // 仅针对当前字段检查是否来自 user_input
                     const isUserInput = item.is_user_input && item.is_user_input["State"];
                     const color = isUserInput ? "#2b5f60" : "";
                     const $cell = $("<div>")
                         .text(value)
-                        .css("background-color", color) // 设置背景色
-                        .css("color", color ? "#fff" : ""); // 如果有背景色，设置字体颜色为白色
+                        .css("color", color) // 仅设置文本颜色
+                        .css("background-color", ""); // 保持背景色为白色或默认色
                     return $cell;
                 }
             },
@@ -176,8 +202,8 @@
                     const color = isUserInput ? "#2b5f60" : "";
                     const $cell = $("<div>")
                         .text(value)
-                        .css("background-color", color)
-                        .css("color", color ? "#fff" : "");
+                        .css("color", color)  // 仅设置文本颜色
+                        .css("background-color", ""); // 保持背景色为白色或默认色
                     return $cell;
                 }
             },
@@ -190,8 +216,8 @@
                     const color = isUserInput ? "#2b5f60" : "";
                     const $cell = $("<div>")
                         .text(value)
-                        .css("background-color", color)
-                        .css("color", color ? "#fff" : "");
+                        .css("color", color)  // 仅设置文本颜色
+                        .css("background-color", ""); // 保持背景色为白色或默认色
                     return $cell;
                 }
             },
@@ -204,8 +230,8 @@
                     const color = isUserInput ? "#2b5f60" : "";
                     const $cell = $("<div>")
                         .text(value)
-                        .css("background-color", color)
-                        .css("color", color ? "#fff" : "");
+                        .css("color", color)  // 仅设置文本颜色
+                        .css("background-color", ""); // 保持背景色为白色或默认色
                     return $cell;
                 }
             },
@@ -218,11 +244,12 @@
                     const color = isUserInput ? "#2b5f60" : "";
                     const $cell = $("<div>")
                         .text(value)
-                        .css("background-color", color)
-                        .css("color", color ? "#fff" : "");
+                        .css("color", color)  // 仅设置文本颜色
+                        .css("background-color", ""); // 保持背景色为白色或默认色
                     return $cell;
                 }
             },
+            
             { name: "My Bid", type: "text", width: 100 },
             {
                 name: "Note",
@@ -234,6 +261,7 @@
                             ? value.substring(0, 12) + "..."
                             : value
                         : ""; // 如果长度超过12，截取并加"..."
+                    
                     const $cell = $("<div>")
                         .text(truncatedValue)
                         .css("cursor", "pointer") // 设置鼠标为手型
@@ -256,19 +284,51 @@
             
                             const $textarea = $("<textarea>")
                                 .css({ width: "100%", height: "100px" })
-                                .val(value || "");
+                                .val(value || "")
+                                .on("input", function() {
+                                    const currentLength = $(this).val().length;
+                                    if (currentLength > 50) {
+                                        // 如果字符超过50，显示提示信息
+                                        $("#charLimitWarning").show();
+                                    } else {
+                                        $("#charLimitWarning").hide();
+                                    }
+                                });
             
                             const $saveButton = $("<button>")
                                 .text("Save")
                                 .css({ marginRight: "10px" })
                                 .on("click", function () {
                                     const newValue = $textarea.val();
-                                    item.Note = newValue; // 更新表格数据
-                                    $cell.text(newValue.substring(0, 12) + "..."); // 更新单元格显示内容
-                                    $popup.remove(); // 移除弹出框
             
-                                    // 调用 jsGrid 的 updateItem 方法同步更新数据
-                                    $("#basicScenario").jsGrid("updateItem", item);
+                                    if (newValue.length > 50) {
+                                        alert("Note cannot exceed 50 characters.");
+                                        return;
+                                    }
+            
+                                    // 调用 $.ajax() 发送数据到后台更新
+                                    $.ajax({
+                                        url: '/update_holding_status/', // 原接口
+                                        method: 'POST',
+                                        contentType: 'application/json',
+                                        data: JSON.stringify({
+                                            property_id: item.property_id, // 保持当前任务的 ID
+                                            Label: item.Label, // 保持其他需要传递的字段
+                                            Note: newValue, // 更新的 Note 字段
+                                            "My Bid": item["My Bid"] // 如果需要更新 My Bid 字段
+                                        }),
+                                        dataType: 'json',
+                                        success: function (response) {
+                                            console.log("Update holding status success:", response);
+                                            
+                                            // 更新后刷新表格
+                                            $("#basicScenario").jsGrid("loadData");
+                                            $popup.remove(); // 关闭弹出框
+                                        },
+                                        error: function (xhr, status, error) {
+                                            console.error("Update holding status error:", error);
+                                        }
+                                    });
                                 });
             
                             const $cancelButton = $("<button>")
@@ -277,14 +337,26 @@
                                     $popup.remove(); // 移除弹出框
                                 });
             
-                            $popup.append($textarea, $("<div>").append($saveButton, $cancelButton));
+                            // 添加字符限制提示信息
+                            const $charLimitWarning = $("<div>")
+                                .attr("id", "charLimitWarning")
+                                .css({
+                                    color: "red",
+                                    fontSize: "12px",
+                                    display: "none" // 默认隐藏
+                                })
+                                .text("Note cannot exceed 50 characters.");
+            
+                            $popup.append($textarea, $charLimitWarning, $("<div>").append($saveButton, $cancelButton));
                             $("body").append($popup); // 添加到页面
                         });
             
                     return $cell;
                 },
                 editing: true // 保持编辑功能
-            },             
+            },
+            
+                
             // 隐藏的字段，不显示在表格中
             { name: "property_user_agreement_id", type: "text", width: 150, editing: false, visible: false },
             {
