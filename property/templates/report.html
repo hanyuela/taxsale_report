@@ -260,18 +260,18 @@
                     <td>{{ data.bedroom_number }}</td>
                     <th>Bathroom Number</th>
                     <td>{{ data.bathroom_number }}</td>
-                    <th>Environmental Hazard Status</th>
-                    <td>{{ data.environmental_hazard_status|default:"N/A" }}</td>
                   </tr>
                   <tr>
+                      <th>Environmental Hazard Status</th>
+                      <td>{{ data.environmental_hazard_status|default:"N/A" }}</td>
                       <th>Flood Status</th>
                       <td>{{ data.flood_status|default:"N/A" }}</td>
                       <th>Flood Risk</th>
                       <td>{{ data.flood_risk|default:"N/A" }}</td>
-                      <th>Latest Sale Date</th>
-                      <td>{{ data.latest_sale_date|date:"m/d/Y" }}</td>
                   </tr>
                   <tr>
+                      <th>Latest Sale Date</th>
+                      <td>{{ data.latest_sale_date|date:"m/d/Y" }}</td>
                       <th>Latest Sale Price</th>
                       <td>${{ data.latest_sale_price }}</td>
                       <th colspan="4"></th> <!-- 留空列 -->
