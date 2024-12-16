@@ -52,24 +52,28 @@ def holdings_data(request):
 
         # 构造数据，优先使用 UserInput 表中的值
         properties_list.append({
-            'Full Address': user_input.full_address if user_input and user_input.full_address else auction.property.street_address,
+            'Address': user_input.street_address if user_input and user_input.street_address else auction.property.street_address,
             'Auction Authority': user_input.auction_authority if user_input and user_input.auction_authority else auction.authority_name,
             'State': user_input.state if user_input and user_input.state else auction.property.state,
             'Amount In Sale': user_input.amount_in_sale if user_input and user_input.amount_in_sale else auction.face_value,
             'Deposit Deadline': user_input.deposit_deadline if user_input and user_input.deposit_deadline else auction.deposit_deadline,
             'Auction Start': user_input.auction_start if user_input and user_input.auction_start else auction.auction_start,
             'Auction End': user_input.auction_end if user_input and user_input.auction_end else auction.auction_end,
+            'City': user_input.city if user_input and user_input.city else auction.property.city,
+            'Zip': user_input.zip if user_input and user_input.zip else auction.property.zip,
             'My Bid': holding.my_bid if holding else "No My Bid",  # Holding 的 My Bid
             'Label': holding.status if holding else "No Bid",  # Holding 的状态
             'Note': holding.note if holding else "No Note",  # Holding 的备注
             'is_user_input': {
-                'Full Address': bool(user_input and user_input.full_address),
+                'Address': bool(user_input and user_input.street_address),
                 'Auction Authority': bool(user_input and user_input.auction_authority),
                 'State': bool(user_input and user_input.state),
                 'Amount In Sale': bool(user_input and user_input.amount_in_sale),
                 'Deposit Deadline': bool(user_input and user_input.deposit_deadline),
                 'Auction Start': bool(user_input and user_input.auction_start),
                 'Auction End': bool(user_input and user_input.auction_end),
+                'City': bool(user_input and user_input.city),
+                'Zip': bool(user_input and user_input.zip),
             },
             'property_id': auction.property.id,
         })
@@ -105,6 +109,10 @@ def update_holding_status(request):
         if not property_id:
             return JsonResponse({'status': 'error', 'message': 'Missing property_id'})
         
+        # 限制 note 字段最多 50 个字符
+        if note and len(note) > 50:
+            return JsonResponse({'status': 'error', 'message': 'Note cannot exceed 50 characters'})
+        
         # 查找对应的 Holding 数据
         try:
             holding = Holding.objects.get(property_id=property_id)  # 查找对应的 Holding 数据
@@ -130,6 +138,7 @@ def update_holding_status(request):
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)})
 
+
 @csrf_exempt
 @login_required
 def save_user_input(request):
@@ -151,9 +160,9 @@ def save_user_input(request):
             # 更新字段，只更新用户传递且修改过的字段
             updated_fields = []
             
-            if "full_address" in data and data["full_address"] != user_input.full_address:
-                user_input.full_address = data["full_address"]
-                updated_fields.append("full_address")
+            if "street_address" in data and data["street_address"] != user_input.street_address:
+                user_input.street_address = data["street_address"]
+                updated_fields.append("street_address")
             
             if "auction_authority" in data and data["auction_authority"] != user_input.auction_authority:
                 user_input.auction_authority = data["auction_authority"]
@@ -179,6 +188,14 @@ def save_user_input(request):
                 user_input.auction_end = data["auction_end"]
                 updated_fields.append("auction_end")
 
+            if "city" in data and data["city"] != str(user_input.city):
+                user_input.city = data["city"]
+                updated_fields.append("city")
+            
+            if "zip" in data and data["zip"] != str(user_input.zip):
+                user_input.zip = data["zip"]
+                updated_fields.append("zip")
+
             # 如果有更新字段才保存
             if updated_fields:
                 user_input.save()
@@ -190,4 +207,3 @@ def save_user_input(request):
             return JsonResponse({"status": "error", "message": str(e)})
 
     return JsonResponse({"status": "error", "message": "Invalid request."})
-    return JsonResponse({"status": "error", "message": "Invalid request"})
