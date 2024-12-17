@@ -287,5 +287,50 @@ def footer_light(request):
     return render(request, 'footer-light.html')
 
 
+@login_required
+def profile(request):
+    user_profile = UserProfile.objects.get(user=request.user)  # 获取当前登录用户的个人资料
+
+    if request.method == "POST":
+        # 更新用户资料
+        user_profile.first_name = request.POST.get('first_name', user_profile.first_name)
+        user_profile.last_name = request.POST.get('last_name', user_profile.last_name)
+        user_profile.phone_number = request.POST.get('phone_number', user_profile.phone_number)
+        user_profile.investment_amount = request.POST.get('investment_amount', user_profile.investment_amount)
+        user_profile.goal = request.POST.get('goal', user_profile.goal)
+
+        # 保存更新后的数据
+        user_profile.save()
+
+        return redirect('profile')  # 重定向回当前页面，显示更新后的数据
+
+    return render(request, 'profile.html', {'user_profile': user_profile})
 
 
+@login_required
+def profile_update(request):
+    # 获取当前登录用户的 UserProfile
+    user_profile = UserProfile.objects.get(user=request.user)
+
+    if request.method == 'POST':
+        # 获取表单数据
+        first_name = request.POST.get('first_name')
+        last_name = request.POST.get('last_name')
+        phone_number = request.POST.get('phone_number')
+        investment_amount = request.POST.get('investment_amount')
+        goal = request.POST.get('goal')
+        default = request.POST.get('default') == 'on'  # 如果复选框被选中，则为True，否则为False
+
+        # 更新 UserProfile 对象
+        user_profile.first_name = first_name
+        user_profile.last_name = last_name
+        user_profile.phone_number = phone_number
+        user_profile.investment_amount = investment_amount
+        user_profile.goal = goal
+        user_profile.default = default
+        user_profile.save()  # 保存更新后的数据
+
+        return redirect('profile')  # 更新后重定向到个人资料页面
+
+    # 如果是 GET 请求，则渲染当前用户的资料
+    return render(request, 'profile_update.html', {'user_profile': user_profile})

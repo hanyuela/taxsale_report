@@ -29,5 +29,6 @@ urlpatterns = [
     path('agree-to-view/', property_views.agree_to_view, name='agree_to_view'),  # 更新为 property app 的视图
     path('check-agreement/', property_views.check_agreement, name='check_agreement'),
     path('save_user_input/',holdings_views.save_user_input, name='save_user_input'),
-    
+    path('profile/',views.profile,name='profile'),
+    path('profile/update/', views.profile_update, name='profile_update'),
 ]
