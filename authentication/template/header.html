@@ -84,9 +84,8 @@
                     </div>
                     <ul class="profile-dropdown onhover-show-div">
                         {% if user.is_authenticated %}
-                            <li><a href="{% static 'template/user-profile.html' %}"><i data-feather="user"></i><span>Account</span></a></li>
+                            <li><a href="{% url 'profile' %}"><i data-feather="user"></i><span>Profile</span></a></li>
                             <li><a href="{% static 'template/letter-box.html' %}"><i data-feather="mail"></i><span>Inbox</span></a></li>
-                            <li><a href="{% static 'template/task.html' %}"><i data-feather="file-text"></i><span>Taskboard</span></a></li>
                             <li><a href="{% url 'edit-profile' %}"><i data-feather="settings"></i><span>Settings</span></a></li>
                             <li><a href="{% url 'logout' %}"><i data-feather="log-out"></i><span>Log out</span></a></li>
                         {% else %}
