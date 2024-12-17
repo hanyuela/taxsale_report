@@ -161,7 +161,7 @@
     <div id="columnOptions" class="modal">
       <h4>Manage Columns</h4>
       <ul id="columnSettingsList">
-        <li><label><input type="checkbox" class="column-toggle" data-column="Full Address" checked> Full Address</label></li>
+        <li><label><input type="checkbox" class="column-toggle" data-column="Address" checked> Address</label></li>
         <li><label><input type="checkbox" class="column-toggle" data-column="Auction Authority" checked> Auction Authority</label></li>
         <li><label><input type="checkbox" class="column-toggle" data-column="State" checked> State</label></li>
         <li><label><input type="checkbox" class="column-toggle" data-column="Amount In Sale" checked> Amount In Sale</label></li>
@@ -170,6 +170,8 @@
         <li><label><input type="checkbox" class="column-toggle" data-column="Auction End" checked> Auction End</label></li>
         <li><label><input type="checkbox" class="column-toggle" data-column="My Bid" checked> My Bid</label></li>
         <li><label><input type="checkbox" class="column-toggle" data-column="Label" checked> Status</label></li>
+        <li><label><input type="checkbox" class="column-toggle" data-column="City" checked> City</label></li>
+        <li><label><input type="checkbox" class="column-toggle" data-column="Zip" checked> Zip</label></li>
       </ul>    
       <button id="saveColumnSettings" class="btn btn-success">Save</button>
       <button id="closeColumnSettings" class="btn btn-secondary">Cancel</button>
@@ -181,6 +183,7 @@
       {% include 'footer-light.html' %}
     
     </div>
+   
     <script>
     // 点击配置列按钮，显示弹窗
     document.getElementById("columnSettings").addEventListener("click", function () {
