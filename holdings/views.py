@@ -13,18 +13,27 @@ def holdings(request):
     # 获取当前登录用户
     user = request.user
 
+    # 获取当前用户的所有 Holding 记录
     agreements = Holding.objects.filter(user=user)
 
+    # 获取所有关联的 Property 实例
     properties = Property.objects.filter(id__in=[agreement.property_id for agreement in agreements])
 
     # 获取与这些 Property 相关的 Auction 数据
-    auctions = Auction.objects.filter(id__in=properties.values_list('auction_id', flat=True))
+    # 通过 'auction' 字段反向查询与每个 Property 相关联的 Auction 数据
+    auctions = Auction.objects.filter(properties__in=properties)
 
-    # 使用 select_related 来优化查询并获取关联数据
-    auctions = auctions.select_related('property')
+    # 使用 select_related 来优化查询，避免 N+1 查询问题
+    auctions = auctions.select_related('auction')  # 需要确认 Auction 是否与 Property 有关联
 
     # 渲染 holdings.html 页面
-    return render(request, 'holdings.html', {'user': user})
+    return render(request, 'holdings.html', {
+        'user': user,
+        'agreements': agreements,
+        'properties': properties,
+        'auctions': auctions
+    })
+
 
 @login_required
 def holdings_data(request):
@@ -38,45 +47,49 @@ def holdings_data(request):
     properties = Property.objects.filter(id__in=[agreement.property_id for agreement in agreements])
 
     # 获取与这些 Properties 相关的 Auction 数据
-    auctions = Auction.objects.filter(property__in=properties).select_related('property')
+    auctions = Auction.objects.filter(id__in=properties.values_list('auction_id', flat=True))
 
     # 构造数据列表
     properties_list = []
     for auction in auctions:
-        # 获取与此 Auction 相关的 Holdings 条目
-        holdings = Holding.objects.filter(property=auction.property)
-        holding = holdings.first() if holdings.exists() else None
+        # 获取与此 Auction 相关的 Properties
+        auction_properties = auction.properties.all()
 
-        # 获取 UserInput 数据（优先显示 UserInput 中的数据）
-        user_input = UserInput.objects.filter(property=auction.property, user=user).first()
+        for property in auction_properties:
+            # 获取与此 Property 相关的 Holdings 条目
+            holdings = Holding.objects.filter(property=property)
+            holding = holdings.first() if holdings.exists() else None
 
-        # 构造数据，优先使用 UserInput 表中的值
-        properties_list.append({
-            'Address': user_input.street_address if user_input and user_input.street_address else auction.property.street_address,
-            'Auction Authority': user_input.auction_authority if user_input and user_input.auction_authority else auction.authority_name,
-            'State': user_input.state if user_input and user_input.state else auction.property.state,
-            'Amount In Sale': user_input.amount_in_sale if user_input and user_input.amount_in_sale else auction.face_value,
-            'Deposit Deadline': user_input.deposit_deadline if user_input and user_input.deposit_deadline else auction.deposit_deadline,
-            'Auction Start': user_input.auction_start if user_input and user_input.auction_start else auction.auction_start,
-            'Auction End': user_input.auction_end if user_input and user_input.auction_end else auction.auction_end,
-            'City': user_input.city if user_input and user_input.city else auction.property.city,
-            'Zip': user_input.zip if user_input and user_input.zip else auction.property.zip,
-            'My Bid': holding.my_bid if holding else "No My Bid",  # Holding 的 My Bid
-            'Label': holding.status if holding else "No Bid",  # Holding 的状态
-            'Note': holding.note if holding else "No Note",  # Holding 的备注
-            'is_user_input': {
-                'Address': bool(user_input and user_input.street_address),
-                'Auction Authority': bool(user_input and user_input.auction_authority),
-                'State': bool(user_input and user_input.state),
-                'Amount In Sale': bool(user_input and user_input.amount_in_sale),
-                'Deposit Deadline': bool(user_input and user_input.deposit_deadline),
-                'Auction Start': bool(user_input and user_input.auction_start),
-                'Auction End': bool(user_input and user_input.auction_end),
-                'City': bool(user_input and user_input.city),
-                'Zip': bool(user_input and user_input.zip),
-            },
-            'property_id': auction.property.id,
-        })
+            # 获取 UserInput 数据（优先显示 UserInput 中的数据）
+            user_input = UserInput.objects.filter(property=property, user=user).first()
+
+            # 构造数据，优先使用 UserInput 表中的值
+            properties_list.append({
+                'Address': user_input.street_address if user_input and user_input.street_address else property.street_address,
+                'Auction Authority': user_input.auction_authority if user_input and user_input.auction_authority else auction.authority_name,
+                'State': user_input.state if user_input and user_input.state else property.state,
+                'Amount In Sale': user_input.amount_in_sale if user_input and user_input.amount_in_sale else property.face_value,
+                'Deposit Deadline': user_input.deposit_deadline if user_input and user_input.deposit_deadline else auction.deposit_deadline,
+                'Auction Start': user_input.auction_start if user_input and user_input.auction_start else auction.auction_start,
+                'Auction End': user_input.auction_end if user_input and user_input.auction_end else auction.auction_end,
+                'City': user_input.city if user_input and user_input.city else property.city,
+                'Zip': user_input.zip if user_input and user_input.zip else property.zip,
+                'My Bid': holding.my_bid if holding else "No My Bid",  # Holding 的 My Bid
+                'Label': holding.status if holding else "No Bid",  # Holding 的状态
+                'Note': holding.note if holding else "No Note",  # Holding 的备注
+                'is_user_input': {
+                    'Address': bool(user_input and user_input.street_address),
+                    'Auction Authority': bool(user_input and user_input.auction_authority),
+                    'State': bool(user_input and user_input.state),
+                    'Amount In Sale': bool(user_input and user_input.amount_in_sale),
+                    'Deposit Deadline': bool(user_input and user_input.deposit_deadline),
+                    'Auction Start': bool(user_input and user_input.auction_start),
+                    'Auction End': bool(user_input and user_input.auction_end),
+                    'City': bool(user_input and user_input.city),
+                    'Zip': bool(user_input and user_input.zip),
+                },
+                'property_id': property.id,
+            })
 
     # 返回 JSON 格式的数据
     return JsonResponse({'data': properties_list})
