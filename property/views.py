@@ -11,6 +11,7 @@ from .models import Property, User
 from authentication.models import UserProfile
 from holdings.models import Holding
 # Create your views here.
+
 @login_required
 def datatable(request):
     PROPERTY_TYPE_MAPPING = {
@@ -37,20 +38,19 @@ def datatable(request):
     # 获取当前用户的筛选条件
     user_criteria = Criterion.objects.filter(user=request.user).first()
 
-    # 初始查询集
-    # 初始查询集：筛选 Auction 表中 auction_end 晚于今天的数据
+    # 筛选 Auction 表中 auction_end 晚于今天的数据
     today = datetime.now()
-    auctions = Auction.objects.select_related('property').filter(auction_end__gt=today)
+    auctions = Auction.objects.filter(auction_end__gt=today).prefetch_related('properties')
 
     # 如果用户有筛选条件
     if user_criteria:
-        # 1. 按 states 筛选
+        # 按 states 筛选
         if user_criteria.states.exists():
             state_ids = user_criteria.states.values_list('id', flat=True)
             abbreviations = States.objects.filter(id__in=state_ids).values_list('abbreviation', flat=True)
-            auctions = auctions.filter(property__state__in=abbreviations)
+            auctions = auctions.filter(properties__state__in=abbreviations)
 
-        # 2. 按 property_type 筛选
+        # 按 property_type 筛选
         if user_criteria.property_type:
             try:
                 selected_property_types = ast.literal_eval(user_criteria.property_type)
@@ -60,11 +60,11 @@ def datatable(request):
                     if PROPERTY_TYPE_MAPPING.get(pt)
                 ]
                 if mapped_classes:
-                    auctions = auctions.filter(property__property_class__in=mapped_classes)
+                    auctions = auctions.filter(properties__property_class__in=mapped_classes)
             except (ValueError, SyntaxError):
                 pass
 
-        # 3. 按 is_online 筛选
+        # 按 is_online 筛选
         if user_criteria.is_online:
             try:
                 selected_online_modes = ast.literal_eval(user_criteria.is_online)
@@ -78,7 +78,7 @@ def datatable(request):
             except (ValueError, SyntaxError):
                 pass
 
-        # 4. 按 auction_type 筛选
+        # 按 auction_type 筛选
         if user_criteria.auction_type:
             try:
                 selected_auction_types = ast.literal_eval(user_criteria.auction_type)
@@ -92,34 +92,34 @@ def datatable(request):
             except (ValueError, SyntaxError):
                 pass
 
-        # 5. 按 market_value 筛选
+        # 按 market_value 筛选
         if user_criteria.market_value_min is not None:
-            auctions = auctions.filter(property__market_value__gte=user_criteria.market_value_min)
+            auctions = auctions.filter(properties__market_value__gte=user_criteria.market_value_min)
         if user_criteria.market_value_max is not None:
-            auctions = auctions.filter(property__market_value__lte=user_criteria.market_value_max)
+            auctions = auctions.filter(properties__market_value__lte=user_criteria.market_value_max)
 
     # 构造数据供模板渲染
     data = []
     for auction in auctions:
-        data.append({
-            "city": auction.property.city,
-            "state": auction.property.state,
-            "property_type": auction.property.property_class,
-            "is_online": auction.is_online,
-            "auction_type": auction.auction_type,
-            "amount_in_sale": auction.face_value,
-            "deposit_deadline": auction.deposit_deadline,
-            "foreclose_score": auction.property.foreclose_score,
-            "property_id":auction.property_id,
-            "property_class":auction.property.property_class,
-            "street_address":auction.property.street_address
-        })
+        for property in auction.properties.all():
+            data.append({
+                "city": property.city,
+                "state": property.state,
+                "property_type": property.property_class,
+                "is_online": auction.is_online,
+                "auction_type": auction.auction_type,
+                "amount_in_sale": property.face_value,
+                "deposit_deadline": auction.deposit_deadline,
+                "foreclose_score": property.foreclose_score,
+                "property_id": property.id,
+                "property_class": property.property_class,
+                "street_address": property.street_address
+            })
 
     return render(request, "datatable.html", {
         "data": data,
         "user_criteria": user_criteria,  # 传递筛选条件，便于前端显示或调试
     })
-
 
 
 @login_required

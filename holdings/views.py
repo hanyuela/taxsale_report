@@ -18,7 +18,7 @@ def holdings(request):
     properties = Property.objects.filter(id__in=[agreement.property_id for agreement in agreements])
 
     # 获取与这些 Property 相关的 Auction 数据
-    auctions = Auction.objects.filter(property__in=properties)
+    auctions = Auction.objects.filter(id__in=properties.values_list('auction_id', flat=True))
 
     # 使用 select_related 来优化查询并获取关联数据
     auctions = auctions.select_related('property')
