@@ -123,8 +123,8 @@ def update_holding_status(request):
             return JsonResponse({'status': 'error', 'message': 'Missing property_id'})
         
         # 限制 note 字段最多 50 个字符
-        if note and len(note) > 50:
-            return JsonResponse({'status': 'error', 'message': 'Note cannot exceed 50 characters'})
+        if note and len(note) > 1000:
+            return JsonResponse({'status': 'error', 'message': 'Note cannot exceed 1000 characters'})
         
         # 查找对应的 Holding 数据
         try:
