@@ -88,14 +88,16 @@
                 }
             
                 // 保存新增字段到 /save_user_input/，仅提交修改的字段
-                const saveUserInputFields = ["Full Address", "Auction Authority", "State", "Amount In Sale", "Deposit Deadline", "Auction Start", "Auction End", "City", "Zip"];
+                const saveUserInputFields = ["Address", "City", "Zip", "Auction Authority", "State", "Amount In Sale", "Deposit Deadline", "Auction Start", "Auction End"];
                 const userInputData = { property_id: item.property_id };
             
                 saveUserInputFields.forEach(field => {
                     if (modifiedFields[field] !== undefined) {
-                        userInputData[field.toLowerCase().replace(/ /g, "_")] = modifiedFields[field];
+                        const fieldName = field === "Address" ? "street_address" : field.toLowerCase().replace(/ /g, "_");
+                        userInputData[fieldName] = modifiedFields[field];
                     }
                 });
+                
             
                 if (Object.keys(userInputData).length > 1) { // 确保除了 property_id 外有其他字段
                     console.log("Sending data to save_user_input:", userInputData);
@@ -128,7 +130,7 @@
                 type: "text",
                 width: 150,
                 itemTemplate: function(value, item) {
-                    const isUserInput = item.is_user_input && item.is_user_input["Full Address"];
+                    const isUserInput = item.is_user_input && item.is_user_input["Address"];
                     const color = isUserInput ? "#2b5f60" : ""; // 如果是用户输入，设置文本颜色为绿色
                     const $cell = $("<div>")
                         .text(value)
@@ -354,9 +356,7 @@
                     return $cell;
                 },
                 editing: true // 保持编辑功能
-            },
-            
-                
+            },                          
             // 隐藏的字段，不显示在表格中
             { name: "property_user_agreement_id", type: "text", width: 150, editing: false, visible: false },
             {
