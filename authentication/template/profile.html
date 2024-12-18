@@ -39,7 +39,84 @@
     <!-- Responsive css-->
     <link rel="stylesheet" type="text/css" href="{% static 'css/responsive.css' %}">
   </head>
+  <style>
+    /* 外部容器样式，统一设置最大宽度和居中显示 */
+    .profile-container {
+      max-width: 600px; /* 设置最大宽度 */
+      margin: 0 auto; /* 居中显示 */
+      padding: 17px; /* 左右内边距 */
+      box-sizing: border-box; /* 包括内边距在内的宽度计算 */
+    }
+
+    /* 统一输入框样式 */
+    .profile-container .form-control {
+      width: 100%; /* 输入框宽度100%，但受容器限制 */
+      padding: 10px 12px; /* 输入框内边距 */
+      box-sizing: border-box; /* 保证宽度包含内边距 */
+    }
+
+    /* 统一标签样式 */
+    .profile-container .form-label {
+      display: block; /* 标签单独一行显示 */
+      margin-bottom: 8px; /* 标签与输入框的间距 */
+      color: #333; /* 标签字体颜色 */
+      font-weight: bold; /* 标签字体加粗 */
+    }
+
+    /* 按钮样式 */
+    .profile-container .btn {
+      margin-top: 5px; /* 按钮与输入框的间距 */
+      padding: 10px;
+      width: 100%;
+    }
+    /* 设置外部容器整体样式 */
+    .card {
+      padding: 20px; /* 添加内边距 */
+      max-width: 800px; /* 设置最大宽度，确保不会过于宽 */
+      margin: 0 auto; /* 居中显示 */
+      box-sizing: border-box; /* 包括内边距在内计算宽度 */
+    }
+
+    /* 输入框和复选框的通用样式 */
+    .card .form-control,
+    .card input[type="radio"],
+    .card input[type="checkbox"] {
+      margin-left: 10px; /* 增加左边距 */
+    }
+
+    /* 标签与输入框对齐 */
+    .card label {
+      margin-left: 10px; /* 标签左边距 */
+      font-weight: bold; /* 标签加粗 */
+      color: #333; /* 标签字体颜色 */
+    }
+
+    /* 调整单选框和复选框 */
+    .card input[type="radio"],
+    .card input[type="checkbox"] {
+      margin-right: 5px; /* 控件与标签之间的间距 */
+    }
+
+    /* 提交按钮样式 */
+    .card-footer .btn {
+      margin-top: 10px;
+      padding: 10px 20px;
+    }
+  </style>
   <body> 
+    {% if messages %}
+      {% for message in messages %}
+        <div class="alert 
+          {% if message.tags == 'success' %}alert-success
+          {% elif message.tags == 'error' %}alert-danger
+          {% elif message.tags == 'warning' %}alert-warning
+          {% else %}alert-info{% endif %} 
+          alert-dismissible fade show" role="alert" style="z-index: 9999; position: relative;">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      {% endfor %}
+    {% endif %}
     <!-- loader starts-->
     <div class="loader-wrapper">
       <div class="theme-loader">    
@@ -80,10 +157,13 @@
                       <div class="card-options"><a class="card-options-collapse" href="#" data-bs-toggle="card-collapse"><i class="fe fe-chevron-up"></i></a><a class="card-options-remove" href="#" data-bs-toggle="card-remove"><i class="fe fe-x"></i></a></div>
                     </div>
                     <div class="card-body">
-                      <form>
+                      <!-- 修改邮箱表单 -->
+                      <form method="POST" action="{% url 'update_email_request' %}">
+                        {% csrf_token %}
                         <div class="row mb-2">
                           <div class="profile-title">
-                            <div class="d-flex">        <img class="img-70 rounded-circle" alt="" src="{% static 'images/user/7.jpg' %}">
+                            <div class="d-flex">
+                              <img class="img-70 rounded-circle" alt="" src="{% static 'images/user/7.jpg' %}">
                               <div class="flex-grow-1">
                                 {% if user.is_authenticated %}
                                   {{ user.username }}
@@ -92,24 +172,49 @@
                             </div>
                           </div>
                         </div>
-                        
-                        <div class="mb-3">
-                          <label class="form-label">Email-Address</label>
-                          <input class="form-control" placeholder="your-email@domain.com">
-                        </div>
-                        <div class="mb-3">
-                          <label class="form-label">Change Password</label>
-                          <input class="form-control" type="password" value="password">
-                        </div>
-                        <div class="mb-3">
-                          <label class="form-label">Repeat New Password</label>
-                          <input class="form-control" type="password" value="password">
-                        </div>
-                        <div class="form-footer">
-                          <button class="btn btn-primary btn-block">Save</button>
+                    
+                        <!-- 修改邮箱 -->
+                        <div class="profile-container">
+                          <div class="mb-3">
+                            <label class="form-label">Current Email</label>
+                            <input class="form-control" type="email" value="{{ user.username }}" disabled>
+                          </div>
+                          
+                          <div class="mb-3 row align-items-center">
+                            <!-- 输入框 -->
+                            <div class="col-md-9">
+                              <label class="form-label">New Email Address</label>
+                              <input class="form-control" type="email" name="new_email" placeholder="Enter new email" required>
+                            </div>
+                            <!-- 按钮 -->
+                            <div class="col-md-3 mt-4">
+                              <button class="btn btn-primary w-100" type="submit" name="update-email">Verify</button>
+                            </div>
+                          </div>
                         </div>
                       </form>
-                    </div>
+                      <hr> <!-- 分割线，区分两个表单 -->                
+                      <!-- 修改密码表单 -->
+                      <form method="POST" action="{% url 'change_password' %}">
+                        {% csrf_token %}
+                        <div class="profile-container">
+                          <div class="mb-3">
+                            <label class="form-label">New Password</label>
+                            <input class="form-control" type="password" name="password" placeholder="Enter new password" required>
+                          </div>
+                    
+                          <div class="mb-3">
+                            <label class="form-label">Repeat New Password</label>
+                            <input class="form-control" type="password" name="repeat_password" placeholder="Repeat new password" required>
+                          </div>
+                    
+                          <!-- 提交按钮 -->
+                          <div class="form-footer">
+                            <button class="btn btn-primary" type="submit">Save</button>
+                          </div>
+                        </div>
+                      </form>
+                    </div>                   
                   </div>
                 </div>
                 <!-- profile start-->
@@ -171,67 +276,6 @@
                   </form>
                 </div>
                 <!-- profile End -->
-
-                <!-- ... start --> 
-                <div class="col-md-12">
-                  <div class="card">
-                    <div class="card-header pb-0">
-                      <h4 class="card-title mb-0">Add projects And Upload</h4>
-                      <div class="card-options"><a class="card-options-collapse" href="#" data-bs-toggle="card-collapse"><i class="fe fe-chevron-up"></i></a><a class="card-options-remove" href="#" data-bs-toggle="card-remove"><i class="fe fe-x"></i></a></div>
-                    </div>
-                    <div class="table-responsive custom-scrollbar theme-scrollbar add-project">
-                      <table class="table card-table table-vcenter text-nowrap">
-                        <thead>
-                          <tr>
-                            <th>Project Name</th>
-                            <th>Date</th>
-                            <th>Status</th>
-                            <th>Price</th>
-                            <th></th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          <tr>
-                            <td><a class="text-inherit" href="#">Untrammelled prevents </a></td>
-                            <td>28 May 2024</td>
-                            <td><span class="status-icon bg-success"></span> Completed</td>
-                            <td>$56,908</td>
-                            <td class="text-end"><a class="icon" href="javascript:void(0)"></a><a class="btn btn-primary btn-sm" href="javascript:void(0)"><i class="fa fa-pencil"></i> Edit</a><a class="icon" href="javascript:void(0)"></a><a class="btn btn-transparent btn-sm" href="javascript:void(0)"><i class="fa fa-link"></i> Update</a><a class="icon" href="javascript:void(0)"></a><a class="btn btn-danger btn-sm" href="javascript:void(0)"><i class="fa fa-trash"></i> Delete</a></td>
-                          </tr>
-                          <tr>
-                            <td><a class="text-inherit" href="#">Untrammelled prevents</a></td>
-                            <td>12 June 2024</td>
-                            <td><span class="status-icon bg-danger"></span> On going</td>
-                            <td>$45,087</td>
-                            <td class="text-end"><a class="icon" href="javascript:void(0)"></a><a class="btn btn-primary btn-sm" href="javascript:void(0)"><i class="fa fa-pencil"></i> Edit</a><a class="icon" href="javascript:void(0)"></a><a class="btn btn-transparent btn-sm" href="javascript:void(0)"><i class="fa fa-link"></i> Update</a><a class="icon" href="javascript:void(0)"></a><a class="btn btn-danger btn-sm" href="javascript:void(0)"><i class="fa fa-trash"></i> Delete</a></td>
-                          </tr>
-                          <tr>
-                            <td><a class="text-inherit" href="#">Untrammelled prevents</a></td>
-                            <td>12 July 2024</td>
-                            <td><span class="status-icon bg-warning"></span> Pending</td>
-                            <td>$60,123</td>
-                            <td class="text-end"><a class="icon" href="javascript:void(0)"></a><a class="btn btn-primary btn-sm" href="javascript:void(0)"><i class="fa fa-pencil"></i> Edit</a><a class="icon" href="javascript:void(0)"></a><a class="btn btn-transparent btn-sm" href="javascript:void(0)"><i class="fa fa-link"></i> Update</a><a class="icon" href="javascript:void(0)"></a><a class="btn btn-danger btn-sm" href="javascript:void(0)"><i class="fa fa-trash"></i> Delete</a></td>
-                          </tr>
-                          <tr>
-                            <td><a class="text-inherit" href="#">Untrammelled prevents</a></td>
-                            <td>14 June 2024</td>
-                            <td><span class="status-icon bg-warning"></span> Pending</td>
-                            <td>$70,435</td>
-                            <td class="text-end"><a class="icon" href="javascript:void(0)"></a><a class="btn btn-primary btn-sm" href="javascript:void(0)"><i class="fa fa-pencil"></i> Edit</a><a class="icon" href="javascript:void(0)"></a><a class="btn btn-transparent btn-sm" href="javascript:void(0)"><i class="fa fa-link"></i> Update</a><a class="icon" href="javascript:void(0)"></a><a class="btn btn-danger btn-sm" href="javascript:void(0)"><i class="fa fa-trash"></i> Delete</a></td>
-                          </tr>
-                          <tr>
-                            <td><a class="text-inherit" href="#">Untrammelled prevents</a></td>
-                            <td>25 June 2024</td>
-                            <td><span class="status-icon bg-success"></span> Completed</td>
-                            <td>$15,987</td>
-                            <td class="text-end"><a class="icon" href="javascript:void(0)"></a><a class="btn btn-primary btn-sm" href="javascript:void(0)"><i class="fa fa-pencil"></i> Edit</a><a class="icon" href="javascript:void(0)"></a><a class="btn btn-transparent btn-sm" href="javascript:void(0)"><i class="fa fa-link"></i> Update</a><a class="icon" href="javascript:void(0)"></a><a class="btn btn-danger btn-sm" href="javascript:void(0)"><i class="fa fa-trash"></i> Delete</a></td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                </div>
-                <!-- ... End -->
               </div>
             </div>
           </div>
@@ -241,6 +285,21 @@
         {% include 'footer-light.html' %}
       </div>
     </div>
+    <script>
+      function submitPasswordForm() {
+        const newPassword = document.getElementById("new_password").value;
+        const repeatPassword = document.getElementById("repeat_password").value;
+        const errorDiv = document.getElementById("password-error");
+
+        if (newPassword !== repeatPassword) {
+          errorDiv.style.display = "block";
+        } else {
+          errorDiv.style.display = "none";
+          document.getElementById("change-password-form").submit();
+        }
+      }
+
+    </script>
     <!-- latest jquery-->
     <script src="{% static 'js/jquery.min.js' %}"></script>
     <!-- Bootstrap js-->
