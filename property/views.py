@@ -126,7 +126,7 @@ def datatable(request):
 def report(request, property_id):
     # 获取指定 property_id 的 Property 对象
     try:
-        property = Property.objects.select_related().get(id=property_id)
+        property = Property.objects.select_related('auction').get(id=property_id)  # 关联 auction 数据
     except Property.DoesNotExist:
         raise Http404("Property not found")
     
@@ -168,22 +168,21 @@ def report(request, property_id):
     # 获取与 Property 关联的 Auction 数据
     auction_data = [
         {
-            "auction_type": auction.auction_type,
-            "face_value": auction.face_value,
-            "is_online": auction.is_online,
-            "deposit_deadline": auction.deposit_deadline,
-            "batch_number": auction.batch_number,
-            "sort_no": auction.sort_no,
-            "authority_name": auction.authority_name,
-            "auction_start": auction.auction_start,
-            "auction_end": auction.auction_end,
-            "redemption_period": auction.redemption_period,
-            "foreclosure_date": auction.foreclosure_date,
-            "bankruptcy_flag": auction.bankruptcy_flag,
-            "auction_tax_year": auction.auction_tax_year,
+            "auction_type": property.auction.auction_type,
+            "face_value": property.face_value,
+            "is_online": property.auction.is_online,
+            "deposit_deadline": property.auction.deposit_deadline,
+            "batch_number": property.batch_number,
+            "sort_no": property.sort_no,
+            "authority_name": property.auction.authority_name,
+            "auction_start": property.auction.auction_start,
+            "auction_end": property.auction.auction_end,
+            "redemption_period": property.auction.redemption_period,
+            "foreclosure_date": property.auction.foreclosure_date,
+            "bankruptcy_flag": property.bankruptcy_flag,
+            "auction_tax_year": property.auction.auction_tax_year,
         }
-        for auction in property.auctions.all()
-    ]
+    ] if property.auction else []
 
     # 添加 Auction 数据
     data['auctions'] = auction_data
