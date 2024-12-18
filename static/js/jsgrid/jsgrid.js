@@ -289,8 +289,8 @@
                                 .val(value || "")
                                 .on("input", function() {
                                     const currentLength = $(this).val().length;
-                                    if (currentLength > 50) {
-                                        // 如果字符超过50，显示提示信息
+                                    if (currentLength > 1000) {
+                                        // 如果字符超过1000，显示提示信息
                                         $("#charLimitWarning").show();
                                     } else {
                                         $("#charLimitWarning").hide();
@@ -303,8 +303,8 @@
                                 .on("click", function () {
                                     const newValue = $textarea.val();
             
-                                    if (newValue.length > 50) {
-                                        alert("Note cannot exceed 50 characters.");
+                                    if (newValue.length > 1000) {
+                                        alert("Note cannot exceed 1000 characters.");
                                         return;
                                     }
             
@@ -347,7 +347,7 @@
                                     fontSize: "12px",
                                     display: "none" // 默认隐藏
                                 })
-                                .text("Note cannot exceed 50 characters.");
+                                .text("Note cannot exceed 1000 characters.");
             
                             $popup.append($textarea, $charLimitWarning, $("<div>").append($saveButton, $cancelButton));
                             $("body").append($popup); // 添加到页面
