@@ -31,4 +31,7 @@ urlpatterns = [
     path('save_user_input/',holdings_views.save_user_input, name='save_user_input'),
     path('profile/',views.profile,name='profile'),
     path('profile/update/', views.profile_update, name='profile_update'),
+    path('verify-new-email/<uid>/<token>/', views.verify_new_email, name="verify_new_email"),
+    path('update-email/', views.update_email_request, name="update_email_request"),
+    path('change_password/', views.change_password, name="change_password"),
 ]

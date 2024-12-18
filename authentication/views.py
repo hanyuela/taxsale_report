@@ -22,7 +22,9 @@ from django.views.decorators.csrf import csrf_exempt
 import json
 from django.db import transaction
 from django.shortcuts import render, get_object_or_404
-
+from django.contrib.sites.shortcuts import get_current_site
+from django.conf import settings
+from django.contrib.auth import update_session_auth_hash
 # 注册页面
 def register(request):
     if request.method == 'POST':
@@ -334,3 +336,105 @@ def profile_update(request):
 
     # 如果是 GET 请求，则渲染当前用户的资料
     return render(request, 'profile_update.html', {'user_profile': user_profile})
+
+
+@login_required
+def update_email_request(request):
+    if request.method == "POST" and 'update-email' in request.POST:
+        new_email = request.POST.get("new_email")
+        user = request.user
+
+        # 1. 验证邮箱是否已存在（检查 username 字段）
+        if User.objects.filter(username=new_email).exists():
+            messages.error(request, "The new email you entered is already registered.")
+            return redirect("profile")
+
+        # 2. 生成验证链接
+        token = default_token_generator.make_token(user)
+        uid = urlsafe_base64_encode(str(user.pk).encode())
+        verification_link = (
+            f"{request.scheme}://{request.get_host()}/verify-new-email/{uid}/{token}/?email={new_email}"
+        )
+
+        # 3. 构建邮件内容
+        subject = "Soyhome.app - New Email Verification"
+        body = (
+            f"Hello {user.username},\n\n"
+            f"Please click the link below to verify your new email address:\n\n"
+            f"{verification_link}\n\n"
+            "Best regards,\nSoyhome.app Team"
+        )
+        sender_email = settings.EMAIL_HOST_USER
+        sender_name = "Soyhome.app"
+
+        # 4. 发送验证邮件
+        try:
+            msg = MIMEText(body, 'plain', 'utf-8')
+            msg['Subject'] = Header(subject, 'utf-8')
+            msg['From'] = formataddr((str(Header(sender_name, 'utf-8')), sender_email))
+            msg['To'] = new_email
+
+            connection = smtplib.SMTP_SSL(settings.EMAIL_HOST, settings.EMAIL_PORT)
+            connection.login(sender_email, settings.EMAIL_HOST_PASSWORD)
+            connection.sendmail(sender_email, [new_email], msg.as_string())
+            connection.quit()
+
+            messages.success(request, "A verification email has been sent to your new email address.")
+        except Exception as e:
+            messages.error(request, f"An error occurred while sending the email: {e}")
+
+        return redirect("profile")
+
+    return render(request, "profile.html")
+
+
+def verify_new_email(request, uid, token):
+    new_email = request.GET.get("email")
+    try:
+        # 1. 解码用户 ID 并获取用户
+        user_id = urlsafe_base64_decode(uid).decode()
+        user = User.objects.get(pk=user_id)
+
+        # 2. 验证 Token 是否有效
+        if default_token_generator.check_token(user, token):
+            if not request.user.is_authenticated:
+                # 如果未登录，自动登录用户
+                login(request, user)
+
+            # 3. 更新 username 而不是 email
+            user.username = new_email
+            user.save()
+
+            messages.success(request, "Your email has been successfully verified and updated.")
+            return redirect("profile")
+        else:
+            messages.error(request, "Invalid or expired verification link.")
+            return redirect("login")
+
+    except (User.DoesNotExist, ValueError, TypeError):
+        messages.error(request, "Invalid verification link.")
+        return redirect("login")
+    
+
+@login_required
+def change_password(request):
+    if request.method == "POST":
+        password = request.POST.get("password")
+        repeat_password = request.POST.get("repeat_password")
+        user = request.user
+
+        # 验证两次密码是否一致
+        if password != repeat_password:
+            messages.error(request, "Passwords do not match.")
+            return redirect("profile")
+
+        # 更新密码
+        user.set_password(password)
+        user.save()
+
+        # 保持用户登录状态
+        update_session_auth_hash(request, user)
+        messages.success(request, "Your password has been successfully updated.")
+        return redirect("profile")
+
+    return redirect("profile")
