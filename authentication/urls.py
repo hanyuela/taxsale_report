@@ -34,4 +34,7 @@ urlpatterns = [
     path('verify-new-email/<uid>/<token>/', views.verify_new_email, name="verify_new_email"),
     path('update-email/', views.update_email_request, name="update_email_request"),
     path('change_password/', views.change_password, name="change_password"),
+    path('add-task/', dashboard_views.add_task, name='add_task'),
+    path('update-task-status/<int:task_id>/', dashboard_views.update_task_status, name='update_task_status'),
+    path('delete-task/<int:task_id>/', dashboard_views.delete_task, name='delete_task'),
 ]
