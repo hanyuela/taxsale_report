@@ -304,7 +304,7 @@
                                     const newValue = $textarea.val();
             
                                     if (newValue.length > 1000) {
-                                        alert("Note cannot exceed 1000 characters.");
+                                        // alert("Note cannot exceed 1000 characters.");
                                         return;
                                     }
             
