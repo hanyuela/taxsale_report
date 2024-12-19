@@ -21,7 +21,8 @@ class Auction(models.Model):
     foreclosure_date = models.DateField(null=True, blank=True)  # Date field for the foreclosure date
     authority_name = models.CharField(max_length=255)  # Name of the authority hosting the tax sale auction, e.g., County or City.
     def __str__(self):
-        return f"Auction {self.batch_number} - {self.sort_no}"
+        return f"Auction {self.authority_name} ({self.auction_tax_year})"
+
 
 class Property(models.Model):
     auction = models.ForeignKey(Auction, on_delete=models.CASCADE, related_name='properties')  # Many-to-one relationship with Auction
@@ -56,7 +57,7 @@ class Property(models.Model):
     environmental_hazard_status = models.CharField(max_length=100, blank=True, null=True)
     flood_status = models.CharField(max_length=100, blank=True, null=True)
     flood_risk = models.CharField(max_length=100, blank=True, null=True)
-    latest_sale_date = models.DateField()
+    latest_sale_date = models.DateField(null=True, blank=True)
     latest_sale_price = models.DecimalField(max_digits=12, decimal_places=2)
     foreclose_score = models.IntegerField(
         default=0,
