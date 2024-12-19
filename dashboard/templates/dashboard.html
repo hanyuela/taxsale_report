@@ -40,6 +40,11 @@
     <!-- Responsive css-->
     <link rel="stylesheet" type="text/css" href="{% static 'css/responsive.css' %}">
   </head>
+  <style>
+    .task-label {
+        padding-left: 20px;
+    }
+  </style>
   <body>
     <!-- tap on top starts-->
     <div class="tap-top"><i data-feather="chevrons-up"></i></div>
@@ -81,29 +86,43 @@
           <div class="container-fluid email-wrap bookmark-wrap todo-wrap">
             <div class="row">
               <div class="col-xxl-3 col-xl-4 box-col-4e">
-                <div class="email-sidebar md-sidebar"><a class="btn btn-primary email-aside-toggle md-sidebar-toggle">To Do filter</a>
+                <div class="email-sidebar md-sidebar">
+                  <a class="btn btn-primary email-aside-toggle md-sidebar-toggle">To Do filter</a>
                   <div class="email-left-aside md-sidebar-aside">
-                    <div class="card"> 
-                      <div class="card-body"> 
+                    <div class="card">
+                      <div class="card-body">
                         <div class="email-app-sidebar left-bookmark custom-scrollbar">
-                          <div class="d-flex align-items-center">
-                            <div class="media-size-email">
-                              <img class="me-3 rounded-circle" src="{% static 'images/user/user.png' %}" alt="">
-                          </div>
-                            <div class="flex-grow-1"> 
-                              <h3>Mark Jecno</h3>
-                              <p>Markjecno@gmail.com</p>
-                            </div>
-                          </div>
+                          <!-- To-Do Filter部分 -->
                           <ul class="nav main-menu custom-scrollbar">
                             <li class="nav-item">
-                              <button class="btn-primary badge-light d-block btn-mail w-100 txt-light"><i class="me-2" data-feather="check-circle"> </i>To Do List</button>
+                              <button class="btn-primary badge-light d-block btn-mail w-100 txt-light" id="all-task-btn">
+                                <i class="me-2" data-feather="check-circle"> </i>All Task
+                              </button>
                             </li>
-                            <li class="nav-item"><a href="javascript:void(0)"><span class="iconbg badge-light-primary"><i data-feather="file-plus"></i></span><span class="title ms-2">All Task</span></a></li>
-                            <li class="nav-item"><a href="javascript:void(0)"><span class="iconbg badge-light-success"><i data-feather="check-circle"></i></span><span class="title ms-2">Completed</span><span class="badge rounded-pill badge-success">3</span></a></li>
-                            <li class="nav-item"><a href="javascript:void(0)"><span class="iconbg badge-light-danger"><i data-feather="cast"></i></span><span class="title ms-2">Pending</span><span class="badge rounded-pill badge-danger">2</span></a></li>
-                            <li class="nav-item"><a href="javascript:void(0)"><span class="iconbg badge-light-info"><i data-feather="activity"></i></span><span class="title ms-2">In Process</span><span class="badge rounded-pill badge-primary">2</span></a></li>
-                            <li class="nav-item"><a href="javascript:void(0)"><span class="iconbg badge-light-danger"><i data-feather="trash"></i></span><span class="title ms-2">Trash</span></a></li>
+                            <li class="nav-item">
+                              <a href="javascript:void(0)" id="in-progress-btn">
+                                <span class="iconbg badge-light-primary"><i data-feather="file-plus"></i></span>
+                                <span class="title ms-2">In Progress</span>
+                              </a>
+                            </li>
+                            <li class="nav-item">
+                              <a href="javascript:void(0)" id="pending-btn">
+                                <span class="iconbg badge-light-success"><i data-feather="check-circle"></i></span>
+                                <span class="title ms-2">Pending</span>
+                              </a>
+                            </li>
+                            <li class="nav-item">
+                              <a href="javascript:void(0)" id="done-btn">
+                                <span class="iconbg badge-light-danger"><i data-feather="cast"></i></span>
+                                <span class="title ms-2">Done</span>
+                              </a>
+                            </li>
+                            <li class="nav-item">
+                              <a href="javascript:void(0)" id="archived-btn">
+                                <span class="iconbg badge-light-info"><i data-feather="activity"></i></span>
+                                <span class="title ms-2">Archived</span>
+                              </a>
+                            </li>
                           </ul>
                         </div>
                       </div>
@@ -113,11 +132,37 @@
               </div>
               <div class="col-xxl-9 col-xl-8 box-col-8">
                 <div class="card">
-                  <div class="card-header b-bottom"> 
-                    <div class="todo-list-header"> 
+                  <div class="card-header b-bottom">
+                    <div class="todo-list-header">
                       <div class="new-task-wrapper input-group">
-                        <input class="form-control m-0" id="new-task" placeholder="Enter new task here. . ."><span class="btn btn-primary add-new-task-btn" id="add-task">Add Task</span>
+                        <input class="form-control m-0" id="new-task" placeholder="Enter new task here...">
+                        <button class="btn btn-primary add-new-task-btn" id="add-task-btn">Add Task</button>
                       </div>
+                    </div>
+                  </div>
+                  <!-- Modal -->
+                  <div class="modal" id="addTaskModal" style="display: none;">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Add Task</h5>
+                                <button type="button" class="btn-close" id="close-modal-btn"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="mb-3">
+                                    <label for="taskContent" class="form-label">Task Content</label>
+                                    <input type="text" class="form-control" id="taskContent" placeholder="Enter task content">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="taskDeadline" class="form-label">Deadline</label>
+                                    <input type="date" class="form-control" id="taskDeadline">
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" id="close-modal-btn">Close</button>
+                                <button type="button" class="btn btn-primary" id="save-task-btn">Save Task</button>
+                            </div>
+                        </div>
                     </div>
                   </div>
                   <div class="card-body">
@@ -125,64 +170,33 @@
                       <div class="todo-list-wrapper custom-scrollbar">
                         <div class="todo-list-container">
                           <div class="todo-list-body">
+                            <!-- 任务列表 -->
                             <ul id="todo-list">
-                              <li class="task">
-                                <div class="task-container">
-                                  <h4 class="task-label">Check validation involves making sure all your tags are properly closed and nested.</h4>
-                                  <div class="d-flex align-items-center gap-3"><span class="badge badge-light-primary done-badge">In Progress</span>
-                                    <h5 class="assign-name m-0">10 Nov</h5><span class="task-action-btn"><span class="action-box large delete-btn" title="Delete Task"><i class="icon"><i class="icon-trash"></i></i></span></span>
+                              {% for task in tasks %}
+                                <li class="task {% if task.label == 'Archived' and not show_archived %}d-none{% endif %}">
+                                  <div class="task-container">
+                                    <h4 class="task-label">{{ task.content }}</h4>
+                                    <div class="d-flex align-items-center gap-3">
+                                      <!-- 任务标签部分 -->
+                                      <span class="badge badge-light-primary">
+                                        <select class="task-status" onchange="updateTaskStatus({{ task.id }}, this.value)">
+                                          <option value="In Progress" {% if task.label == 'In Progress' %}selected{% endif %}>In Progress</option>
+                                          <option value="Pending" {% if task.label == 'Pending' %}selected{% endif %}>Pending</option>
+                                          <option value="Done" {% if task.label == 'Done' %}selected{% endif %}>Done</option>
+                                          <option value="Archived" {% if task.label == 'Archived' %}selected{% endif %}>Archived</option>
+                                        </select>
+                                      </span>
+                                      <h5 class="assign-name m-0">{{ task.deadline }}</h5>
+                                      <span class="task-action-btn">
+                                        <span class="action-box large delete-btn" title="Delete Task" onclick="deleteTask({{ task.id }})">
+                                          <i class="icon"><i class="icon-trash"></i></i>
+                                        </span>
+                                      </span>
+                                    </div>
                                   </div>
-                                </div>
-                              </li>
-                              <li class="task">
-                                <div class="task-container">
-                                  <h4 class="task-label">Test the outgoing links from all the pages to the specific domain under test.</h4>
-                                  <div class="d-flex align-items-center gap-3"><span class="badge badge-light-danger">Pending</span>
-                                    <h5 class="assign-name m-0">04 Aug</h5><span class="task-action-btn"><span class="action-box large delete-btn" title="Delete Task"><i class="icon"><i class="icon-trash"></i></i></span></span>
-                                  </div>
-                                </div>
-                              </li>
-                              <li class="completed task">
-                                <div class="task-container">
-                                  <h4 class="task-label">Test links are used to send emails to admin or other users from web pages.</h4>
-                                  <div class="d-flex align-items-center gap-3"><span class="badge badge-light-success">Done</span>
-                                    <h5 class="assign-name m-0">25 Feb</h5><span class="task-action-btn"><span class="action-box large delete-btn" title="Delete Task"><i class="icon"><i class="icon-trash"></i></i></span></span>
-                                  </div>
-                                </div>
-                              </li>
-                              <li class="task">
-                                <div class="task-container">
-                                  <h4 class="task-label">Options to create forms, if any, form deletes a view or modify the forms.</h4>
-                                  <div class="d-flex align-items-center gap-3"><span class="badge badge-light-primary">In Progress</span>
-                                    <h5 class="assign-name m-0">15 Dec</h5><span class="task-action-btn"><span class="action-box large delete-btn" title="Delete Task"><i class="icon"><i class="icon-trash"></i></i></span></span>
-                                  </div>
-                                </div>
-                              </li>
-                              <li class="task">
-                                <div class="task-container">
-                                  <h4 class="task-label">Wrong inputs in the forms to the fields in the forms.</h4>
-                                  <div class="d-flex align-items-center gap-3"><span class="badge badge-light-danger">Pending</span>
-                                    <h5 class="assign-name m-0">11 Nov</h5><span class="task-action-btn"><span class="action-box large delete-btn" title="Delete Task"><i class="icon"><i class="icon-trash"></i></i></span></span>
-                                  </div>
-                                </div>
-                              </li>
-                              <li class="task completed">
-                                <div class="task-container">
-                                  <h4 class="task-label">Check if the instructions provided are perfect to satisfy its purpose.</h4>
-                                  <div class="d-flex align-items-center gap-3"><span class="badge badge-light-danger">Pending</span>
-                                    <h5 class="assign-name m-0">04 Sept</h5><span class="task-action-btn"><span class="action-box large delete-btn" title="Delete Task"><i class="icon"><i class="icon-trash"></i></i></span></span>
-                                  </div>
-                                </div>
-                              </li>
-                              <li class="task">
-                                <div class="task-container">
-                                  <h4 class="task-label">Application server and Database server interface.</h4>
-                                  <div class="d-flex align-items-center gap-3"><span class="badge badge-light-success">Done</span>
-                                    <h5 class="assign-name m-0">08 July</h5><span class="task-action-btn"><span class="action-box large delete-btn" title="Delete Task"><i class="icon"><i class="icon-trash"></i></i></span></span>
-                                  </div>
-                                </div>
-                              </li>
-                            </ul>
+                                </li>
+                              {% endfor %}
+                            </ul>                            
                           </div>
                         </div>
                       </div>
@@ -190,56 +204,232 @@
                         <p><span class="task"></span><span class="notification-text"></span></p>
                       </div>
                     </div>
-                    <!-- HTML Template for tasks-->
-                    <script id="task-template" type="tect/template">
-                      <li class="task">
-                        <div class="task-container">
-                          <h4 class="task-label"></h4>
-                          <div class="d-flex align-items-center gap-3">
-                            <span class="badge badge-light-danger">Pending</span>
-                            <h5 class="assign-name m-0">16 Jan</h5>
-                            <span class="task-action-btn">
-                              <span class="action-box large delete-btn" title="Delete Task">
-                                <i class="icon"><i class="icon-trash"></i></i>
-                              </span>
-                            </span>
-                          </div>
-                        </div>
-                      </li>
-                    </script>
                   </div>
                 </div>
               </div>
             </div>
           </div>
           <!-- Container-fluid Ends-->
-          <!-- Container-fluid ends                    -->
-        </div>
-        <!-- footer start-->
-        {% include 'footer-light.html' %}
-    <!-- latest jquery-->
-    <script src="{% static 'js/jquery.min.js' %}"></script>
-    <!-- Bootstrap js-->
-    <script src="{% static 'js/bootstrap/bootstrap.bundle.min.js' %}"></script>
-    <!-- feather icon js-->
-    <script src="{% static 'js/icons/feather-icon/feather.min.js' %}"></script>
-    <script src="{% static 'js/icons/feather-icon/feather-icon.js' %}"></script>
-    <!-- scrollbar js-->
-    <script src="{% static 'js/scrollbar/simplebar.js' %}"></script>
-    <script src="{% static 'js/scrollbar/custom.js' %}"></script>
-    <!-- Sidebar jquery-->
-    <script src="{% static 'js/config.js' %}"></script>
-    <!-- Plugins JS start-->
-    <script src="{% static 'js/sidebar-menu.js' %}"></script>
-    <script src="{% static 'js/sidebar-pin.js' %}"></script>
-    <script src="{% static 'js/slick/slick.min.js' %}"></script>
-    <script src="{% static 'js/slick/slick.js' %}"></script>
-    <script src="{% static 'js/header-slick.js' %}"></script>
-    <script src="{% static 'js/todo/todo.js' %}"></script>
-    <!-- Plugins JS Ends-->
-    <!-- Theme js-->
-    <script src="{% static 'js/script.js' %}"></script>
-    <script src="{% static 'js/theme-customizer/customizer.js' %}"></script>
-    <!-- Plugin used-->
+          </div>
+          <!-- footer start-->
+          {% include 'footer-light.html' %}
+
+          <!-- CSRF Token -->
+          {% csrf_token %}
+          <script>
+            // Open modal
+            document.getElementById('add-task-btn').addEventListener('click', function() {
+                document.getElementById('addTaskModal').style.display = 'block';
+            });
+        
+            // Close modal
+            document.getElementById('close-modal-btn').addEventListener('click', function() {
+                document.getElementById('addTaskModal').style.display = 'none';
+            });
+        
+            // Save task and add to the list
+            document.getElementById('save-task-btn').addEventListener('click', function() {
+                const taskContent = document.getElementById('taskContent').value;
+                const taskDeadline = document.getElementById('taskDeadline').value;
+        
+                if (!taskContent || !taskDeadline) {
+                    alert('Please enter both task content and deadline!');
+                    return;
+                }
+        
+                const formData = new FormData();
+                formData.append('content', taskContent);
+                formData.append('deadline', taskDeadline);
+        
+                fetch('/add-task/', {
+                    method: 'POST',
+                    body: formData,
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        const newTaskHTML = `
+                            <li class="task">
+                                <div class="task-container">
+                                    <h4 class="task-label">${data.task.content}</h4>
+                                    <div class="d-flex align-items-center gap-3">
+                                        <span class="badge badge-light-primary">${data.task.label}</span>
+                                        <h5 class="assign-name m-0">${data.task.deadline}</h5>
+                                    </div>
+                                </div>
+                            </li>
+                        `;
+                        document.getElementById('todo-list').insertAdjacentHTML('beforeend', newTaskHTML);
+                        document.getElementById('addTaskModal').style.display = 'none';
+                    } else {
+                        alert('There was an error saving the task.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('There was an error saving the task.');
+                });
+            });
+          </script>
+          <script>
+            // 默认显示所有任务，包括 Archived
+            let showArchived = false;  // 默认显示所有任务（包括Archived）
+            let showInProgress = true;
+            let showPending = true;
+            let showDone = true;
+        
+            // 点击 All Task 时，显示所有任务（包括 Archived）
+            document.getElementById('all-task-btn').addEventListener('click', function() {
+                showArchived = true;
+                showInProgress = true;
+                showPending = true;
+                showDone = true;
+                filterTasks();
+            });
+        
+            // 点击 In Progress 时，显示 In Progress 任务
+            document.getElementById('in-progress-btn').addEventListener('click', function() {
+                showInProgress = true;
+                showArchived = false;
+                showPending = false;
+                showDone = false;
+                filterTasks();
+            });
+        
+            // 点击 Pending 时，显示 Pending 任务
+            document.getElementById('pending-btn').addEventListener('click', function() {
+                showPending = true;
+                showArchived = false;
+                showInProgress = false;
+                showDone = false;
+                filterTasks();
+            });
+        
+            // 点击 Done 时，显示 Done 任务
+            document.getElementById('done-btn').addEventListener('click', function() {
+                showDone = true;
+                showArchived = false;
+                showInProgress = false;
+                showPending = false;
+                filterTasks();
+            });
+        
+            // 点击 Archived 时，显示 Archived 任务
+            document.getElementById('archived-btn').addEventListener('click', function() {
+                showArchived = true;
+                showInProgress = false;
+                showPending = false;
+                showDone = false;
+                filterTasks();
+            });
+        
+            // 过滤任务，显示或隐藏根据状态选择的任务
+            function filterTasks() {
+                const tasks = document.querySelectorAll('#todo-list .task');
+                tasks.forEach(function(task) {
+                    const taskStatus = task.querySelector('.task-status').value;
+                    if (taskStatus === 'Archived') {
+                        if (showArchived) {
+                            task.classList.remove('d-none');  // 显示 Archived 任务
+                        } else {
+                            task.classList.add('d-none');  // 隐藏 Archived 任务
+                        }
+                    } else if (taskStatus === 'In Progress' && showInProgress) {
+                        task.classList.remove('d-none'); // 显示 In Progress 任务
+                    } else if (taskStatus === 'Pending' && showPending) {
+                        task.classList.remove('d-none'); // 显示 Pending 任务
+                    } else if (taskStatus === 'Done' && showDone) {
+                        task.classList.remove('d-none'); // 显示 Done 任务
+                    } else {
+                        task.classList.add('d-none');  // 隐藏其他任务
+                    }
+                });
+            }
+        
+            // 初始化时，根据按钮点击的状态，显示或者隐藏任务
+            filterTasks();
+          </script>
+          <script>
+            // 更新任务状态的函数
+            function updateTaskStatus(taskId, status) {
+              console.log("Selected status:", status);  // 打印选中的标签，检查是否正确传递
+
+              fetch(`/update-task-status/${taskId}/`, {
+                  method: 'POST',
+                  headers: {
+                      'Content-Type': 'application/json',
+                      'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                  },
+                  body: JSON.stringify({ label: status })  // 传递标签
+              })
+              .then(response => response.json())
+              .then(data => {
+                  if (data.status === 'success') {
+                      // 在这里可以更新前端任务状态的显示
+                      console.log('Task status updated:', data);
+                  } else {
+                      console.error('Failed to update task label:', data);
+                  }
+              })
+              .catch(error => {
+                  console.error('Error:', error);
+              });
+            }
+          </script>
+          <script>
+            // 删除任务
+            function deleteTask(taskId) {
+              if (confirm('Are you sure you want to delete this task?')) {
+                fetch(`/delete-task/${taskId}/`, {
+                  method: 'DELETE',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                  }
+                })
+                .then(response => response.json())
+                .then(data => {
+                  if (data.status === 'success') {
+                    // 删除任务后，从 DOM 中移除对应任务
+                    const taskElement = document.querySelector(`#todo-list .task[data-id="${taskId}"]`);
+                    if (taskElement) {
+                      taskElement.remove();
+                    }
+                  } else {
+                    alert('Error: Unable to delete task.');
+                  }
+                })
+                .catch(error => {
+                  console.error('Error:', error);
+                  alert('Error: Unable to delete task.');
+                });
+              }
+            }
+          </script>
+          <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+          <!-- latest jquery-->
+          <script src="{% static 'js/jquery.min.js' %}"></script>
+          <!-- Bootstrap js-->
+          <script src="{% static 'js/bootstrap/bootstrap.bundle.min.js' %}"></script>
+          <!-- feather icon js-->
+          <script src="{% static 'js/icons/feather-icon/feather.min.js' %}"></script>
+          <script src="{% static 'js/icons/feather-icon/feather-icon.js' %}"></script>
+          <!-- scrollbar js-->
+          <script src="{% static 'js/scrollbar/simplebar.js' %}"></script>
+          <script src="{% static 'js/scrollbar/custom.js' %}"></script>
+          <!-- Sidebar jquery-->
+          <script src="{% static 'js/config.js' %}"></script>
+          <!-- Plugins JS start-->
+          <script src="{% static 'js/sidebar-menu.js' %}"></script>
+          <script src="{% static 'js/sidebar-pin.js' %}"></script>
+          <script src="{% static 'js/slick/slick.min.js' %}"></script>
+          <script src="{% static 'js/slick/slick.js' %}"></script>
+          <script src="{% static 'js/header-slick.js' %}"></script>
+          <script src="{% static 'js/todo/todo.js' %}"></script>
+          <!-- Plugins JS Ends-->
+          <!-- Theme js-->
+          <script src="{% static 'js/script.js' %}"></script>
+          <script src="{% static 'js/theme-customizer/customizer.js' %}"></script>
+          <!-- Plugin used-->
   </body>
 </html>
