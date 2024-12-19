@@ -42,8 +42,8 @@
                 </li>
                 <li class="onhover-dropdown">
                     <div class="notification-box">
-                        <svg>
-                            <use href="{% static 'svg/icon-sprite.svg#Bell' %}"></use>
+                        <svg class="icon">
+                            <use id="icon-bell" xlink:href="{% static 'svg/icon-sprite.svg#Bell' %}"></use>
                         </svg>
                     </div>
                     <div class="onhover-show-div notification-dropdown">
@@ -98,3 +98,13 @@
     </div>
 </div>
 <!-- Page Header Ends-->
+<script>
+    window.onload = function() {
+        // 获取到 <use> 元素
+        var iconUse = document.getElementById('icon-bell');
+        // 获取 href 属性
+        var href = iconUse.getAttribute('xlink:href');
+        // 修正 URL 中的 %23 为 # 符号
+        iconUse.setAttribute('xlink:href', href.replace('%23', '#'));
+    };
+</script>
