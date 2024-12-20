@@ -44,6 +44,22 @@
     .task-label {
         padding-left: 20px;
     }
+    /* 调整select框的样式 */
+    .select-wrapper select {
+        background-color: #f8f9fa; /* 设置背景颜色与现有一致 */
+        border: 1px solid #ccc; /* 设置边框颜色与现有一致 */
+        padding: 5px 10px; /* 调整内边距使其看起来更一致 */
+        border-radius: 4px; /* 添加圆角 */
+        font-size: 14px; /* 保持字体大小一致 */
+    }
+
+    /* 为新任务添加select选择框的包裹样式 */
+    .task-container select {
+        background-color: #f8f9fa; /* 确保新任务的选择框背景一致 */
+        border: 1px solid #ccc; /* 边框样式一致 */
+        padding: 5px 10px; /* 内边距一致 */
+        border-radius: 4px; /* 圆角一致 */
+    }
   </style>
   <body>
     <!-- tap on top starts-->
@@ -134,37 +150,19 @@
                 <div class="card">
                   <div class="card-header b-bottom">
                     <div class="todo-list-header">
-                      <div class="new-task-wrapper input-group">
-                        <input class="form-control m-0" id="new-task" placeholder="Enter new task here...">
-                        <button class="btn btn-primary add-new-task-btn" id="add-task-btn">Add Task</button>
-                      </div>
-                    </div>
-                  </div>
-                  <!-- Modal -->
-                  <div class="modal" id="addTaskModal" style="display: none;">
-                    <div class="modal-dialog">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title">Add Task</h5>
-                                <button type="button" class="btn-close" id="close-modal-btn"></button>
-                            </div>
-                            <div class="modal-body">
-                                <div class="mb-3">
-                                    <label for="taskContent" class="form-label">Task Content</label>
-                                    <input type="text" class="form-control" id="taskContent" placeholder="Enter task content">
-                                </div>
-                                <div class="mb-3">
-                                    <label for="taskDeadline" class="form-label">Deadline</label>
-                                    <input type="date" class="form-control" id="taskDeadline">
-                                </div>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" id="close-modal-btn">Close</button>
-                                <button type="button" class="btn btn-primary" id="save-task-btn">Save Task</button>
-                            </div>
+                        <div class="new-task-wrapper input-group">
+                            <!-- Task Content Input -->
+                            <label for="taskContent" class="form-label">Task Content</label>
+                            <input class="form-control m-0 half-width" id="taskContent" placeholder="Enter task content here...">
+                            
+                            <!-- Deadline Input -->
+                            <label for="taskDeadline" class="form-label">Deadline</label>
+                            <input type="date" class="form-control m-0 half-width" id="taskDeadline">
+                            
+                            <button class="btn btn-primary add-new-task-btn" id="add-task-btn">Add Task</button>
                         </div>
                     </div>
-                  </div>
+                </div>
                   <div class="card-body">
                     <div class="todo">
                       <div class="todo-list-wrapper custom-scrollbar">
@@ -217,59 +215,67 @@
           <!-- CSRF Token -->
           {% csrf_token %}
           <script>
-            // Open modal
             document.getElementById('add-task-btn').addEventListener('click', function() {
-                document.getElementById('addTaskModal').style.display = 'block';
-            });
-        
-            // Close modal
-            document.getElementById('close-modal-btn').addEventListener('click', function() {
-                document.getElementById('addTaskModal').style.display = 'none';
-            });
-        
-            // Save task and add to the list
-            document.getElementById('save-task-btn').addEventListener('click', function() {
-                const taskContent = document.getElementById('taskContent').value;
-                const taskDeadline = document.getElementById('taskDeadline').value;
-        
-                if (!taskContent || !taskDeadline) {
-                    alert('Please enter both task content and deadline!');
-                    return;
-                }
-        
-                const formData = new FormData();
-                formData.append('content', taskContent);
-                formData.append('deadline', taskDeadline);
-        
-                fetch('/add-task/', {
-                    method: 'POST',
-                    body: formData,
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.status === 'success') {
-                        const newTaskHTML = `
-                            <li class="task">
-                                <div class="task-container">
-                                    <h4 class="task-label">${data.task.content}</h4>
-                                    <div class="d-flex align-items-center gap-3">
-                                        <span class="badge badge-light-primary">${data.task.label}</span>
-                                        <h5 class="assign-name m-0">${data.task.deadline}</h5>
-                                    </div>
+              const taskContent = document.getElementById('taskContent').value;
+              const taskDeadline = document.getElementById('taskDeadline').value;
+          
+              if (!taskContent || !taskDeadline) {
+                  alert('Please enter both task content and deadline!');
+                  return;
+              }
+          
+              const formData = new FormData();
+              formData.append('content', taskContent);
+              formData.append('deadline', taskDeadline);
+          
+              fetch('/add-task/', {
+                  method: 'POST',
+                  body: formData,
+              })
+              .then(response => response.json())
+              .then(data => {
+                  if (data.status === 'success') {
+                      // 创建新任务的HTML
+                      
+                      const newTaskHTML = `
+                        <li class="task">
+                            <div class="task-container">
+                                <h4 class="task-label">${data.task.content}</h4>
+                                <div class="d-flex align-items-center gap-3">
+                                    <!-- 任务标签部分 -->
+                                    <span class="badge badge-light-primary">
+                                        <select class="task-status" onchange="updateTaskStatus(${data.task.id}, this.value)">
+                                            <option value="In Progress" ${data.task.label == 'In Progress' ? 'selected' : ''}>In Progress</option>
+                                            <option value="Pending" ${data.task.label == 'Pending' ? 'selected' : ''}>Pending</option>
+                                            <option value="Done" ${data.task.label == 'Done' ? 'selected' : ''}>Done</option>
+                                            <option value="Archived" ${data.task.label == 'Archived' ? 'selected' : ''}>Archived</option>
+                                        </select>
+                                    </span>
+                                    <h5 class="assign-name m-0">${data.task.deadline}</h5>
+                                    <span class="task-action-btn">
+                                        <span class="action-box large delete-btn" title="Delete Task" onclick="deleteTask(${data.task.id})">
+                                            <i class="icon"><i class="icon-trash"></i></i>
+                                        </span>
+                                    </span>
                                 </div>
-                            </li>
-                        `;
-                        document.getElementById('todo-list').insertAdjacentHTML('beforeend', newTaskHTML);
-                        document.getElementById('addTaskModal').style.display = 'none';
-                    } else {
-                        alert('There was an error saving the task.');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('There was an error saving the task.');
-                });
-            });
+                            </div>
+                        </li>
+                    `;
+
+                      // 插入新的任务到任务列表
+                      document.getElementById('todo-list').insertAdjacentHTML('beforeend', newTaskHTML);
+                      // 清空输入框
+                      document.getElementById('taskContent').value = '';
+                      document.getElementById('taskDeadline').value = '';
+                  } else {
+                      alert('There was an error saving the task.');
+                  }
+              })
+              .catch(error => {
+                  console.error('Error:', error);
+                  alert('There was an error saving the task.');
+              });
+          });
           </script>
           <script>
             // 默认显示所有任务，包括 Archived
@@ -425,7 +431,6 @@
           <script src="{% static 'js/slick/slick.min.js' %}"></script>
           <script src="{% static 'js/slick/slick.js' %}"></script>
           <script src="{% static 'js/header-slick.js' %}"></script>
-          <script src="{% static 'js/todo/todo.js' %}"></script>
           <!-- Plugins JS Ends-->
           <!-- Theme js-->
           <script src="{% static 'js/script.js' %}"></script>
