@@ -1,5 +1,15 @@
 <!-- Page Header Start-->
 {% load static %}
+
+ <style>
+    .user-profile img {
+    width: 40px; /* 头像宽度 */
+    height: 40px; /* 头像高度 */
+    object-fit: cover; /* 保持内容比例 */
+    border-radius: 50%; /* 圆形头像 */
+    margin-top: 1px;
+  }
+ </style> 
 <div class="page-header">
     <div class="header-wrapper row m-0">
         <div class="header-logo-wrapper col-auto p-0">
@@ -68,15 +78,32 @@
                 </li>
                 <li class="profile-nav onhover-dropdown pe-0 py-0">
                     <div class="d-flex align-items-center profile-media">
-                        <img class="b-r-25" src="{% static 'images/dashboard/profile.png' %}" alt="">
+                        <div class="user-profile">
+                            <img class="b-r-25" 
+                                 src="{% if user.profile.avatar_path %}{{ user.profile.avatar_path }}{% else %}{% static 'images/user/7.jpg' %}{% endif %}" 
+                                 alt="User Avatar">
+                          </div>
                         <div class="flex-grow-1 user">
                             {% if user.is_authenticated %}
-                                <span>{{ user.username }}</span>
-                                <p class="mb-0 font-nunito">Logged in as {{ user.username }}</p>
+                                <span>
+                                    {% if user.profile.first_name %}
+                                        {{ user.profile.first_name }}
+                                    {% else %}
+                                        {{ user.username }}
+                                    {% endif %}
+                                </span>
+                                <p class="mb-0 font-nunito">Logged in as 
+                                    {% if user.profile.first_name %}
+                                        {{ user.profile.first_name }}
+                                    {% else %}
+                                        {{ user.username }}
+                                    {% endif %}
+                                </p>
                             {% else %}
                                 <span>Guest</span>
                                 <p class="mb-0 font-nunito">Not logged in</p>
                             {% endif %}
+
                             <svg>
                                 <use href="{% static 'svg/icon-sprite.svg#header-arrow-down' %}"></use>
                             </svg>

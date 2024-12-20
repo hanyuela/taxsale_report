@@ -157,13 +157,20 @@
                       <div class="card-options"><a class="card-options-collapse" href="#" data-bs-toggle="card-collapse"><i class="fe fe-chevron-up"></i></a><a class="card-options-remove" href="#" data-bs-toggle="card-remove"><i class="fe fe-x"></i></a></div>
                     </div>
                     <div class="card-body">
-                      <!-- 修改邮箱表单 -->
-                      <form method="POST" action="{% url 'update_email_request' %}">
+
+                      <!-- 修改头像表单 -->
+                      <form id="avatar-upload-form" method="POST" enctype="multipart/form-data">
                         {% csrf_token %}
                         <div class="row mb-2">
                           <div class="profile-title">
                             <div class="d-flex">
-                              <img class="img-70 rounded-circle" alt="" src="{% static 'images/user/7.jpg' %}">
+                              <!-- 显示用户头像 -->
+                              <label for="avatar-upload">
+                                <img class="img-70 rounded-circle" alt="User Avatar"
+                                     src="{% if user.profile.avatar_path %}{{ user.profile.avatar_path }}{% else %}{% static 'images/user/7.jpg' %}{% endif %}"
+                                     id="avatar-img" style="cursor: pointer;">
+                              </label>
+                              <input type="file" id="avatar-upload" name="avatar" style="display: none;" onchange="uploadAvatar();">
                               <div class="flex-grow-1">
                                 {% if user.is_authenticated %}
                                   {{ user.username }}
@@ -172,8 +179,12 @@
                             </div>
                           </div>
                         </div>
-                    
-                        <!-- 修改邮箱 -->
+                      </form>
+                      
+                      
+
+                        {% csrf_token %}
+                        <!-- 修改邮箱表单 -->
                         <div class="profile-container">
                           <div class="mb-3">
                             <label class="form-label">Current Email</label>
@@ -192,7 +203,7 @@
                             </div>
                           </div>
                         </div>
-                      </form>
+                        </form>
                       <hr> <!-- 分割线，区分两个表单 -->                
                       <!-- 修改密码表单 -->
                       <form method="POST" action="{% url 'change_password' %}">
@@ -233,25 +244,25 @@
                         <!-- First Name -->
                         <div class="form-group mb-3 col-md-6">
                           <label for="first_name">First Name</label>
-                          <input class="form-control" id="first_name" type="text" name="first_name" value="{{ user_profile.first_name }}" required>
+                          <input class="form-control" id="first_name" type="text" name="first_name" value="{{ user_profile.first_name }}">
                         </div>
-                        
+
                         <!-- Last Name -->
                         <div class="form-group mb-3 col-md-6">
                           <label for="last_name">Last Name</label>
-                          <input class="form-control" id="last_name" type="text" name="last_name" value="{{ user_profile.last_name }}" required>
+                          <input class="form-control" id="last_name" type="text" name="last_name" value="{{ user_profile.last_name }}">
                         </div>
-                        
+
                         <!-- Phone Number -->
                         <div class="form-group mb-3 col-md-6">
                           <label for="phone_number">Phone Number</label>
-                          <input class="form-control" id="phone_number" type="text" name="phone_number" value="{{ user_profile.phone_number }}" required>
+                          <input class="form-control" id="phone_number" type="text" name="phone_number" value="{{ user_profile.phone_number }}">
                         </div>
-                        
+
                         <!-- Investment Amount -->
                         <div class="form-group mb-3 col-md-6">
                           <label for="investment_amount">How much are you planning to invest in tax sales?</label>
-                          <input class="form-control" id="investment_amount" type="number" name="investment_amount" value="{{ user_profile.investment_amount }}" required max="1000000000" oninput="adjustMaxValue(this)">
+                          <input class="form-control" id="investment_amount" type="number" name="investment_amount" value="{{ user_profile.investment_amount }}" max="1000000000" oninput="adjustMaxValue(this)">
                         </div>
                     
                         <!-- Investment Purpose -->
@@ -285,6 +296,36 @@
         {% include 'footer-light.html' %}
       </div>
     </div>
+    <script>
+      function uploadAvatar() {
+        var formData = new FormData();
+        var avatarFile = document.getElementById('avatar-upload').files[0];
+        formData.append('avatar', avatarFile);
+    
+        // 发送 AJAX 请求
+        fetch("{% url 'update_avatar' %}", {
+          method: "POST",
+          body: formData,
+          headers: {
+            "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value  // 添加 CSRF Token
+          }
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            // 更新头像
+            document.getElementById('avatar-img').src = data.avatar_url;
+            alert('头像上传成功！');
+          } else {
+            alert('上传失败，请稍后再试。');
+          }
+        })
+        .catch(error => {
+          alert('上传失败，请稍后再试。');
+        });
+      }
+    </script>
+    
     <script>
       function submitPasswordForm() {
         const newPassword = document.getElementById("new_password").value;
