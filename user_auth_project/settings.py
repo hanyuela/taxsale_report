@@ -105,3 +105,7 @@ EMAIL_PORT = 465
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'tech@soyhome.app'
 EMAIL_HOST_PASSWORD = 'Soyhome@us2021!'
+
+
+MEDIA_URL = '/media/'  # 媒体文件的 URL 前缀
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')  # 媒体文件的存储路径
