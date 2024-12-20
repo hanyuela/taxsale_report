@@ -162,6 +162,7 @@
                                 <th>Deposit Deadline</th>
                                 <th>Foreclose Score</th>
                                 <th>Action</th>
+                                <th><input type="checkbox" id="select_all" /></th> <!-- 表头全选 -->
                             </tr>
                         </thead>
                         <tbody>
@@ -178,7 +179,7 @@
                                 <td><span class="badge badge-light-warning">{{ item.foreclose_score }}</span></td>
                                 <td>
                                       <ul class="action">
-                                          <li class="edit"><a href="#"><i class="icon-pencil-alt"></i></a></li>
+                                          
                                           <li class="delete">
                                             <a href="#" data-property-id="{{ item.property_id }}" data-user-id="{{ user.id }}">
                                                 <i class="fa fa-shopping-cart"></i>
@@ -186,6 +187,7 @@
                                           </li>
                                       </ul>
                                 </td>
+                                <td><input type="checkbox" class="row-select" /></td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -214,6 +216,39 @@
         </div> 
     <!-- 弹出窗口 -->
     <!-- jQuery -->
+    <script>
+        $(document).ready(function() {
+            // 监听全选复选框的点击事件
+            $('#select_all').click(function() {
+                var isChecked = $(this).prop('checked');  // 获取全选框的状态
+                $('.row-select').prop('checked', isChecked);  // 设置所有行的复选框为相同状态
+            });
+    
+            // 监听每一行的点击事件，排除购物车按钮点击
+            $('#keytable tbody tr').click(function(e) {
+                // 如果点击的是购物车按钮，直接返回，不做处理
+                if ($(e.target).closest('.delete a').length > 0) {
+                    return;
+                }
+                var checkbox = $(this).find('.row-select');  // 获取当前行的复选框
+                checkbox.prop('checked', !checkbox.prop('checked'));  // 反转选中状态
+            });
+    
+            // 监听每个复选框的点击事件，防止影响到行点击的事件
+            $('.row-select').click(function(e) {
+                e.stopPropagation();  // 阻止点击事件冒泡到行上
+            });
+    
+            // 购物车按钮的点击事件
+            $('.delete a').click(function(e) {
+                e.preventDefault();  // 阻止默认行为
+                // 单独执行购物车的逻辑
+                console.log("购物车按钮被点击！");
+            });
+        });
+    </script>
+    
+      
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>   
     <script src="{% static 'js/jquery.min.js' %}"></script>
     <!-- Bootstrap js-->
@@ -259,25 +294,193 @@
     <script src="{% static 'js/theme-customizer/customizer.js' %}"></script>
     <!-- Plugin used-->
     <script>
-      $(document).ready(function() {
-          // 检查 DataTable 是否已经初始化，如果是则跳过
-          if (!$.fn.DataTable.isDataTable('#keytable')) {
-              // 初始化 DataTable
-              $('#keytable').DataTable({
-                  "autoWidth": false,
-                  "responsive": true,
-                  "columnDefs": [
-                      { "width": "15%", "targets": 0 },
-                      { "width": "15%", "targets": 1 },
-                      { "width": "20%", "targets": 2 }
-                  ]
-              });
-          }
-          
-          // 将搜索框移动到 .card-header 中
-          $(".dataTables_filter").detach().appendTo(".card-header");
-      });
+        $(document).ready(function() {
+            
+            // 初始化 DataTable
+            if (!$.fn.DataTable.isDataTable('#keytable')) {
+                $('#keytable').DataTable({
+                    "autoWidth": false,
+                    "responsive": true,
+                    "columnDefs": [
+                        { "width": "15%", "targets": 0 },
+                        { "width": "15%", "targets": 1 },
+                        { "width": "20%", "targets": 2 }
+                    ]
+                });
+            }
+    
+            // 将搜索框移动到 .card-header 中
+            $(".dataTables_filter").detach().appendTo(".card-header");
+    
+            // 添加“统一购买”按钮到分页控件的最后
+            $(".dataTables_paginate").append('<button class="bulk-purchase-btn btn btn-primary" style="margin-left: 10px;"><i class="fa fa-shopping-cart"></i></button>');
+            // 添加购物车按钮函数
+            function addBulkPurchaseButton() {
+                if (!$(".bulk-purchase-btn").length) { // 检查按钮是否已经存在
+                    $(".dataTables_paginate").append('<button class="bulk-purchase-btn btn btn-primary" style="margin-left: 10px;"><i class="fa fa-shopping-cart"></i></button>');
+                }
+            }
+
+            // 初始加载时添加按钮
+            addBulkPurchaseButton();
+
+            // 监听 DataTables 的 draw 事件，确保分页或操作时按钮不被删除
+            $('#keytable').on('draw.dt', function() {
+                addBulkPurchaseButton();
+            });
+            
+            // 绑定“统一购买”按钮的点击事件
+            $(document).on('click', '.bulk-purchase-btn', function() {
+                var selectedRows = $('.row-select:checked');
+    
+                // 检查是否有选中的行
+                if (selectedRows.length > 0) {
+                    var bulkData = [];
+                    var checkRequests = []; // 用于存放检查请求
+                    
+                    selectedRows.each(function() {
+                        var row = $(this).closest('tr'); // 获取当前行
+                        var propertyId = row.find('.delete a').data('property-id'); // 从 `a` 标签中获取 data-property-id
+                        var userId = row.find('.delete a').data('user-id'); // 从 `a` 标签中获取 data-user-id
+                    
+                        if (propertyId && userId) {
+                            bulkData.push({ propertyId, userId });
+    
+                            // 检查 `agreement_exists`
+                            var checkRequest = $.ajax({
+                                url: '/check-agreement/',
+                                method: 'GET',
+                                data: {
+                                    property_id: propertyId,
+                                    user_id: userId,
+                                    csrfmiddlewaretoken: '{{ csrf_token }}'
+                                },
+                                success: function(response) {
+                                    if (response.success) {
+                                        if (response.agreement_exists) {
+                                            // 如果 agreement_exists 为 true，直接处理
+                                            $.ajax({
+                                                url: '/agree-to-view/',
+                                                method: 'POST',
+                                                data: {
+                                                    property_id: propertyId,
+                                                    user_id: userId,
+                                                    default: true, // 直接默认同意
+                                                    csrfmiddlewaretoken: '{{ csrf_token }}'
+                                                },
+                                                success: function(res) {
+                                                    if (res.success) {
+                                                        console.log(`成功处理 property_id: ${propertyId}`);
+                                                    }
+                                                },
+                                                error: function(xhr, status, error) {
+                                                    console.error(`处理失败 property_id: ${propertyId}, 错误: ${error}`);
+                                                }
+                                            });
+                                        }
+                                    }
+                                },
+                                error: function(xhr, status, error) {
+                                    console.error(`检查失败 property_id: ${propertyId}, 错误: ${error}`);
+                                }
+                            });
+                            checkRequests.push(checkRequest);
+                        } else {
+                            console.log("缺少 property_id 或 user_id，跳过该行");
+                        }
+                    });
+    
+                    // 等待所有检查请求完成
+                    $.when.apply($, checkRequests).done(function() {
+                        // 检查完毕后，过滤出需要弹出同意窗口的数据
+                        var pendingApproval = bulkData.filter(function(item) {
+                            // 根据检查结果决定是否需要同意窗口
+                            var checkbox = $(`.delete a[data-property-id="${item.propertyId}"]`);
+                            return !checkbox.data('agreement-exists'); // 只有 `agreement_exists == false` 才需要弹窗
+                        });
+    
+                        if (pendingApproval.length > 0) {
+                            // 弹出同意窗口，保存待处理数据
+                            window.bulkSelectedData = pendingApproval;
+                            $('#confirm-modal').fadeIn();
+                        } else {
+                            alert("已成功处理所有选中项！");
+                        }
+                    });
+                } else {
+                    alert("请先选择至少一项进行购买！");
+                }
+            });
+    
+            // 弹窗中“同意”按钮的逻辑
+            // 弹窗中“同意”按钮的逻辑
+            $('#agree-button').off('click').on('click', function() {
+                if (window.bulkSelectedData && window.bulkSelectedData.length > 0) {
+                    var requests = [];
+                    var hasPurchased = false; // 标志是否存在已购买的项
+                    var hasProcessed = false; // 标志是否有成功处理的项
+
+                    window.bulkSelectedData.forEach(function(item) {
+                        var request = $.ajax({
+                            url: '/agree-to-view/',
+                            method: 'POST',
+                            data: {
+                                property_id: item.propertyId,
+                                user_id: item.userId,
+                                default: $('#default-checkbox').is(':checked'),
+                                csrfmiddlewaretoken: '{{ csrf_token }}'
+                            },
+                            success: function(response) {
+                                if (response.success) {
+                                    if (response.agreement_exists) {
+                                        // 如果返回已购买，提示用户
+                                        alert(`Property ID: ${item.propertyId} 的数据已被购买！`);
+                                        hasPurchased = true; // 设置标志
+                                    } else {
+                                        // 提示用户未被购买的数据已成功处理
+                                        alert(`Property ID: ${item.propertyId} 的数据已成功处理！`);
+                                        console.log(`成功处理 property_id: ${item.propertyId}`);
+                                        hasProcessed = true; // 有成功处理的数据
+                                    }
+                                }
+                            },
+                            error: function(xhr, status, error) {
+                                console.error(`请求失败 property_id: ${item.propertyId}, 错误: ${error}`);
+                            }
+                        });
+                        requests.push(request);
+                    });
+
+                    // 等待所有请求完成
+                    $.when.apply($, requests).done(function() {
+                        // 如果有成功处理的数据，清空数据并关闭弹窗
+                        if (hasProcessed) {
+                            window.bulkSelectedData = []; // 清空数据
+                            $('#confirm-modal').fadeOut();
+                            console.log("已成功处理所有选中项！");
+                        }
+
+                        // 如果所有数据均已被购买，仅提示，不清空数据或关闭弹窗
+                        if (!hasProcessed && hasPurchased) {
+                            console.log("所有选中项均已被购买！");
+                        }
+                    }).fail(function() {
+                        console.error("处理部分选中项时出错！");
+                    });
+                } else {
+                    alert("没有找到需要处理的数据！");
+                }
+            });
+
+    
+            // 弹窗中“取消”按钮的逻辑
+            $('#cancel-button').click(function() {
+                $('#confirm-modal').fadeOut(); // 关闭弹窗
+            });
+        });
     </script>
+    
+    
     <script>
         $(document).ready(function() {
             // 页面加载时检查哪些数据已存在，但不打开报告页面
@@ -376,10 +579,7 @@
                 var propertyId = window.selectedProperty;
                 var userId = window.selectedUser;
 
-                if (!propertyId || !userId) {
-                    alert("缺少必要的参数，请重试！");
-                    return;
-                }
+                
 
                 // 获取复选框状态，表示是否默认同意
                 var isDefaultChecked = $('#default-checkbox').is(':checked'); // 确保复选框的 ID 是 #default-checkbox
