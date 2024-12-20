@@ -25,6 +25,8 @@ from django.shortcuts import render, get_object_or_404
 from django.contrib.sites.shortcuts import get_current_site
 from django.conf import settings
 from django.contrib.auth import update_session_auth_hash
+import os
+from django.core.files.storage import FileSystemStorage
 # 注册页面
 def register(request):
     if request.method == 'POST':
@@ -319,7 +321,13 @@ def profile_update(request):
         first_name = request.POST.get('first_name')
         last_name = request.POST.get('last_name')
         phone_number = request.POST.get('phone_number')
-        investment_amount = request.POST.get('investment_amount')
+        # 获取表单数据
+        investment_amount = request.POST.get('investment_amount', None)
+
+        # 将空字符串转换为 None
+        if investment_amount == '':
+            investment_amount = None
+        
         goal = request.POST.get('goal')
         default = request.POST.get('default') == 'on'  # 如果复选框被选中，则为True，否则为False
 
@@ -438,3 +446,27 @@ def change_password(request):
         return redirect("profile")
 
     return redirect("profile")
+
+
+@login_required
+def update_avatar(request):
+    if request.method == 'POST' and request.FILES.get('avatar'):
+        avatar = request.FILES['avatar']
+
+        # 设置文件存储路径
+        fs = FileSystemStorage(location=os.path.join(settings.BASE_DIR, 'static/images/avatars'))
+        filename = fs.save(avatar.name, avatar)  # 保存文件并获取文件名
+        file_url = f'/static/images/avatars/{filename}'  # 拼接文件的相对路径
+
+        # 获取或创建用户档案
+        profile, created = UserProfile.objects.get_or_create(user=request.user)
+
+        # 将文件路径存入数据库
+        profile.avatar_path = file_url
+        profile.save()  # 保存更改
+
+        # 返回 JSON 响应
+        return JsonResponse({'success': True, 'avatar_url': file_url})
+
+    # 如果请求不是文件上传，返回失败
+    return JsonResponse({'success': False, 'error': 'No avatar uploaded'})

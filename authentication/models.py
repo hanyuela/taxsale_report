@@ -8,6 +8,7 @@ class UserProfile(models.Model):
         ('foreclosure', 'Foreclosure'),
     ]
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")  # 关联 User 表
+    avatar_path = models.CharField(max_length=255, blank=True, null=True)
     first_name = models.CharField(max_length=50, blank=True, null=True)  # 名（可为空）
     last_name = models.CharField(max_length=50, blank=True, null=True)  # 姓（可为空）
     phone_number = models.CharField(max_length=15, blank=True, null=True)  # 手机号码（可为空）

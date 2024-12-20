@@ -5,6 +5,8 @@ from dashboard import views as dashboard_views
 from criterion import views as criterion_views
 from property import views as property_views  # 导入 property app 的视图
 from holdings import views as holdings_views  # 导入 holdings app 的视图
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('', views.user_login, name='login'),
@@ -37,4 +39,9 @@ urlpatterns = [
     path('add-task/', dashboard_views.add_task, name='add_task'),
     path('update-task-status/<int:task_id>/', dashboard_views.update_task_status, name='update_task_status'),
     path('delete-task/<int:task_id>/', dashboard_views.delete_task, name='delete_task'),
+    path('update-avatar/', views.update_avatar, name='update_avatar'),
 ]
+
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
