@@ -9,16 +9,16 @@
     '<div class="customizer-links">' +
       '<div class="nav flex-column nac-pills" id="c-pills-tab" role="tablist" aria-orientation="vertical">' +
       '<a class="nav-link" id="c-pills-layouts-tab" data-bs-toggle="pill" href="#c-pills-layouts" role="tab" aria-controls="c-pills-layouts" aria-selected="true" data-original-title=""><span>Check layouts</span></a>' +
-      '<a class="nav-link" id="c-pills-home-tab" data-bs-toggle="pill" href="#c-pills-home" role="tab" aria-controls="c-pills-home" aria-selected="true" data-original-title="">' +
-        '<div class="settings"><img class="img-fluid" src="/static/images/customizer/1.png" alt="nft"></div><span>Quick option</span></a>' +
+      //'<a class="nav-link" id="c-pills-home-tab" data-bs-toggle="pill" href="#c-pills-home" role="tab" aria-controls="c-pills-home" aria-selected="true" data-original-title="">' +
+      //  '<div class="settings"><img class="img-fluid" src="/static/images/customizer/1.png" alt="nft"></div><span>Quick option</span></a>' +
       '<a class="nav-link" target="_blank" href="https://support.pixelstrap.com/portal/en/signin" data-original-title="">' +
         '<div><img class="img-fluid" src="/static/images/customizer/5.png" alt=""></div><span>Support</span></a>' +
-      '<a class="nav-link" target="_blank" href="https://docs.pixelstrap.net/admin/zono/document/" data-original-title="">' +
-        '<div><img class="img-fluid" src="/static/images/customizer/2.png" alt=""></div><span>Document</span></a>' +
-      '<a class="nav-link" target="_blank" href="landing-page.html#framework" data-original-title="">' +
-        '<div><img class="img-fluid" src="/static/images/customizer/4.png" alt=""></div><span>Check features</span></a>' +
-      '<a class="nav-link" target="_blank" href="https://themeforest.net/user/pixelstrap/portfolio" data-original-title="">' +
-        '<div><img class="img-fluid" src="/static/images/customizer/3.png" alt=""></div><span>Buy now</span></a>' +
+      //'<a class="nav-link" target="_blank" href="https://docs.pixelstrap.net/admin/zono/document/" data-original-title="">' +
+      //  '<div><img class="img-fluid" src="/static/images/customizer/2.png" alt=""></div><span>Document</span></a>' +
+      //'<a class="nav-link" target="_blank" href="landing-page.html#framework" data-original-title="">' +
+      //  '<div><img class="img-fluid" src="/static/images/customizer/4.png" alt=""></div><span>Check features</span></a>' +
+      //'<a class="nav-link" target="_blank" href="https://themeforest.net/user/pixelstrap/portfolio" data-original-title="">' +
+      //  '<div><img class="img-fluid" src="/static/images/customizer/3.png" alt=""></div><span>Buy now</span></a>' +
       '</div></div>'
   ).appendTo($("body"));
   
