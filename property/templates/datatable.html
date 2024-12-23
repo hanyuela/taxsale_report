@@ -438,7 +438,7 @@
                                         hasPurchased = true; // 设置标志
                                     } else {
                                         // 提示用户未被购买的数据已成功处理
-                                        alert(`Property ID: ${item.propertyId} 的数据已成功处理！`);
+                                        //alert(`Property ID: ${item.propertyId} 的数据已成功处理！`);
                                         console.log(`成功处理 property_id: ${item.propertyId}`);
                                         hasProcessed = true; // 有成功处理的数据
                                     }
@@ -453,6 +453,14 @@
 
                     // 等待所有请求完成
                     $.when.apply($, requests).done(function() {
+                        // 遍历选中的数据并更新图标为 √
+                        window.bulkSelectedData.forEach(function(item) {
+                            // 更新图标为 √
+                            var icon = $('.delete a[data-property-id="' + item.propertyId + '"] i');
+                            if (icon.length > 0) {
+                                icon.removeClass('fa-shopping-cart').addClass('icon-eye');
+                            }
+                        });
                         // 如果有成功处理的数据，清空数据并关闭弹窗
                         if (hasProcessed) {
                             window.bulkSelectedData = []; // 清空数据
