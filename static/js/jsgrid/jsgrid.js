@@ -444,8 +444,80 @@
             }
             
         ],
+        onRefreshed: function () {
+            const grid = $("#basicScenario");
+            const headerRow = grid.find(".jsgrid-header-row"); // 找到表头行
+        
+            // 如果 headerRow 存在，则绑定拖拽事件
+            if (headerRow.length) {
+                const headers = headerRow.children("th"); // 获取所有表头列
+        
+                // 解绑旧事件，避免重复绑定
+                headers.off("dragstart dragover dragleave drop dragend");
+        
+                headers.each(function (index) {
+                    $(this).attr("draggable", "true"); // 开启拖拽
+                    $(this).data("index", index); // 保存列索引
+        
+                    // 绑定拖拽事件
+                    $(this)
+                        .on("dragstart", function (e) {
+                            e.originalEvent.dataTransfer.setData("fromIndex", index); // 保存拖动的起始索引
+                            $(this).addClass("dragging");
+                        })
+                        .on("dragover", function (e) {
+                            e.preventDefault(); // 必须阻止默认事件，才能触发 drop
+                            $(this).addClass("drag-over");
+                        })
+                        .on("dragleave", function () {
+                            $(this).removeClass("drag-over");
+                        })
+                        .on("drop", function (e) {
+                            e.preventDefault();
+                            $(this).removeClass("drag-over");
+        
+                            const fromIndex = parseInt(e.originalEvent.dataTransfer.getData("fromIndex"), 10); // 获取起始索引
+                            const toIndex = $(this).data("index"); // 获取目标索引
+        
+                            // 如果索引不同，则交换列
+                            if (fromIndex !== toIndex) {
+                                swapFields(fromIndex, toIndex);
+                            }
+                        })
+                        .on("dragend", function () {
+                            $(this).removeClass("dragging");
+                        });
+                });
+            }
+        }
+        
     });
+    function swapFields(fromIndex, toIndex) {
+        const grid = $("#basicScenario");
     
+        // 获取当前的 fields 配置
+        const fields = grid.jsGrid("option", "fields");
+    
+        // 交换 fields 中的列配置
+        const temp = fields[fromIndex];
+        fields[fromIndex] = fields[toIndex];
+        fields[toIndex] = temp;
+    
+        // 确保每个字段都有完整的配置（例如 visible）
+        fields.forEach(field => {
+            if (field.visible === undefined) {
+                field.visible = true; // 设置默认可见性
+            }
+        });
+    
+        // 更新 jsGrid 配置并重新渲染表格
+        grid.jsGrid("option", "fields", fields);
+    
+        // 加载最新数据
+        grid.jsGrid("loadData"); // 替换 grid.jsGrid("refresh");
+    
+        console.log(`Swapped columns: ${fromIndex} ↔ ${toIndex}`);
+    }
     
     // 给 Archived 行添加虚线边框
     $(".archived-row").css("border-bottom", "1px dashed #ccc");
