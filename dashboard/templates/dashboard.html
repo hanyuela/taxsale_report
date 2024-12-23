@@ -60,6 +60,11 @@
         padding: 5px 10px; /* 内边距一致 */
         border-radius: 4px; /* 圆角一致 */
     }
+    .form-label {
+      font-weight: 600;
+      margin-bottom: 4px;
+      margin-top: 15px;
+    }
   </style>
   <body>
     <!-- tap on top starts-->
@@ -150,17 +155,17 @@
                 <div class="card">
                   <div class="card-header b-bottom">
                     <div class="todo-list-header">
-                        <div class="new-task-wrapper input-group">
-                            <!-- Task Content Input -->
-                            <label for="taskContent" class="form-label">Task Content</label>
-                            <input class="form-control m-0 half-width" id="taskContent" placeholder="Enter task content here...">
-                            
-                            <!-- Deadline Input -->
-                            <label for="taskDeadline" class="form-label">Deadline</label>
-                            <input type="date" class="form-control m-0 half-width" id="taskDeadline">
-                            
-                            <button class="btn btn-primary add-new-task-btn" id="add-task-btn">Add Task</button>
-                        </div>
+                      <div class="new-task-wrapper input-group">
+                        <!-- Task Content Input -->
+                        <label for="taskContent" class="form-label" style="margin-right: 10px;">Task Content</label>
+                        <input class="form-control m-0 half-width" id="taskContent" placeholder="Enter task content here...">
+                        
+                        <!-- Deadline Input -->
+                        <label for="taskDeadline" class="form-label" style="margin-right: 10px; margin-left: 20px;">Deadline</label>
+                        <input type="date" class="form-control m-0 half-width" id="taskDeadline">
+                        
+                        <button class="btn btn-primary add-new-task-btn" id="add-task-btn" style="margin-left: 20px;">Add Task</button>
+                      </div>                   
                     </div>
                 </div>
                   <div class="card-body">
