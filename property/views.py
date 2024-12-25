@@ -91,12 +91,25 @@ def datatable(request):
                     auctions = auctions.filter(auction_type__in=mapped_types)
             except (ValueError, SyntaxError):
                 pass
+        
+        # 按 accessed_land_value 筛选
+        if user_criteria.Assessed_Land_Value_min is not None:
+            auctions = auctions.filter(properties__accessed_land_value__gte=user_criteria.Assessed_Land_Value_min)
+        if user_criteria.Assessed_Land_Value_max is not None:
+            auctions = auctions.filter(properties__accessed_land_value__lte=user_criteria.Assessed_Land_Value_max)
 
-        # 按 market_value 筛选
-        if user_criteria.market_value_min is not None:
-            auctions = auctions.filter(properties__market_value__gte=user_criteria.market_value_min)
-        if user_criteria.market_value_max is not None:
-            auctions = auctions.filter(properties__market_value__lte=user_criteria.market_value_max)
+        # 按 accessed_improvement_value 筛选
+        if user_criteria.Assessed_Improvement_Value_min is not None:
+            auctions = auctions.filter(properties__accessed_improvement_value__gte=user_criteria.Assessed_Improvement_Value_min)
+        if user_criteria.Assessed_Improvement_Value_max is not None:
+            auctions = auctions.filter(properties__accessed_improvement_value__lte=user_criteria.Assessed_Improvement_Value_max)
+
+        # 按 total_assessed_value 筛选
+        if user_criteria.Total_Market_Value_min is not None:
+            auctions = auctions.filter(properties__total_assessed_value__gte=user_criteria.Total_Market_Value_min)
+        if user_criteria.Total_Market_Value_max is not None:
+            auctions = auctions.filter(properties__total_assessed_value__lte=user_criteria.Total_Market_Value_max)
+
 
     # 构造数据供模板渲染
     data = []
