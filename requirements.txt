@@ -1,2 +1,5 @@
-Django==3.0.4
-Pillow==10.0.1
+# python==3.12
+django==4.2
+Pillow==11.0.0
+numpy==1.26
+pandas==2.2
