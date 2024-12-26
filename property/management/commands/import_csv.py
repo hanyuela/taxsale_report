@@ -96,7 +96,7 @@ class Command(BaseCommand):
                     property_data['tax_amount_annual'] = self.safe_decimal(row.get('tax_amount_annual', 0))
                     property_data['zillow_link'] = row.get('zillow_link', '')
                     property_data['redfin_link'] = row.get('redfin_link', '')
-                    property_data['market_value'] = self.safe_decimal(row.get('market_value', 0))
+                    property_data['Total_Market_Value'] = self.safe_decimal(row.get('Total_Market_Value', 0))
                     property_data['year_built'] = row.get('year_built', 0)
                     property_data['lot_size_sqft'] = self.safe_decimal(row.get('lot_size_sqft', 0))
                     property_data['lot_size_acres'] = self.safe_decimal(row.get('lot_size_acres', 0))
@@ -120,25 +120,31 @@ class Command(BaseCommand):
 
                     # 获取 Owner 数据并关联到 Property
                     try:
-                        owner_name = row.get('owner_name', '').strip()
+                        owner_name = row.get('owner_name', '').strip()  # 从 CSV 获取 Owner 名称
                         if owner_name:
-                            owner, created = Owner.objects.get_or_create(
-                                name=owner_name,
-                                defaults={
-                                    'phone_1': '',
-                                    'email_1': '',
-                                    'primary_address': ''
-                                }
-                            )
-                            property_instance.owners.add(owner)
+                            # 查找是否已有相同的 Owner
+                            owner = Owner.objects.filter(name=owner_name).first()  # 仅获取第一个匹配的 Owner
+                            if not owner:
+                                # 如果 Owner 不存在，则创建新记录
+                                owner = Owner.objects.create(
+                                    name=owner_name,
+                                    phone_1=row.get('phone_1', '').strip(),
+                                    email_1=row.get('email_1', '').strip(),
+                                    primary_address=row.get('primary_address', '').strip()
+                                )
+                                self.stdout.write(self.style.SUCCESS(f"新建 Owner: {owner.name}"))
 
-                        self.stdout.write(self.style.SUCCESS(
-                            f"关联 Owner(s): {[owner.name for owner in property_instance.owners.all()]}"
-                        ))
+                            # 将 Owner 关联到 Property
+                            property_instance.owners.add(owner)  # 添加到多对多关系表
+
+                            self.stdout.write(self.style.SUCCESS(
+                                f"关联 Owner(s): {[owner.name for owner in property_instance.owners.all()]}"
+                            ))
 
                     except Exception as e:
                         self.stdout.write(self.style.WARNING(f"Owner 处理时出错: {e}"))
                         continue
+
 
                 except Exception as e:
                     self.stdout.write(self.style.WARNING(f"Property 导入时出错: {e}"))
