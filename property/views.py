@@ -105,10 +105,28 @@ def datatable(request):
             auctions = auctions.filter(properties__accessed_improvement_value__lte=user_criteria.Assessed_Improvement_Value_max)
 
         # 按 total_assessed_value 筛选
+        if user_criteria.Total_Assessed_Value_min is not None:
+            auctions = auctions.filter(properties__total_assessed_value__gte=user_criteria.Total_Assessed_Value_min)
+        if user_criteria.Total_Assessed_Value_max is not None:
+            auctions = auctions.filter(properties__total_assessed_value__lte=user_criteria.Total_Assessed_Value_max)
+            
+        # 按 Market Land Value 筛选
+        if user_criteria.Market_Land_Value_min is not None:
+            auctions = auctions.filter(properties__Market_Land_Value__gte=user_criteria.Market_Land_Value_min)
+        if user_criteria.Market_Land_Value_max is not None:
+            auctions = auctions.filter(properties__Market_Land_Value__lte=user_criteria.Market_Land_Value_max)
+
+        # 按 Market Improvement Value 筛选
+        if user_criteria.Market_Improvement_Value_min is not None:
+            auctions = auctions.filter(properties__Market_Improvement_Value__gte=user_criteria.Market_Improvement_Value_min)
+        if user_criteria.Market_Improvement_Value_max is not None:
+            auctions = auctions.filter(properties__Market_Improvement_Value__lte=user_criteria.Market_Improvement_Value_max)
+
+        # 按 Total Market Value 筛选
         if user_criteria.Total_Market_Value_min is not None:
-            auctions = auctions.filter(properties__total_assessed_value__gte=user_criteria.Total_Market_Value_min)
+            auctions = auctions.filter(properties__Total_Market_Value__gte=user_criteria.Total_Market_Value_min)
         if user_criteria.Total_Market_Value_max is not None:
-            auctions = auctions.filter(properties__total_assessed_value__lte=user_criteria.Total_Market_Value_max)
+            auctions = auctions.filter(properties__Total_Market_Value__lte=user_criteria.Total_Market_Value_max)
 
 
     # 构造数据供模板渲染
@@ -161,7 +179,7 @@ def report(request, property_id):
         'lot_size': lot_size,
         'primary_link': primary_link,  # 添加主链接字段
         'redfin_link': property.redfin_link,
-        'market_value': property.market_value,
+        'Total_Market_Value': property.Total_Market_Value,
         'year_built': property.year_built,
         'building_size_sqft': property.building_size_sqft,
         'bedroom_number': property.bedroom_number,
