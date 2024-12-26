@@ -200,20 +200,6 @@
                             <label class="form-label">
                                 <strong>What is the value of the property you are looking to invest in?</strong>
                             </label>
-                            <!-- Total Market Value range -->
-                            <div style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
-                                <span>Total Market Value range: </span>
-                                <input type="number" id="Total_Market_Value_min" name="Total_Market_Value_min" class="form-control" placeholder="Min $" 
-                                    value="{{ user_criteria.Total_Market_Value_min|floatformat:0 }}" style="width: 150px;" 
-                                    min="0" max="1000000000" step="1" 
-                                    oninput="validateMinMaxRange()">
-                                <span>~</span>
-                                <input type="number" id="Total_Market_Value_max" name="Total_Market_Value_max" class="form-control" placeholder="Max $" 
-                                    value="{{ user_criteria.Total_Market_Value_max|floatformat:0 }}" style="width: 150px;" 
-                                    min="0" max="1000000000" step="1" 
-                                    oninput="validateMinMaxRange()">
-                            </div>
-
                             <!-- Assessed Land Value range -->
                             <div style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
                                 <span>Assessed Land Value range: </span>
@@ -239,6 +225,62 @@
                                 <input type="number" id="Assessed_Improvement_Value_max" name="Assessed_Improvement_Value_max" class="form-control" placeholder="Max $" 
                                     value="{{ user_criteria.Assessed_Improvement_Value_max|floatformat:0 }}" style="width: 150px;" 
                                     min="0" max="1000000000" step="1" 
+                                    oninput="validateMinMaxRange()">
+                            </div>
+
+                            <!-- Total Market Value range -->
+                            <div style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                                <span>Total Assessed Value range: </span>
+                                <input type="number" id="Total_Assessed_Value_min" name="Total_Assessed_Value_min" class="form-control" placeholder="Min $" 
+                                    value="{{ user_criteria.Total_Assessed_Value_min|floatformat:0 }}" style="width: 150px;" 
+                                    min="0" max="1000000000" step="1" 
+                                    oninput="validateMinMaxRange()">
+                                <span>~</span>
+                                <input type="number" id="Total_Assessed_Value_max" name="Total_Assessed_Value_max" class="form-control" placeholder="Max $" 
+                                    value="{{ user_criteria.Total_Assessed_Value_max|floatformat:0 }}" style="width: 150px;" 
+                                    min="0" max="1000000000" step="1" 
+                                    oninput="validateMinMaxRange()">
+                            </div>
+
+                            <!-- Market Land Value range -->
+                            <div style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                                <span>Market Land Value range: </span>
+                                <input type="number" id="Market_Land_Value_min" name="Market_Land_Value_min" class="form-control" placeholder="Min $"
+                                    value="{{ user_criteria.Market_Land_Value_min|floatformat:2 }}" style="width: 150px;" 
+                                    min="0" max="1000000000" step="0.01" 
+                                    oninput="validateMinMaxRange()">
+                                <span>~</span>
+                                <input type="number" id="Market_Land_Value_max" name="Market_Land_Value_max" class="form-control" placeholder="Max $"
+                                    value="{{ user_criteria.Market_Land_Value_max|floatformat:2 }}" style="width: 150px;" 
+                                    min="0" max="1000000000" step="0.01" 
+                                    oninput="validateMinMaxRange()">
+                            </div>
+
+                            <!-- Market Improvement Value range -->
+                            <div style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                                <span>Market Improvement Value range: </span>
+                                <input type="number" id="Market_Improvement_Value_min" name="Market_Improvement_Value_min" class="form-control" placeholder="Min $"
+                                    value="{{ user_criteria.Market_Improvement_Value_min|floatformat:2 }}" style="width: 150px;" 
+                                    min="0" max="1000000000" step="0.01" 
+                                    oninput="validateMinMaxRange()">
+                                <span>~</span>
+                                <input type="number" id="Market_Improvement_Value_max" name="Market_Improvement_Value_max" class="form-control" placeholder="Max $"
+                                    value="{{ user_criteria.Market_Improvement_Value_max|floatformat:2 }}" style="width: 150px;" 
+                                    min="0" max="1000000000" step="0.01" 
+                                    oninput="validateMinMaxRange()">
+                            </div>
+
+                            <!-- Total Market Value range -->
+                            <div style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                                <span>Total Market Value range: </span>
+                                <input type="number" id="Total_Market_Value_min" name="Total_Market_Value_min" class="form-control" placeholder="Min $"
+                                    value="{{ user_criteria.Total_Market_Value_min|floatformat:2 }}" style="width: 150px;" 
+                                    min="0" max="1000000000" step="0.01" 
+                                    oninput="validateMinMaxRange()">
+                                <span>~</span>
+                                <input type="number" id="Total_Market_Value_max" name="Total_Market_Value_max" class="form-control" placeholder="Max $"
+                                    value="{{ user_criteria.Total_Market_Value_max|floatformat:2 }}" style="width: 150px;" 
+                                    min="0" max="1000000000" step="0.01" 
                                     oninput="validateMinMaxRange()">
                             </div>
 
