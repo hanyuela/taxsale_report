@@ -109,6 +109,25 @@ class Criterion(models.Model):
     
     property_type = models.TextField(null=True, blank=True, default="")
 
+    # Market value
+    Market_Land_Value_min = models.DecimalField(
+        max_digits=10, decimal_places=2, null=True, blank=True
+    )
+    Market_Land_Value_max = models.DecimalField(
+        max_digits=10, decimal_places=2, null=True, blank=True
+    )
+    Market_Improvement_Value_min = models.DecimalField(
+        max_digits=10, decimal_places=2, null=True, blank=True
+    )
+    Market_Improvement_Value_max = models.DecimalField(
+        max_digits=10, decimal_places=2, null=True, blank=True
+    )
+    Total_Market_Value_min = models.DecimalField(
+        max_digits=10, decimal_places=2, null=True, blank=True
+    )
+    Total_Market_Value_max = models.DecimalField(
+        max_digits=10, decimal_places=2, null=True, blank=True
+    )
     # 新增字段：市场价值范围和面值范围
     Assessed_Land_Value_min = models.DecimalField(
         max_digits=10, decimal_places=2, null=True, blank=True
@@ -122,10 +141,10 @@ class Criterion(models.Model):
     Assessed_Improvement_Value_max = models.DecimalField(
         max_digits=10, decimal_places=2, null=True, blank=True
     )
-    Total_Market_Value_min = models.DecimalField(
+    Total_Assessed_Value_min = models.DecimalField(
         max_digits=10, decimal_places=2, null=True, blank=True
     )
-    Total_Market_Value_max = models.DecimalField(
+    Total_Assessed_Value_max = models.DecimalField(
         max_digits=10, decimal_places=2, null=True, blank=True
     )
     face_value_min = models.DecimalField(

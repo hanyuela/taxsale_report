@@ -33,10 +33,10 @@ def criterion(request):
             user_criteria.is_online = []  # 如果没有选中，清空列表
 
         # 更新市场价值范围
-        Total_Market_Value_min = request.POST.get('Total_Market_Value_min', None)
-        Total_Market_Value_max = request.POST.get('Total_Market_Value_max', None)
-        user_criteria.Total_Market_Value_min = Total_Market_Value_min if Total_Market_Value_min else None
-        user_criteria.Total_Market_Value_max = Total_Market_Value_max if Total_Market_Value_max else None
+        Total_Assessed_Value_min = request.POST.get('Total_Assessed_Value_min', None)
+        Total_Assessed_Value_max = request.POST.get('Total_Assessed_Value_max', None)
+        user_criteria.Total_Assessed_Value_min = Total_Assessed_Value_min if Total_Assessed_Value_min else None
+        user_criteria.Total_Assessed_Value_max = Total_Assessed_Value_max if Total_Assessed_Value_max else None
 
         Assessed_Land_Value_min = request.POST.get('Assessed_Land_Value_min', None)
         Assessed_Land_Value_max = request.POST.get('Assessed_Land_Value_max', None)
@@ -48,6 +48,24 @@ def criterion(request):
         user_criteria.Assessed_Improvement_Value_min = Assessed_Improvement_Value_min if Assessed_Improvement_Value_min else None
         user_criteria.Assessed_Improvement_Value_max = Assessed_Improvement_Value_max if Assessed_Improvement_Value_max else None
         
+        # 更新市场价值范围
+        Market_Land_Value_min = request.POST.get('Market_Land_Value_min', None)
+        Market_Land_Value_max = request.POST.get('Market_Land_Value_max', None)
+        user_criteria.Market_Land_Value_min = Market_Land_Value_min if Market_Land_Value_min else None
+        user_criteria.Market_Land_Value_max = Market_Land_Value_max if Market_Land_Value_max else None
+
+        # 更新市场改善价值范围
+        Market_Improvement_Value_min = request.POST.get('Market_Improvement_Value_min', None)
+        Market_Improvement_Value_max = request.POST.get('Market_Improvement_Value_max', None)
+        user_criteria.Market_Improvement_Value_min = Market_Improvement_Value_min if Market_Improvement_Value_min else None
+        user_criteria.Market_Improvement_Value_max = Market_Improvement_Value_max if Market_Improvement_Value_max else None
+
+        # 更新总市场价值范围
+        Total_Market_Value_min = request.POST.get('Total_Market_Value_min', None)
+        Total_Market_Value_max = request.POST.get('Total_Market_Value_max', None)
+        user_criteria.Total_Market_Value_min = Total_Market_Value_min if Total_Market_Value_min else None
+        user_criteria.Total_Market_Value_max = Total_Market_Value_max if Total_Market_Value_max else None
+
         # 更新面值范围
         face_value_min = request.POST.get('face_value_min', None)
         face_value_max = request.POST.get('face_value_max', None)
