@@ -281,6 +281,22 @@
                                                   </div>
                                               </div>
                                           </div>
+                                          <!-- Total Market Value range -->
+                                          <div style="margin-bottom: 20px;">
+                                            <div style="margin-bottom: 10px;">
+                                                <span>Total Market Value range:</span>
+                                            </div>
+                                            <div style="display: flex; gap: 10px;">
+                                                <input type="number" id="Total_Market_Value_min" name="Total_Market_Value_min" class="form-control" 
+                                                    placeholder="Min $" value="{{ user_criteria.Total_Market_Value_min|floatformat:2 }}" 
+                                                    style="width: 150px;" min="0" max="1000000000" step="0.01" oninput="validateMinMaxRange()">
+                                                <span>~</span>
+                                                <input type="number" id="Total_Market_Value_max" name="Total_Market_Value_max" class="form-control" 
+                                                    placeholder="Max $" value="{{ user_criteria.Total_Market_Value_max|floatformat:2 }}" 
+                                                    style="width: 150px;" min="0" max="1000000000" step="0.01" oninput="validateMinMaxRange()">
+                                            </div>
+                                          </div>
+                                        
                                           <div class="col-12">
                                               <div class="card w-100">
                                                   <div class="card-header pb-0">
