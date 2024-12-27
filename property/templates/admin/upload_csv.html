@@ -1,10 +1,80 @@
 {% extends "admin/base_site.html" %}
 {% block content %}
-<h1>上传 CSV 文件</h1>
-<form method="POST" enctype="multipart/form-data">
+<h1 style="text-align: center;">上传 CSV 文件并填写拍卖信息</h1>
+<form method="POST" enctype="multipart/form-data" style="max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ccc; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);">
     {% csrf_token %}
-    <label for="csv_file">选择 CSV 文件：</label>
-    <input type="file" name="csv_file" required />
-    <button type="submit" class="default">上传并导入</button>
+    
+    <!-- 拍卖信息部分 -->
+    <fieldset style="margin-bottom: 20px;">
+        <legend style="font-weight: bold; font-size: 1.2em; margin-bottom: 10px;">拍卖信息</legend>
+        <div style="margin-bottom: 15px;">
+            <label for="auction_type" style="display: block; margin-bottom: 5px; font-weight: bold;">Auction Type</label>
+            <select id="auction_type" name="auction_type" required style="width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 5px;">
+                <option value="tax lien">Lien</option>
+                <option value="tax deed">Deed</option>
+            </select>
+        </div>
+        <div style="margin-bottom: 15px;">
+            <label for="is_online" style="display: block; margin-bottom: 5px; font-weight: bold;">Is Online</label>
+            <select id="is_online" name="is_online" required style="width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 5px;">
+                <option value="online">Online</option>
+                <option value="in-person">In-person</option>
+            </select>
+        </div>
+        <div style="margin-bottom: 15px;">
+            <label for="auction_tax_year" style="display: block; margin-bottom: 5px; font-weight: bold;">Auction Tax Year</label>
+            <input type="number" id="auction_tax_year" name="auction_tax_year" placeholder="Enter tax year" required style="width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 5px;">
+        </div>
+        <div style="margin-bottom: 15px;">
+            <label for="deposit_deadline" style="display: block; margin-bottom: 5px; font-weight: bold;">Deposit Deadline</label>
+            <input type="date" id="deposit_deadline" name="deposit_deadline" style="width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 5px;">
+        </div>
+        <div style="margin-bottom: 15px;">
+            <label for="auction_start" style="display: block; margin-bottom: 5px; font-weight: bold;">Auction Start Date</label>
+            <input type="date" id="auction_start" name="auction_start" style="width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 5px;">
+        </div>
+        <div style="margin-bottom: 15px;">
+            <label for="auction_end" style="display: block; margin-bottom: 5px; font-weight: bold;">Auction End Date</label>
+            <input type="date" id="auction_end" name="auction_end" style="width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 5px;">
+        </div>
+        <div style="margin-bottom: 15px;">
+            <label for="redemption_period" style="display: block; margin-bottom: 5px; font-weight: bold;">Redemption Period (years)</label>
+            <input type="number" id="redemption_period" name="redemption_period" placeholder="Enter redemption period" style="width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 5px;">
+        </div>
+        <div style="margin-bottom: 15px;">
+            <label for="foreclosure_date" style="display: block; margin-bottom: 5px; font-weight: bold;">Foreclosure Date</label>
+            <input type="date" id="foreclosure_date" name="foreclosure_date" style="width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 5px;">
+        </div>
+        <div style="margin-bottom: 15px;">
+            <label for="authority_name" style="display: block; margin-bottom: 5px; font-weight: bold;">Authority Name</label>
+            <input type="text" id="authority_name" name="authority_name" placeholder="Enter authority name" required style="width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 5px;">
+        </div>
+    </fieldset>
+    
+    <!-- CSV 文件上传部分 -->
+    <fieldset style="margin-bottom: 20px;">
+        <legend style="font-weight: bold; font-size: 1.2em; margin-bottom: 10px;">CSV 文件上传</legend>
+        <div style="margin-bottom: 15px;">
+            <label for="csv_file" style="display: block; margin-bottom: 5px; font-weight: bold;">选择 CSV 文件</label>
+            <input type="file" name="csv_file" required style="width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 5px;">
+        </div>
+    </fieldset>
+    
+    <!-- 提交按钮 -->
+    <div style="text-align: center;">
+        <button type="submit" style="padding: 10px 15px; border: none; background-color: #4CAF50; color: white; border-radius: 5px; cursor: pointer;">上传并导入</button>
+    </div>
 </form>
+
+<script>
+    // 空值转换为 null
+    document.querySelector("form").addEventListener("submit", function (e) {
+        const inputs = document.querySelectorAll("input[type='number']");
+        inputs.forEach(input => {
+            if (input.value.trim() === "") {
+                input.value = null;
+            }
+        });
+    });
+</script>
 {% endblock %}
