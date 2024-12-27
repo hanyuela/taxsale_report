@@ -93,10 +93,8 @@ def signup_wizard(request):
         is_online_modes = request.POST.getlist('is_online')  # 获取 is_online 的多选列表
         investment_purpose = request.POST.get('investment_purpose', '').strip()
         property_types = request.POST.getlist('property_type')  # 获取选择字段列表
-        Total_Assessed_Value_min = request.POST.get('Total_Assessed_Value_min', '').strip()
-        Total_Assessed_Value_max = request.POST.get('Total_Assessed_Value_max', '').strip()
-        face_value_min = request.POST.get('face_value_min', '').strip()
-        face_value_max = request.POST.get('face_value_max', '').strip()
+        Total_Market_Value_min = request.POST.get('Total_Market_Value_min')
+        Total_Market_Value_max = request.POST.get('Total_Market_Value_max')
         selected_states = request.POST.getlist('states')  # 前端传递的州缩写
 
         # 初始化上下文以保留已填写数据
@@ -106,10 +104,8 @@ def signup_wizard(request):
             'is_online': is_online_modes,  # 保留 is_online 的多选值
             'investment_purpose': investment_purpose,
             'property_type': property_types,  # 保留选择值
-            'Total_Assessed_Value_min': Total_Assessed_Value_min,
-            'Total_Assessed_Value_max': Total_Assessed_Value_max,
-            'face_value_min': face_value_min,
-            'face_value_max': face_value_max,
+            'Total_Market_Value_min':Total_Market_Value_min,
+            'Total_Market_Value_max':Total_Market_Value_max,
             'states': selected_states,
             'first_name': request.POST.get('first_name', '').strip(),
             'last_name': request.POST.get('last_name', '').strip(),
@@ -153,10 +149,9 @@ def signup_wizard(request):
                 # 保存 Criterion 信息
                 criterion = Criterion.objects.create(
                     user=user,
-                    Total_Assessed_Value_min=Total_Assessed_Value_min or None,
-                    Total_Assessed_Value_max=Total_Assessed_Value_max or None,
-                    face_value_min=face_value_min or None,
-                    face_value_max=face_value_max or None,
+
+                    Total_Market_Value_min =Total_Market_Value_min or None,
+                    Total_Market_Value_max =Total_Market_Value_max or None
                 )
 
                 # 保存 Auction Type 信息
