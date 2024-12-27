@@ -30,6 +30,13 @@ class Command(BaseCommand):
             type=str,
             help='CSV 文件路径'
         )
+        # 定义可选的 auction_id 参数
+        parser.add_argument(
+            '--auction_id',
+            type=int,
+            help='绑定的 Auction ID（可选）',
+        )
+
 
     def handle(self, *args, **options):
         # 动态加载模型
@@ -39,46 +46,53 @@ class Command(BaseCommand):
 
         # 获取文件路径参数
         file_path = options['file_path']
+        auction_id = options.get('auction_id')  # 获取可选的 auction_id 参数
+
         if not os.path.exists(file_path):  # 检查文件路径是否存在
             self.stdout.write(self.style.ERROR(f"文件路径不存在：{file_path}"))
             return
 
         try:
+            # 如果传递了 auction_id，使用现有的 Auction
+            if auction_id:
+                try:
+                    auction = Auction.objects.get(id=auction_id)
+                    self.stdout.write(self.style.SUCCESS(f"使用现有 Auction，ID: {auction.id}"))
+                except Auction.DoesNotExist:
+                    self.stdout.write(self.style.ERROR(f"Auction ID {auction_id} 不存在"))
+                    return
+            else:
+                # 创建 Auction 实例（如果没有提供 auction_id）
+                auction_data = {
+                    "auction_tax_year": "2024",  # 示例数据
+                    "auction_type": "tax lien",
+                    "is_online": "online",
+                    "deposit_deadline": None,
+                    "auction_start": None,
+                    "auction_end": None,
+                    "redemption_period": None,
+                    "foreclosure_date": None,
+                    "authority_name": "Example Authority",  # 示例数据
+                }
+
+                # 创建并保存 Auction
+                auction = Auction.objects.create(**auction_data)
+                self.stdout.write(self.style.SUCCESS(f"新建 Auction，ID: {auction.id}"))
+
             # 读取 CSV 文件
             df = pd.read_csv(file_path, encoding='utf-8')
             self.stdout.write(self.style.SUCCESS(f"成功读取文件：{file_path}"))
 
+            # 遍历每一行数据并创建 Property
             for index, row in df.iterrows():
-                auction_data = {}
                 property_data = {}
 
                 # 打印当前行号和数据
                 self.stdout.write(f"正在处理第 {index + 1} 行数据: {row.to_dict()}")
 
-                # 获取 Auction 数据
-                auction_data['auction_tax_year'] = row.get('auction_tax_year', '').strip()
-                auction_data['auction_type'] = row.get('auction_type', '').strip()
-                auction_data['is_online'] = row.get('is_online', '').strip()
-                auction_data['deposit_deadline'] = self.parse_csv_date(row.get('deposit_deadline', '').strip())
-                auction_data['auction_start'] = self.parse_csv_date(row.get('auction_start', '').strip())
-                auction_data['auction_end'] = self.parse_csv_date(row.get('auction_end', '').strip())
-                auction_data['redemption_period'] = row.get('redemption_period', '').strip()
-                auction_data['foreclosure_date'] = self.parse_csv_date(row.get('foreclosure_date', '').strip())
-                auction_data['authority_name'] = row.get('authority_name', '').strip()
-
-                # 创建 Auction 实例
                 try:
-                    clean_auction_data = {field: value for field, value in auction_data.items() if value not in [None, "", "nan"]}
-                    auction = Auction.objects.create(**clean_auction_data)
-                    self.stdout.write(self.style.SUCCESS(
-                        f"新建 Auction: {auction.authority_name} ({auction.auction_tax_year})"))
-                except Exception as e:
-                    self.stdout.write(self.style.WARNING(f"Auction 导入时出错: {e}"))
-                    continue
-
-                # 获取 Property 数据
-                try:
-                    property_data['auction'] = auction
+                    # 获取 Property 数据并绑定到 Auction
+                    property_data['auction'] = auction  # 绑定到指定的 Auction
                     property_data['face_value'] = row.get('face_value', 0)
                     property_data['batch_number'] = row.get('batch_number', '')
                     property_data['sort_no'] = row.get('sort_no', '')
@@ -144,7 +158,6 @@ class Command(BaseCommand):
                     except Exception as e:
                         self.stdout.write(self.style.WARNING(f"Owner 处理时出错: {e}"))
                         continue
-
 
                 except Exception as e:
                     self.stdout.write(self.style.WARNING(f"Property 导入时出错: {e}"))
