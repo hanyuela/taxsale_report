@@ -141,9 +141,9 @@
                     <h4 class="mb-3">Basic Scenario</h4>
                     <span>Grid with filtering, editing, inserting, deleting, sorting, and paging. Data provided by controller.</span>
                   </div>
-                  <div class="column-control" style="position: absolute; right: 20px; top: 40px; z-index: 1000;">
+                  <div class="column-control" style="position: absolute; right: 20px; top: 40px; ;">
                     <button id="columnSettings" class="btn btn-primary">
-                        <i class="fa fa-cog"></i> Configure Columns
+                        <i class="fa fa-cog"></i> Manage Columns
                     </button>
                 </div>                
                   <div class="card-body">
@@ -233,30 +233,48 @@
       // 页面加载时，读取保存的列设置
       window.addEventListener("load", function() {
         const savedColumnSettings = localStorage.getItem("columnSettings");
+        
         if (savedColumnSettings) {
-          const columnSettings = JSON.parse(savedColumnSettings);
-  
-          // 遍历复选框并设置其状态
-          document.querySelectorAll(".column-toggle").forEach(function (checkbox) {
-              const columnName = checkbox.dataset.column;
-              const isVisible = columnSettings[columnName];
-              checkbox.checked = isVisible; // 根据保存的设置更新复选框状态
-          });
-  
-          // 初始化表格列的显示状态
-          const grid = $("#basicScenario").data("JSGrid");
-          grid.fields.forEach(function(field) {
-            if (columnSettings.hasOwnProperty(field.name)) {
-              field.visible = columnSettings[field.name]; // 更新字段的 visible 属性
-            }
-          });
-  
-          // 更新表格并刷新
-          $("#basicScenario").jsGrid("option", "fields", grid.fields);
-          $("#basicScenario").jsGrid("refresh");
+            const columnSettings = JSON.parse(savedColumnSettings);
+
+            // 遍历复选框并设置其状态
+            document.querySelectorAll(".column-toggle").forEach(function (checkbox) {
+                const columnName = checkbox.dataset.column;
+                const isVisible = columnSettings[columnName];
+                checkbox.checked = isVisible; // 根据保存的设置更新复选框状态
+            });
+
+            // 初始化表格列的显示状态
+            const grid = $("#basicScenario").data("JSGrid");
+            grid.fields.forEach(function(field) {
+                if (columnSettings.hasOwnProperty(field.name)) {
+                    field.visible = columnSettings[field.name]; // 更新字段的 visible 属性
+                }
+            });
+
+            // 更新表格并刷新
+            $("#basicScenario").jsGrid("option", "fields", grid.fields);
+            $("#basicScenario").jsGrid("refresh");
+        } else {
+            // 如果没有保存的列设置，确保一开始默认所有列都可见
+            document.querySelectorAll(".column-toggle").forEach(function (checkbox) {
+                checkbox.checked = true; // 默认选中所有复选框
+            });
+
+            // 获取当前的 grid 对象并确保所有列可见
+            const grid = $("#basicScenario").data("JSGrid");
+            grid.fields.forEach(function(field) {
+                field.visible = true; // 设置每列的可见性为 true
+            });
+
+            // 更新表格并刷新
+            $("#basicScenario").jsGrid("option", "fields", grid.fields);
+            $("#basicScenario").jsGrid("refresh");
         }
       });
-  </script>
+
+            
+    </script>
     <script>
       window.addEventListener('resize', () => {
         const grid = $('#grid').data('JSGrid');
