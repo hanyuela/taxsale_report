@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     'dashboard',
     'criterion',
     'holdings',
+    'payments',
 ]
 
 MIDDLEWARE = [
@@ -111,3 +112,7 @@ EMAIL_HOST_PASSWORD = 'Soyhome@us2021!'
 
 MEDIA_URL = '/media/'  # 媒体文件的 URL 前缀
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')  # 媒体文件的存储路径
+
+# Stripe API 密钥
+STRIPE_PUBLIC_KEY = 'your-public-key'
+STRIPE_SECRET_KEY = 'your-secret-key'
