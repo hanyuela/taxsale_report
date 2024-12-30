@@ -43,9 +43,9 @@ class Property(models.Model):
     tax_amount_annual = models.DecimalField(max_digits=12, decimal_places=2)
     zillow_link = models.URLField(max_length=255, blank=True, null=True)
     redfin_link = models.URLField(max_length=255, blank=True, null=True)
-    Market_Land_Value= models.DecimalField(max_digits=12, decimal_places=2)
-    Market_Improvement_Value = models.DecimalField(max_digits=12, decimal_places=2)
-    Total_Market_Value = models.DecimalField(max_digits=12, decimal_places=2)
+    Market_Land_Value = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    Market_Improvement_Value = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    Total_Market_Value = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
     year_built = models.IntegerField()
     lot_size_sqft = models.DecimalField(max_digits=12, decimal_places=2)
     lot_size_acres = models.DecimalField(max_digits=12, decimal_places=2)
@@ -74,7 +74,12 @@ class Property(models.Model):
     )  # 新增字段：允许的值为 0~5，默认值为 0
 
     owners = models.ManyToManyField('Owner', related_name='properties')
-
+    # 新增字段
+    block = models.CharField(max_length=100, blank=True, null=True)  # Block
+    lot = models.CharField(max_length=100, blank=True, null=True)  # Lot
+    qualifier = models.CharField(max_length=100, blank=True, null=True)  # Qualifier
+    latitude = models.DecimalField(max_digits=10, decimal_places=6, null=True, blank=True)  # Latitude
+    longitude = models.DecimalField(max_digits=10, decimal_places=6, null=True, blank=True)  # Longitude
     def __str__(self):
         return self.street_address
 
@@ -104,7 +109,7 @@ class Owner(models.Model):
     email_4 = models.EmailField(blank=True, null=True)
     email_5 = models.EmailField(blank=True, null=True)
     
-    is_veteran = models.BooleanField(default=False)
+    Homestead_Exemptions = models.BooleanField(default=False)
     primary_address = models.CharField(max_length=255)
 
     def __str__(self):
