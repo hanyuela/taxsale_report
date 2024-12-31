@@ -72,7 +72,7 @@ def index(request):
 # 编辑个人资料页面
 @login_required
 def edit_profile(request):
-    return render(request, 'edit-profile.html')
+    return render(request, 'profile.html')
 
 
 # 错误页面
