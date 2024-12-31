@@ -113,7 +113,12 @@
                         {% if user.is_authenticated %}
                             <li><a href="{% url 'profile' %}"><i data-feather="user"></i><span>Profile</span></a></li>
                             <li><a href="{% static 'template/letter-box.html' %}"><i data-feather="mail"></i><span>Inbox</span></a></li>
-                            <li><a href="{% url 'edit-profile' %}"><i data-feather="settings"></i><span>Settings</span></a></li>
+                            <li>
+                                <a href="javascript:void(0);" id="openPaymentsPopup">
+                                  <i data-feather="credit-card"></i>
+                                  <span>Payments</span>
+                                </a>
+                              </li>                              
                             <li><a href="{% url 'logout' %}"><i data-feather="log-out"></i><span>Log out</span></a></li>
                         {% else %}
                             <li><a href="{% url 'login' %}"><i data-feather="log-in"></i><span>Log in</span></a></li>
@@ -124,6 +129,17 @@
         </div>
     </div>
 </div>
+<!-- 覆盖层 -->
+<div class="overlay" id="overlay" style="display: none;"></div>
+
+<!-- 支付中心弹窗 -->
+<div class="payment-popup" id="paymentPopup" style="display: none;">
+  <button class="close-btn" id="closePaymentPopup">&times;</button>
+  <div class="popup-content" id="paymentContent">
+    <!-- 动态加载的内容将插入到这里 -->
+  </div>
+</div>
+
 <!-- Page Header Ends-->
 <script>
     window.onload = function() {
@@ -135,3 +151,51 @@
         iconUse.setAttribute('xlink:href', href.replace('%23', '#'));
     };
 </script>
+<script>
+    // 获取元素
+    const paymentPopup = document.getElementById('paymentPopup');
+    const paymentContent = document.getElementById('paymentContent');
+    const overlay = document.getElementById('overlay');
+    const openPopupBtn = document.getElementById('openPaymentsPopup');
+    const closePopupBtn = document.getElementById('closePaymentPopup');
+  
+    // 点击导航栏 "Payments" 按钮，加载内容并显示弹窗
+    openPopupBtn.addEventListener('click', () => {
+      // 显示加载状态（可选）
+      paymentContent.innerHTML = '<p>Loading...</p>';
+  
+      // 使用 Fetch API 动态加载 payments.html
+      fetch('/payments/') // 替换为您的 payments.html 路径
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.text(); // 返回 HTML 内容
+        })
+        .then(html => {
+          // 将加载的 HTML 内容插入到弹窗中
+          paymentContent.innerHTML = html;
+  
+          // 显示弹窗和覆盖层
+          paymentPopup.style.display = 'block';
+          overlay.style.display = 'block';
+        })
+        .catch(error => {
+          paymentContent.innerHTML = '<p>Failed to load content. Please try again later.</p>';
+          console.error('There was a problem loading the payments file:', error);
+        });
+    });
+  
+    // 点击关闭按钮，隐藏弹窗
+    closePopupBtn.addEventListener('click', () => {
+      paymentPopup.style.display = 'none';
+      overlay.style.display = 'none';
+    });
+  
+    // 点击覆盖层隐藏弹窗
+    overlay.addEventListener('click', () => {
+      paymentPopup.style.display = 'none';
+      overlay.style.display = 'none';
+    });
+  </script>
+  
