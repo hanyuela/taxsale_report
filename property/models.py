@@ -87,9 +87,9 @@ class Property(models.Model):
 
 class Loan(models.Model):
     property = models.ForeignKey(Property, on_delete=models.CASCADE, related_name='loans')
-    loan_amount = models.DecimalField(max_digits=12, decimal_places=2)
-    loan_due_date = models.DateField()
-    loan_type = models.CharField(max_length=100)
+    loan_amount = models.DecimalField(max_digits=12, decimal_places=2,blank=True, null=True)
+    loan_due_date = models.DateField(blank=True, null=True)
+    loan_type = models.CharField(max_length=100,blank=True, null=True)
     
     def __str__(self):
         return f"Loan for {self.property.street_address}"
@@ -109,8 +109,8 @@ class Owner(models.Model):
     email_4 = models.EmailField(blank=True, null=True)
     email_5 = models.EmailField(blank=True, null=True)
     
-    Homestead_Exemptions = models.BooleanField(default=False)
-    primary_address = models.CharField(max_length=255)
+    Homestead_Exemptions = models.BooleanField(max_length=255, blank=True, null=True)
+    primary_address = models.CharField(max_length=255, blank=True, null=True)
 
     def __str__(self):
         return f"{self.name} - {self.phone_1} - {self.email_1}"

@@ -15,7 +15,7 @@ from holdings.models import Holding
 @login_required
 def datatable(request):
     PROPERTY_TYPE_MAPPING = {
-        "single_family_residential": "Single-Family",
+        "single_family_residential": "Single Family Residential",
         "multi_family_residential": "Multi-Family",
         "other_residential": "Other Residential",
         "commercial": "Commercial",
@@ -130,22 +130,26 @@ def datatable(request):
 
 
     # 构造数据供模板渲染
+    seen_properties = set()
     data = []
+
     for auction in auctions:
         for property in auction.properties.all():
-            data.append({
-                "city": property.city,
-                "state": property.state,
-                "property_type": property.property_class,
-                "is_online": auction.is_online,
-                "auction_type": auction.auction_type,
-                "amount_in_sale": property.face_value,
-                "deposit_deadline": auction.deposit_deadline,
-                "foreclose_score": property.foreclose_score,
-                "property_id": property.id,
-                "property_class": property.property_class,
-                "street_address": property.street_address
-            })
+            if property.id not in seen_properties:  # 检查是否已处理过
+                seen_properties.add(property.id)
+                data.append({
+                    "city": property.city,
+                    "state": property.state,
+                    "property_type": property.property_class,
+                    "is_online": auction.is_online,
+                    "auction_type": auction.auction_type,
+                    "amount_in_sale": property.face_value,
+                    "deposit_deadline": auction.deposit_deadline,
+                    "foreclose_score": property.foreclose_score,
+                    "property_id": property.id,
+                    "property_class": property.property_class,
+                    "street_address": property.street_address
+                })
 
     return render(request, "datatable.html", {
         "data": data,
