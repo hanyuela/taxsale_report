@@ -32,7 +32,7 @@ class Payment_history(models.Model):  # 模型名称为 Payment_history
         ordering = ['-date', '-time']
 
 
-class Payment_methd(models.Model):  # 使用您指定的模型名称
+class Payment_method(models.Model):  # 使用您指定的模型名称
     PAYMENT_METHODS = [
         ('credit_card', 'Credit Card'),
         ('paypal', 'PayPal'),

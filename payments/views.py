@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
-from payments.models import Payment_methd, Payment_history
+from payments.models import Payment_method, Payment_history
 import stripe
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.timezone import now
@@ -19,7 +19,7 @@ def payments(request):
 
     # 查询用户的付款记录和支付方式
     payment_history = Payment_history.objects.filter(user=user).order_by('-date', '-time')
-    payment_methods = Payment_methd.objects.filter(user=user)
+    payment_methods = Payment_method.objects.filter(user=user)
 
     # 示例的订阅信息
     subscription = {
@@ -54,7 +54,7 @@ def add_funds(request):
                 return JsonResponse({'status': 'error', 'message': 'Invalid amount'})
 
             # 获取支付方式
-            payment_method = Payment_methd.objects.get(id=payment_method_id, user=request.user)
+            payment_method = Payment_method.objects.get(id=payment_method_id, user=request.user)
 
             # 保存到 Payment_history
             Payment_history.objects.create(
@@ -67,7 +67,7 @@ def add_funds(request):
             )
             return JsonResponse({'status': 'success', 'message': 'Funds added successfully!'})
 
-        except Payment_methd.DoesNotExist:
+        except Payment_method.DoesNotExist:
             return JsonResponse({'status': 'error', 'message': 'Invalid payment method'})
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)})
