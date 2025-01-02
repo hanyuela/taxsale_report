@@ -69,10 +69,7 @@ def index(request):
         return redirect('login')  # 用户未登录，重定向到登录页面
     
 
-# 编辑个人资料页面
-@login_required
-def edit_profile(request):
-    return render(request, 'profile.html')
+
 
 
 # 错误页面

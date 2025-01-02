@@ -15,7 +15,6 @@ urlpatterns = [
     path('login/', views.user_login, name='login'),
     path('logout/', views.logout, name='logout'),
     path('index/', views.index, name='index'),
-    path('edit-profile/', views.edit_profile, name='edit-profile'),
     path('datatable/', property_views.datatable, name='datatable'),  # 更新为 property app 的视图
     path('error/', views.error_503, name='error_503'),
     path('sign-up-wizard/', views.signup_wizard, name='sign-up-wizard'),
