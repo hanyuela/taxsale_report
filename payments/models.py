@@ -40,14 +40,14 @@ class Payment_method(models.Model):  # 使用您指定的模型名称
         ('stripe', 'Stripe'),
     ]
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='payment_methods', verbose_name='用户')
-    method = models.CharField(max_length=20, choices=PAYMENT_METHODS, verbose_name='支付方式')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='payment_methods', verbose_name='user')
+    method = models.CharField(max_length=20, choices=PAYMENT_METHODS, verbose_name='Payment_method')
     stripe_payment_method_id = models.CharField(max_length=255, null=True, blank=True, verbose_name='Stripe Payment Method ID')
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='create time')
 
     def __str__(self):
         return f"{self.user.username} - {self.method}"
 
     class Meta:
-        verbose_name = '支付方式'
-        verbose_name_plural = '支付方式'
+        verbose_name = 'Payment_method'
+        verbose_name_plural = 'Payment_method'

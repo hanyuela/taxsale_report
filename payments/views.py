@@ -111,3 +111,11 @@ def apply_coupon(request):
             return JsonResponse({'status': 'error', 'message': str(e)})
 
     return JsonResponse({'status': 'error', 'message': 'Invalid request method.'})
+
+
+def payment_methods_view(request):
+    # 获取当前用户的支付方式
+    user_payment_methods = Payment_method.objects.filter(user=request.user)
+    return render(request, 'payment_methods.html', {
+        'payment_methods': user_payment_methods
+    })
