@@ -87,6 +87,7 @@
     .card input[type="radio"],
     .card input[type="checkbox"] {
       margin-left: 10px; /* 增加左边距 */
+      margin-bottom: 20px;
     }
 
     /* 标签与输入框对齐 */
@@ -106,6 +107,32 @@
     .card-footer .btn {
       margin-top: 10px;
       padding: 10px 20px;
+    }
+    .apply-btn {
+      display: block;
+      margin-left: auto;
+      margin-right: 0;
+    }
+    .radio-option {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px; /* 增加每个选项的间距 */
+    }
+    
+    .radio-option label {
+      flex: 1; /* 标签占据左侧空间 */
+    }
+    
+    .radio-option input[type="radio"] {
+      margin: 0;
+      vertical-align: middle; /* 确保按钮垂直居中 */
+    }
+    p {
+      font-size: 14px;
+      letter-spacing: 0.7px;
+      margin-left: 10px;
+      line-height: 1.7;
     }
   </style>
 <body>
@@ -142,51 +169,172 @@
       <!-- Container-fluid starts-->
       <div class="container">
         <div class="row">
+
           <!-- 左侧内容 -->
           <div class="col-md-6">
             <div class="card">
-              <div class="card-header">
-                <h4 class="card-title">Remaining Balance</h4>
-              </div>
               <div class="card-body">
+                <!-- Remaining Balance -->
                 <div class="form-group">
                   <label for="remaining_balance">Remaining Balance</label>
                   <input class="form-control" id="remaining_balance" type="text" value="$99" disabled>
                 </div>
-                <div class="form-group">
-                  <label for="amount">Add Funds</label>
-                  <input class="form-control" id="amount" type="number" placeholder="Enter amount">
+          
+                <!-- 分隔线 -->
+                <hr class="my-4">
+          
+                <!-- Payment Method Selection -->
+                <div id="payment-method-section">
+                  <div class="form-group">
+                    <label for="amount">Add Funds</label>
+                    <input class="form-control" id="amount" type="number" placeholder="Enter amount">
+                  </div>
+                  <!-- Select Payment Method -->
+                  <div class="form-group">
+                    <label>Select Payment Method</label>
+                    {% if payment_methods.exists %}
+                      {% for method in payment_methods %}
+                        <div class="radio-option">
+                          <!-- 显示支付方式名称 -->
+                          <label>
+                            {{ method.get_method_display }} 
+                            <br>
+                            <small class="text-muted">
+                              Stripe ID: {{ method.stripe_payment_method_id|default:"N/A" }}<br>
+                              Created at: {{ method.created_at|date:"Y-m-d H:i:s" }}
+                            </small>
+                          </label>
+                          <!-- 单选按钮 -->
+                          <input type="radio" name="payment_method" value="{{ method.method }}">
+                        </div>
+                      {% endfor %}
+                    {% else %}
+                      <p class="text-muted">No payment methods available. Please add one.</p>
+                    {% endif %}
+                  </div>
+                  
+
+          
+                  <!-- Add Payment Method -->
+                  <div class="form-group">
+                    <label>Add Payment Method</label>
+                    <div class="radio-option">
+                      <p>Debit or Credit Card</p>
+                      <input type="radio" name="payment_method" value="credit_card">
+                    </div>
+                    <div class="radio-option">
+                      <p>PayPal</p>
+                      <input type="radio" name="payment_method" value="paypal">
+                    </div>
+                    <div class="radio-option">
+                      <p>Wire Transfer</p>
+                      <input type="radio" name="payment_method" value="add_wire_transfer">
+                    </div>
+                  </div>
+          
+                  <!-- Next 按钮 -->
+                  <div class="text-end mt-4">
+                    <button id="apply-btn" class="btn btn-primary">Next</button>
+                  </div>
                 </div>
-                <div class="form-group">
-                  <label for="payment_method">Select Payment Method</label>
-                  <ul class="list-group">
-                    {% for method in payment_methods %}
-                    <li class="list-group-item" data-method-id="{{ method.id }}">
-                      <i class="fa fa-cc-{{ method.method|lower }}"></i> {{ method.method }}
-                    </li>
-                    {% empty %}
-                    <li class="list-group-item">No payment methods available</li>
-                    {% endfor %}
-                  </ul>
-                </div>
-                <div class="form-group">
-                  <label for="add_payment_method">Add Payment Method</label>
-                  <select class="form-control" id="add_payment_method">
-                    <option value="credit_card">Debit or Credit Card</option>
-                    <option value="paypal">PayPal</option>
-                    <option value="wire_transfer">Wire Transfer</option>
-                  </select>
+          
+                <!-- Add Payment Form (隐藏的内容) -->
+                <div id="add-payment-form" style="display: none;">
+                  <h4>Debit or Credit Card</h4>
+                  <div class="form-group">
+                    <label for="card_name">Name on Card</label>
+                    <input class="form-control" id="card_name" type="text" placeholder="Enter cardholder name">
+                  </div>
+                  <div class="form-group">
+                    <label for="card_number">Card Number</label>
+                    <input class="form-control" id="card_number" type="text" placeholder="Enter card number">
+                  </div>
+                  <div class="form-row">
+                    <div class="form-group col-md-6">
+                      <label for="expiry_date">MM/YY</label>
+                      <input class="form-control" id="expiry_date" type="text" placeholder="MM/YY">
+                    </div>
+                    <div class="form-group col-md-6">
+                      <label for="cvv">CVV</label>
+                      <input class="form-control" id="cvv" type="text" placeholder="CVV">
+                    </div>
+                  </div>
+                  <p class="text-muted mt-2">
+                    <small>Your payment methods are saved and stored securely. Terms apply.</small>
+                  </p>
+          
+                  <!-- Billing Address -->
+                  <h5 class="mt-4">Billing Address</h5>
+                  <div>
+                    <!-- Saved Billing Address -->
+                    <div class="radio-option">
+                      <input type="radio" id="saved_billing_1" name="billing_address" value="saved_address_1">
+                      <label for="saved_billing_1">
+                        <strong>Hanyue Wang</strong><br>
+                        1515 Colby Ave Apt 104, Los Angeles, CA, US, 90025
+                      </label>
+                    </div>
+          
+                    <!-- Add New Billing Address -->
+                    <div class="mt-3">
+                      <a href="#" id="add-billing-address-link" class="text-primary">Add billing address</a>
+                    </div>
+          
+                    <!-- New Billing Address Form -->
+                    <div id="new-billing-address-form" style="display: none; margin-top: 20px;">
+                      <h5>Add Billing Address</h5>
+                      <div class="form-group">
+                        <label for="country_region">Country or Region</label>
+                        <input class="form-control" id="country_region" type="text" value="United States" readonly>
+                      </div>
+                      <div class="form-group">
+                        <label for="full_name">Full Name</label>
+                        <input class="form-control" id="full_name" type="text" placeholder="Full name">
+                      </div>
+                      <div class="form-group">
+                        <label for="business_name">Business Name (if applicable)</label>
+                        <input class="form-control" id="business_name" type="text" placeholder="Business name">
+                      </div>
+                      <div class="form-group">
+                        <label for="address">Address</label>
+                        <input class="form-control" id="address" type="text" placeholder="Address">
+                      </div>
+                      <div class="form-group">
+                        <label for="address_line_2">Address Line 2 (optional)</label>
+                        <input class="form-control" id="address_line_2" type="text" placeholder="Address line 2 (optional)">
+                      </div>
+                      <div class="form-row">
+                        <div class="form-group col-md-6">
+                          <label for="city">City</label>
+                          <input class="form-control" id="city" type="text" placeholder="City">
+                        </div>
+                        <div class="form-group col-md-3">
+                          <label for="state">State</label>
+                          <input class="form-control" id="state" type="text" placeholder="State">
+                        </div>
+                        <div class="form-group col-md-3">
+                          <label for="zip_code">ZIP Code</label>
+                          <input class="form-control" id="zip_code" type="text" placeholder="ZIP code">
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+          
+                  <!-- Save Button -->
+                  <div class="text-end mt-4">
+                    <button class="btn btn-primary">Save</button>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
+          
+
+
       
           <!-- 右侧内容 -->
           <div class="col-md-6">
             <div class="card">
-              <div class="card-header">
-                <h4 class="card-title">Subscription</h4>
-              </div>
               <div class="card-body">
                 <div class="form-group">
                   <label>Subscription Information</label>
@@ -197,22 +345,22 @@
                   <p>Next Payment Amount: $5.00</p>
                 </div>
                 <div class="form-group">
-                  <button class="btn btn-primary w-100">Cancel Next Subscription</button>
-                </div>
+                  <button class="btn btn-primary" style="margin-top: 15px; margin-bottom: 15px; margin-left: 10px;">
+                    Cancel Next Subscription
+                  </button>
+                </div>                
                 <div class="form-group">
                   <label for="coupon">Use Coupon</label>
-                  <input class="form-control" id="coupon" type="text" placeholder="Enter coupon code">
-                </div>
-              </div>
-              <div class="col-md-3 mt-4">
-                <button id="apply-btn" class="btn btn-primary w-100">Apply</button>
-              </div>
+                  <div style="display: flex; align-items: center;">
+                    <input class="form-control" id="coupon" type="text" placeholder="Enter coupon code" style="flex: 1; margin-right: 10px; height: 38px;">
+                    <button id="apply-btn" class="btn btn-primary" style="height: 38px; margin-bottom: 20px;">Apply</button>
+                  </div>
+                </div>                              
+              </div>  
             </div>
           </div>
         </div>
       </div>
-      
-      
       
       <!-- Container-fluid Ends-->
     </div>
@@ -249,47 +397,41 @@
 <script src="{% static 'js/script.js' %}"></script>
 <script src="{% static 'js/theme-customizer/customizer.js' %}"></script>
 <!-- Plugin used-->
+
 <script>
   document.getElementById('apply-btn').addEventListener('click', function () {
-    const amount = document.getElementById('amount').value; // 获取金额
-    const selectedMethod = document.querySelector('.payment-methods li'); // 获取选中的支付方式
-    const paymentMethodId = selectedMethod ? selectedMethod.getAttribute('data-method-id') : null;
+    const paymentOptions = document.getElementsByName('payment_method');
+    let selectedOption = null;
 
-    if (!amount || amount <= 0) {
-      alert('Please enter a valid amount.');
-      return;
-    }
+    // 遍历单选按钮，获取选中的值
+    paymentOptions.forEach(option => {
+      if (option.checked) {
+        selectedOption = option.value;
+      }
+    });
 
-    if (!paymentMethodId) {
+    if (selectedOption) {
+      if (selectedOption === 'credit_card' || selectedOption === 'paypal' || selectedOption === 'add_wire_transfer') {
+        // 如果选中的是 Add Payment Method 下的选项，跳转到隐藏表单
+        document.getElementById('payment-method-section').style.display = 'none'; // 隐藏选择区域
+        document.getElementById('add-payment-form').style.display = 'block'; // 显示添加付款方式表单
+      } else {
+        // 如果选中的是 Select Payment Method 下的选项，执行其他逻辑
+        alert('Proceeding with the selected saved payment method: ' + selectedOption);
+        // 在这里可以加入直接支付的逻辑
+      }
+    } else {
+      // 如果没有选中任何选项，提示用户选择
       alert('Please select a payment method.');
-      return;
     }
+  });
 
-    // 提交数据到后端
-    fetch('/add-funds/', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRFToken': '{{ csrf_token }}', // 确保 CSRF Token 存在
-      },
-      body: JSON.stringify({
-        amount: amount,
-        payment_method_id: paymentMethodId, // 发送支付方式 ID
-      }),
-    })
-      .then(response => response.json())
-      .then(data => {
-        if (data.status === 'success') {
-          alert(data.message); // 成功提示
-          location.reload(); // 刷新页面
-        } else {
-          alert(data.message); // 错误提示
-        }
-      })
-      .catch(error => {
-        console.error('Error:', error);
-        alert('An error occurred. Please try again later.');
-      });
+  // 处理账单地址部分的显示和隐藏
+  document.getElementById('add-billing-address-link').addEventListener('click', function (e) {
+    e.preventDefault();
+    const form = document.getElementById('new-billing-address-form');
+    form.style.display = form.style.display === 'none' ? 'block' : 'none';
   });
 </script>
+
 
