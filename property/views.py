@@ -47,8 +47,19 @@ def datatable(request):
         # 按 states 筛选
         if user_criteria.states.exists():
             state_ids = user_criteria.states.values_list('id', flat=True)
-            abbreviations = States.objects.filter(id__in=state_ids).values_list('abbreviation', flat=True)
-            auctions = auctions.filter(properties__state__in=abbreviations)
+            # 获取对应的缩写和全称
+            states = States.objects.filter(id__in=state_ids)
+            
+            # 提取出缩写和全称（假设全称字段是 state）
+            abbreviations = states.values_list('abbreviation', flat=True)
+            full_names = states.values_list('state', flat=True)  # 改成 'state' 字段
+
+            # 将两者合并成一个集合
+            all_states = set(abbreviations) | set(full_names)
+
+            # 过滤 auctions，支持缩写和全称
+            auctions = auctions.filter(properties__state__in=all_states)
+
 
         # 按 property_type 筛选
         if user_criteria.property_type:
