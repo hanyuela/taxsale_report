@@ -41,9 +41,9 @@ urlpatterns = [
     path('delete-task/<int:task_id>/', dashboard_views.delete_task, name='delete_task'),
     path('update-avatar/', views.update_avatar, name='update_avatar'),
     path('payments/', payments_views.payments, name='payments'),
-    path('add-funds/', payments_views.add_funds, name='add_funds'),
-    path('cancel-subscription/', payments_views.cancel_subscription, name='cancel_subscription'),
-    path('apply-coupon/', payments_views.apply_coupon, name='apply_coupon'),
+    path('save-payment-details/', payments_views.save_payment_details, name='save_payment_details'),
+    path('save-payment-method/', payments_views.save_payment_method, name='save_payment_method'),
+    path('save-billing-address/', payments_views.save_billing_address,name='save_billing_address')
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
