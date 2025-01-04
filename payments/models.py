@@ -51,3 +51,22 @@ class Payment_method(models.Model):  # 使用您指定的模型名称
     class Meta:
         verbose_name = 'Payment_method'
         verbose_name_plural = 'Payment_method'
+
+
+class BillingAddress(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='billing_addresses', verbose_name='User')
+    full_name = models.CharField(max_length=255, verbose_name='Full Name')
+    business_name = models.CharField(max_length=255, null=True, blank=True, verbose_name='Business Name (if applicable)')
+    address = models.CharField(max_length=255, verbose_name='Address')
+    address_line_2 = models.CharField(max_length=255, null=True, blank=True, verbose_name='Address Line 2')
+    city = models.CharField(max_length=100, verbose_name='City')
+    state = models.CharField(max_length=100, verbose_name='State')
+    zip_code = models.CharField(max_length=20, verbose_name='ZIP Code')
+    country_region = models.CharField(max_length=100, default="United States", verbose_name='Country or Region')
+
+    def __str__(self):
+        return f"{self.full_name}, {self.city}, {self.state}, {self.zip_code}"
+
+    class Meta:
+        verbose_name = 'Billing Address'
+        verbose_name_plural = 'Billing Addresses'
