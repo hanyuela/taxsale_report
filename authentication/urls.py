@@ -43,7 +43,8 @@ urlpatterns = [
     path('payments/', payments_views.payments, name='payments'),
     path('save-payment-details/', payments_views.save_payment_details, name='save_payment_details'),
     path('save-payment-method/', payments_views.save_payment_method, name='save_payment_method'),
-    path('save-billing-address/', payments_views.save_billing_address,name='save_billing_address')
+    path('save-billing-address/', payments_views.save_billing_address,name='save_billing_address'),
+    path('process-payment/', payments_views.process_payment,name='process_payment')
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
