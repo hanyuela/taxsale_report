@@ -88,7 +88,48 @@
                 }
             
                 // 保存新增字段到 /save_user_input/，仅提交修改的字段
-                const saveUserInputFields = ["Address", "City", "Zip", "Auction Authority", "State", "Amount In Sale", "Deposit Deadline", "Auction Start", "Auction End"];
+                const saveUserInputFields = [
+                    "Address", 
+                    "City", 
+                    "Zip", 
+                    "Auction Authority", 
+                    "State", 
+                    "Amount In Sale", 
+                    "Deposit Deadline", 
+                    "Auction Start", 
+                    "Auction End", 
+                    "Batch Number", 
+                    "Sort No", 
+                    "Bankruptcy Flag", 
+                    "Parcel Number", 
+                    "Property Class", 
+                    "Tax Overdue", 
+                    "Accessed Land Value", 
+                    "Accessed Improvement Value", 
+                    "Total Assessed Value", 
+                    "Tax Amount Annual", 
+                    "Zillow Link", 
+                    "Redfin Link", 
+                    "Market Land Value", 
+                    "Market Improvement Value", 
+                    "Total Market Value", 
+                    "Year Built", 
+                    "Lot Size (sqft)", 
+                    "Lot Size (acres)", 
+                    "Building Size (sqft)", 
+                    "Bedroom Number", 
+                    "Bathroom Number", 
+                    "Nearby Schools", 
+                    "Walk Score", 
+                    "Transit Score", 
+                    "Bike Score", 
+                    "Environmental Hazard Status", 
+                    "Flood Status", 
+                    "Flood Risk", 
+                    "Latest Sale Date", 
+                    "Latest Sale Price"
+                ];
+                
                 const userInputData = { property_id: item.property_id };
             
                 saveUserInputFields.forEach(field => {
@@ -251,6 +292,428 @@
                     return $cell;
                 }
             },
+            //新增字段
+            {
+                name: "Batch Number",
+                type: "text",
+                width: 150,
+                itemTemplate: function(value, item) {
+                    const isUserInput = item.is_user_input && item.is_user_input["Batch Number"];
+                    const color = isUserInput ? "#2b5f60" : "";
+                    const $cell = $("<div>")
+                        .text(value)
+                        .css("color", color)  // 仅设置文本颜色
+                        .css("background-color", ""); // 保持背景色为白色或默认色
+                    return $cell;
+                }
+            },
+            {
+                name: "Sort No",
+                type: "text",
+                width: 150,
+                itemTemplate: function(value, item) {
+                    const isUserInput = item.is_user_input && item.is_user_input["Sort No"];
+                    const color = isUserInput ? "#2b5f60" : "";
+                    const $cell = $("<div>")
+                        .text(value)
+                        .css("color", color)  // 仅设置文本颜色
+                        .css("background-color", ""); // 保持背景色为白色或默认色
+                    return $cell;
+                }
+            },
+            {
+                name: "Bankruptcy Flag",
+                type: "text",
+                width: 150,
+                itemTemplate: function(value, item) {
+                    const isUserInput = item.is_user_input && item.is_user_input["Bankruptcy Flag"];
+                    const color = isUserInput ? "#2b5f60" : "";
+                    const $cell = $("<div>")
+                        .text(value ? "Yes" : "No")
+                        .css("color", color)  // 仅设置文本颜色
+                        .css("background-color", ""); // 保持背景色为白色或默认色
+                    return $cell;
+                }
+            },
+            {
+                name: "Parcel Number",
+                type: "text",
+                width: 150,
+                itemTemplate: function(value, item) {
+                    const isUserInput = item.is_user_input && item.is_user_input["Parcel Number"];
+                    const color = isUserInput ? "#2b5f60" : "";
+                    const $cell = $("<div>")
+                        .text(value)
+                        .css("color", color)  // 仅设置文本颜色
+                        .css("background-color", ""); // 保持背景色为白色或默认色
+                    return $cell;
+                }
+            },
+            {
+                name: "Property Class",
+                type: "text",
+                width: 150,
+                itemTemplate: function(value, item) {
+                    const isUserInput = item.is_user_input && item.is_user_input["Property Class"];
+                    const color = isUserInput ? "#2b5f60" : "";
+                    const $cell = $("<div>")
+                        .text(value)
+                        .css("color", color)  // 仅设置文本颜色
+                        .css("background-color", ""); // 保持背景色为白色或默认色
+                    return $cell;
+                }
+            },
+            {
+                name: "Tax Overdue",
+                type: "text",
+                width: 150,
+                itemTemplate: function(value, item) {
+                    const isUserInput = item.is_user_input && item.is_user_input["Tax Overdue"];
+                    const color = isUserInput ? "#2b5f60" : "";
+                    const $cell = $("<div>")
+                        .text(value)
+                        .css("color", color)  // 仅设置文本颜色
+                        .css("background-color", ""); // 保持背景色为白色或默认色
+                    return $cell;
+                }
+            },
+            {
+                name: "Accessed Land Value",
+                type: "text",
+                width: 150,
+                itemTemplate: function(value, item) {
+                    const isUserInput = item.is_user_input && item.is_user_input["Accessed Land Value"];
+                    const color = isUserInput ? "#2b5f60" : "";
+                    const $cell = $("<div>")
+                        .text(value)
+                        .css("color", color)  // 仅设置文本颜色
+                        .css("background-color", ""); // 保持背景色为白色或默认色
+                    return $cell;
+                }
+            },
+            {
+                name: "Accessed Improvement Value",
+                type: "text",
+                width: 150,
+                itemTemplate: function(value, item) {
+                    const isUserInput = item.is_user_input && item.is_user_input["Accessed Improvement Value"];
+                    const color = isUserInput ? "#2b5f60" : "";
+                    const $cell = $("<div>")
+                        .text(value)
+                        .css("color", color)  // 仅设置文本颜色
+                        .css("background-color", ""); // 保持背景色为白色或默认色
+                    return $cell;
+                }
+            },
+            {
+                name: "Total Assessed Value",
+                type: "text",
+                width: 150,
+                itemTemplate: function(value, item) {
+                    const isUserInput = item.is_user_input && item.is_user_input["Total Assessed Value"];
+                    const color = isUserInput ? "#2b5f60" : "";
+                    const $cell = $("<div>")
+                        .text(value)
+                        .css("color", color)  // 仅设置文本颜色
+                        .css("background-color", ""); // 保持背景色为白色或默认色
+                    return $cell;
+                }
+            },
+            {
+                name: "Tax Amount Annual",
+                type: "text",
+                width: 150,
+                itemTemplate: function(value, item) {
+                    const isUserInput = item.is_user_input && item.is_user_input["Tax Amount Annual"];
+                    const color = isUserInput ? "#2b5f60" : "";
+                    const $cell = $("<div>")
+                        .text(value)
+                        .css("color", color)  // 仅设置文本颜色
+                        .css("background-color", ""); // 保持背景色为白色或默认色
+                    return $cell;
+                }
+            },
+            {
+                name: "Zillow Link",
+                type: "text",
+                width: 150,
+                itemTemplate: function(value, item) {
+                    const isUserInput = item.is_user_input && item.is_user_input["Zillow Link"];
+                    const color = isUserInput ? "#2b5f60" : "";
+                    const $cell = $("<div>")
+                        .text(value)
+                        .css("color", color)  // 仅设置文本颜色
+                        .css("background-color", ""); // 保持背景色为白色或默认色
+                    return $cell;
+                }
+            },
+            {
+                name: "Redfin Link",
+                type: "text",
+                width: 150,
+                itemTemplate: function(value, item) {
+                    const isUserInput = item.is_user_input && item.is_user_input["Redfin Link"];
+                    const color = isUserInput ? "#2b5f60" : "";
+                    const $cell = $("<div>")
+                        .text(value)
+                        .css("color", color)  // 仅设置文本颜色
+                        .css("background-color", ""); // 保持背景色为白色或默认色
+                    return $cell;
+                }
+            },
+            {
+                name: "Market Land Value",
+                type: "text",
+                width: 150,
+                itemTemplate: function(value, item) {
+                    const isUserInput = item.is_user_input && item.is_user_input["Market Land Value"];
+                    const color = isUserInput ? "#2b5f60" : "";
+                    const $cell = $("<div>")
+                        .text(value)
+                        .css("color", color)  // 仅设置文本颜色
+                        .css("background-color", ""); // 保持背景色为白色或默认色
+                    return $cell;
+                }
+            },
+            {
+                name: "Market Improvement Value",
+                type: "text",
+                width: 150,
+                itemTemplate: function(value, item) {
+                    const isUserInput = item.is_user_input && item.is_user_input["Market Improvement Value"];
+                    const color = isUserInput ? "#2b5f60" : "";
+                    const $cell = $("<div>")
+                        .text(value)
+                        .css("color", color)  // 仅设置文本颜色
+                        .css("background-color", ""); // 保持背景色为白色或默认色
+                    return $cell;
+                }
+            },
+            {
+                name: "Total Market Value",
+                type: "text",
+                width: 150,
+                itemTemplate: function(value, item) {
+                    const isUserInput = item.is_user_input && item.is_user_input["Total Market Value"];
+                    const color = isUserInput ? "#2b5f60" : "";
+                    const $cell = $("<div>")
+                        .text(value)
+                        .css("color", color)  // 仅设置文本颜色
+                        .css("background-color", ""); // 保持背景色为白色或默认色
+                    return $cell;
+                }
+            },
+            {
+                name: "Year Built",
+                type: "text",
+                width: 150,
+                itemTemplate: function(value, item) {
+                    const isUserInput = item.is_user_input && item.is_user_input["Year Built"];
+                    const color = isUserInput ? "#2b5f60" : "";
+                    const $cell = $("<div>")
+                        .text(value)
+                        .css("color", color)  // 仅设置文本颜色
+                        .css("background-color", ""); // 保持背景色为白色或默认色
+                    return $cell;
+                }
+            },
+            {
+                name: "Lot Size (sqft)",
+                type: "text",
+                width: 150,
+                itemTemplate: function(value, item) {
+                    const isUserInput = item.is_user_input && item.is_user_input["Lot Size (sqft)"];
+                    const color = isUserInput ? "#2b5f60" : "";
+                    const $cell = $("<div>")
+                        .text(value)
+                        .css("color", color)  // 仅设置文本颜色
+                        .css("background-color", ""); // 保持背景色为白色或默认色
+                    return $cell;
+                }
+            },
+            {
+                name: "Lot Size (acres)",
+                type: "text",
+                width: 150,
+                itemTemplate: function(value, item) {
+                    const isUserInput = item.is_user_input && item.is_user_input["Lot Size (acres)"];
+                    const color = isUserInput ? "#2b5f60" : "";
+                    const $cell = $("<div>")
+                        .text(value)
+                        .css("color", color)  // 仅设置文本颜色
+                        .css("background-color", ""); // 保持背景色为白色或默认色
+                    return $cell;
+                }
+            },
+            {
+                name: "Building Size (sqft)",
+                type: "text",
+                width: 150,
+                itemTemplate: function(value, item) {
+                    const isUserInput = item.is_user_input && item.is_user_input["Building Size (sqft)"];
+                    const color = isUserInput ? "#2b5f60" : "";
+                    const $cell = $("<div>")
+                        .text(value)
+                        .css("color", color)  // 仅设置文本颜色
+                        .css("background-color", ""); // 保持背景色为白色或默认色
+                    return $cell;
+                }
+            },
+            {
+                name: "Bedroom Number",
+                type: "text",
+                width: 150,
+                itemTemplate: function(value, item) {
+                    const isUserInput = item.is_user_input && item.is_user_input["Bedroom Number"];
+                    const color = isUserInput ? "#2b5f60" : "";
+                    const $cell = $("<div>")
+                        .text(value)
+                        .css("color", color)  // 仅设置文本颜色
+                        .css("background-color", ""); // 保持背景色为白色或默认色
+                    return $cell;
+                }
+            },
+            {
+                name: "Bathroom Number",
+                type: "text",
+                width: 150,
+                itemTemplate: function(value, item) {
+                    const isUserInput = item.is_user_input && item.is_user_input["Bathroom Number"];
+                    const color = isUserInput ? "#2b5f60" : "";
+                    const $cell = $("<div>")
+                        .text(value)
+                        .css("color", color)  // 仅设置文本颜色
+                        .css("background-color", ""); // 保持背景色为白色或默认色
+                    return $cell;
+                }
+            },
+            {
+                name: "Nearby Schools",
+                type: "text",
+                width: 150,
+                itemTemplate: function(value, item) {
+                    const isUserInput = item.is_user_input && item.is_user_input["Nearby Schools"];
+                    const color = isUserInput ? "#2b5f60" : "";
+                    const $cell = $("<div>")
+                        .text(value)
+                        .css("color", color)  // 仅设置文本颜色
+                        .css("background-color", ""); // 保持背景色为白色或默认色
+                    return $cell;
+                }
+            },
+            {
+                name: "Walk Score",
+                type: "text",
+                width: 150,
+                itemTemplate: function(value, item) {
+                    const isUserInput = item.is_user_input && item.is_user_input["Walk Score"];
+                    const color = isUserInput ? "#2b5f60" : "";
+                    const $cell = $("<div>")
+                        .text(value)
+                        .css("color", color)  // 仅设置文本颜色
+                        .css("background-color", ""); // 保持背景色为白色或默认色
+                    return $cell;
+                }
+            },
+            {
+                name: "Transit Score",
+                type: "text",
+                width: 150,
+                itemTemplate: function(value, item) {
+                    const isUserInput = item.is_user_input && item.is_user_input["Transit Score"];
+                    const color = isUserInput ? "#2b5f60" : "";
+                    const $cell = $("<div>")
+                        .text(value)
+                        .css("color", color)  // 仅设置文本颜色
+                        .css("background-color", ""); // 保持背景色为白色或默认色
+                    return $cell;
+                }
+            },
+            {
+                name: "Bike Score",
+                type: "text",
+                width: 150,
+                itemTemplate: function(value, item) {
+                    const isUserInput = item.is_user_input && item.is_user_input["Bike Score"];
+                    const color = isUserInput ? "#2b5f60" : "";
+                    const $cell = $("<div>")
+                        .text(value)
+                        .css("color", color)  // 仅设置文本颜色
+                        .css("background-color", ""); // 保持背景色为白色或默认色
+                    return $cell;
+                }
+            },
+            {
+                name: "Environmental Hazard Status",
+                type: "text",
+                width: 150,
+                itemTemplate: function(value, item) {
+                    const isUserInput = item.is_user_input && item.is_user_input["Environmental Hazard Status"];
+                    const color = isUserInput ? "#2b5f60" : "";
+                    const $cell = $("<div>")
+                        .text(value)
+                        .css("color", color)  // 仅设置文本颜色
+                        .css("background-color", ""); // 保持背景色为白色或默认色
+                    return $cell;
+                }
+            },
+            {
+                name: "Flood Status",
+                type: "text",
+                width: 150,
+                itemTemplate: function(value, item) {
+                    const isUserInput = item.is_user_input && item.is_user_input["Flood Status"];
+                    const color = isUserInput ? "#2b5f60" : "";
+                    const $cell = $("<div>")
+                        .text(value)
+                        .css("color", color)  // 仅设置文本颜色
+                        .css("background-color", ""); // 保持背景色为白色或默认色
+                    return $cell;
+                }
+            },
+            {
+                name: "Flood Risk",
+                type: "text",
+                width: 150,
+                itemTemplate: function(value, item) {
+                    const isUserInput = item.is_user_input && item.is_user_input["Flood Risk"];
+                    const color = isUserInput ? "#2b5f60" : "";
+                    const $cell = $("<div>")
+                        .text(value)
+                        .css("color", color)  // 仅设置文本颜色
+                        .css("background-color", ""); // 保持背景色为白色或默认色
+                    return $cell;
+                }
+            },
+            {
+                name: "Latest Sale Date",
+                type: "text",
+                width: 150,
+                itemTemplate: function(value, item) {
+                    const isUserInput = item.is_user_input && item.is_user_input["Latest Sale Date"];
+                    const color = isUserInput ? "#2b5f60" : "";
+                    const $cell = $("<div>")
+                        .text(value)
+                        .css("color", color)  // 仅设置文本颜色
+                        .css("background-color", ""); // 保持背景色为白色或默认色
+                    return $cell;
+                }
+            },
+            {
+                name: "Latest Sale Price",
+                type: "text",
+                width: 150,
+                itemTemplate: function(value, item) {
+                    const isUserInput = item.is_user_input && item.is_user_input["Latest Sale Price"];
+                    const color = isUserInput ? "#2b5f60" : "";
+                    const $cell = $("<div>")
+                        .text(value)
+                        .css("color", color)  // 仅设置文本颜色
+                        .css("background-color", ""); // 保持背景色为白色或默认色
+                    return $cell;
+                }
+            },
+            //新增结束
             
             { name: "My Bid", type: "text", width: 100 },
             {
