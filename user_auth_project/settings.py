@@ -113,6 +113,7 @@ EMAIL_HOST_PASSWORD = 'Soyhome@us2021!'
 MEDIA_URL = '/media/'  # 媒体文件的 URL 前缀
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')  # 媒体文件的存储路径
 
-# Stripe API 密钥
-STRIPE_PUBLIC_KEY = 'your-public-key'
-STRIPE_SECRET_KEY = 'your-secret-key'
+
+# Stripe 配置
+STRIPE_TEST_PUBLISHABLE_KEY = "pk_test_PD2ascVHzDPlb6wmo4bBKJUP00AHECz4dU"  # 替换为你的 Publishable Key
+STRIPE_TEST_SECRET_KEY = "sk_test_51FN1KgHzoCY5vXyDhcXO9SRUWBU2h94vRRsWDo6ilvSSaEVX9kD75k63uWT9dGw8VKYmQZpCvRBUb4zTcRdKK67g00B3LP1JP9"  # 替换为你的 Secret Key
