@@ -30,7 +30,6 @@ class Holding(models.Model):
 
 
 class UserInput(models.Model):
-    
     property = models.ForeignKey(Property, on_delete=models.CASCADE, related_name='user_inputs')  # 引用 Property 表
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_inputs')  # 引用 User 表
     street_address = models.CharField(max_length=255, blank=True)  # 完整地址
@@ -42,6 +41,38 @@ class UserInput(models.Model):
     auction_end = models.DateField(null=True, blank=True)  # 拍卖结束日期
     city = models.CharField(max_length=100)
     zip = models.CharField(max_length=20)
+    
+    # 新添加的字段
+    batch_number = models.CharField(max_length=50, blank=True)  # 批次号
+    sort_no = models.CharField(max_length=50, blank=True)  # 排序号
+    bankruptcy_flag = models.BooleanField(default=False)  # 是否破产标记
+    parcel_number = models.CharField(max_length=50, blank=True)  # 地块编号
+    property_class = models.CharField(max_length=255, blank=True)  # 房产类型
+    tax_overdue = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)  # 欠税
+    accessed_land_value = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)  # 土地评估价值
+    accessed_improvement_value = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)  # 改良评估价值
+    total_assessed_value = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)  # 总评估价值
+    tax_amount_annual = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)  # 年税额
+    zillow_link = models.URLField(max_length=255, blank=True, null=True)  # Zillow 链接
+    redfin_link = models.URLField(max_length=255, blank=True, null=True)  # Redfin 链接
+    Market_Land_Value = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)  # 市场土地价值
+    Market_Improvement_Value = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)  # 市场改良价值
+    Total_Market_Value = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)  # 总市场价值
+    year_built = models.IntegerField(null=True, blank=True)  # 建造年份
+    lot_size_sqft = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)  # 地块大小（平方英尺）
+    lot_size_acres = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)  # 地块大小（英亩）
+    building_size_sqft = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)  # 建筑大小（平方英尺）
+    bedroom_number = models.IntegerField(null=True, blank=True)  # 卧室数量
+    bathroom_number = models.IntegerField(null=True, blank=True)  # 浴室数量
+    nearby_schools = models.CharField(max_length=255, blank=True, null=True)  # 附近学校
+    walk_score = models.IntegerField(null=True, blank=True)  # 步行分数
+    transit_score = models.IntegerField(null=True, blank=True)  # 交通分数
+    bike_score = models.IntegerField(null=True, blank=True)  # 骑行分数
+    environmental_hazard_status = models.CharField(max_length=100, blank=True, null=True)  # 环境危险状况
+    flood_status = models.CharField(max_length=100, blank=True, null=True)  # 洪水状态
+    flood_risk = models.CharField(max_length=100, blank=True, null=True)  # 洪水风险
+    latest_sale_date = models.DateField(null=True, blank=True)  # 最新销售日期
+    latest_sale_price = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)  # 最新销售价格
 
     def __str__(self):
         return f"{self.property.name} - {self.user.username}"
