@@ -195,21 +195,21 @@
                     <div class="form-group">
                       <label>Select Payment Method</label>
                       {% if payment_methods.exists %}
-                        {% for method in payment_methods %}
-                          <div class="radio-option">
-                            <label>
-                              {{ method.get_method_display }}
-                              <br>
-                              <small class="text-muted">
-                                Stripe ID: {{ method.stripe_payment_method_id|default:"N/A" }}<br>
-                                Created at: {{ method.created_at|date:"Y-m-d H:i:s" }}
-                              </small>
-                            </label>
-                            <input type="radio" name="payment_method" value="{{ method.method }}">
-                          </div>
-                        {% endfor %}
+                      {% for method in payment_methods %}
+                      <div class="radio-option">
+                        <label>
+                          {{ method.get_method_display }}
+                          <br>
+                          <small class="text-muted">
+                            Stripe ID: {{ method.stripe_payment_method_id|default:"N/A" }}<br>
+                            Created at: {{ method.created_at|date:"Y-m-d H:i:s" }}
+                          </small>
+                        </label>
+                        <input type="radio" name="payment_method" value="{{ method.method }}">
+                      </div>
+                      {% endfor %}
                       {% else %}
-                        <p class="text-muted">No payment methods available. Please add one.</p>
+                      <p class="text-muted">No payment methods available. Please add one.</p>
                       {% endif %}
                     </div>
 
@@ -250,80 +250,81 @@
                       </div>
                       <div id="card-errors" class="text-danger mt-2" role="alert"></div>
 
+                      <!-- Back 和 Save 按钮 -->
                       <div class="text-end mt-4">
-                        <button id="save-payment-method-btn" class="btn btn-success">Save</button>
+                        <button type="button" id="back-btn" class="btn btn-outline-success me-2">Back</button>
+                        <button id="save-payment-method-btn" class="btn btn-primary">Save</button>
+                      </div>
+
+                      <!-- Billing Address -->
+                      <h5 class="mt-4">Billing Address</h5>
+                      <div>
+                        {% for address in billing_addresses %}
+                        <div class="radio-option">
+                          <input type="radio" id="billing_{{ forloop.counter }}" name="billing_address" value="{{ address.id }}">
+                          <label for="billing_{{ forloop.counter }}">
+                            <strong>{{ address.full_name }}</strong><br>
+                            {{ address.address }}{% if address.address_line_2 %}, {{ address.address_line_2 }}{% endif %}<br>
+                            {{ address.city }}, {{ address.state }}, {{ address.zip_code }}, {{ address.country_region }}
+                          </label>
+                        </div>
+                        {% empty %}
+                        <p class="text-muted">No billing addresses found. Please add one.</p>
+                        {% endfor %}
+
+                        <!-- Add New Billing Address -->
+                        <div class="mt-3">
+                          <a href="#" id="add-billing-address-link" class="text-primary">Add billing address</a>
+                        </div>
                       </div>
                     </div>
 
-                    <!-- Billing Address -->
-                    <h5 class="mt-4">Billing Address</h5>
-                    <div>
-                      <!-- Saved Billing Address -->
-                      <!-- 循环显示账单地址 -->
-                      {% for address in billing_addresses %}
-                      <div class="radio-option">
-                        <input type="radio" id="billing_{{ forloop.counter }}" name="billing_address" value="{{ address.id }}">
-                        <label for="billing_{{ forloop.counter }}">
-                          <strong>{{ address.full_name }}</strong><br>
-                          {{ address.address }}{% if address.address_line_2 %}, {{ address.address_line_2 }}{% endif %}<br>
-                          {{ address.city }}, {{ address.state }}, {{ address.zip_code }}, {{ address.country_region }}
-                        </label>
+                    <!-- Step 3: Add Billing Address -->
+                    <div id="new-billing-address-form" style="display: none;">
+                      <h5>Add Billing Address</h5>
+                      <div class="form-group">
+                        <label for="country_region">Country or Region</label>
+                        <input class="form-control" id="country_region" type="text" value="United States" readonly>
                       </div>
-                      {% empty %}
-                        <p class="text-muted">No billing addresses found. Please add one.</p>
-                      {% endfor %}
-
-                      <!-- Add New Billing Address -->
-                      <div class="mt-3">
-                        <a href="#" id="add-billing-address-link" class="text-primary">Add billing address</a>
+                      <div class="form-group">
+                        <label for="full_name">Full Name</label>
+                        <input class="form-control" id="full_name" type="text" placeholder="Full name">
+                      </div>
+                      <div class="form-group">
+                        <label for="business_name">Business Name (if applicable)</label>
+                        <input class="form-control" id="business_name" type="text" placeholder="Business name">
+                      </div>
+                      <div class="form-group">
+                        <label for="address">Address</label>
+                        <input class="form-control" id="address" type="text" placeholder="Address">
+                      </div>
+                      <div class="form-group">
+                        <label for="address_line_2">Address Line 2 (optional)</label>
+                        <input class="form-control" id="address_line_2" type="text" placeholder="Address line 2 (optional)">
+                      </div>
+                      <div class="form-row">
+                        <div class="form-group col-md-6">
+                          <label for="city">City</label>
+                          <input class="form-control" id="city" type="text" placeholder="City">
+                        </div>
+                        <div class="form-group col-md-3">
+                          <label for="state">State</label>
+                          <input class="form-control" id="state" type="text" placeholder="State">
+                        </div>
+                        <div class="form-group col-md-3">
+                          <label for="zip_code">ZIP Code</label>
+                          <input class="form-control" id="zip_code" type="text" placeholder="ZIP code">
+                        </div>
+                      </div>
+                      <div class="text-end mt-4">
+                        <button id="save-billing-address-btn" class="btn btn-primary">Save</button>
                       </div>
                     </div>
                   </form>
-
-                  <!-- Step 3: Add Billing Address -->
-                  <div id="new-billing-address-form" style="display: none;">
-                    <h5>Add Billing Address</h5>
-                    <div class="form-group">
-                      <label for="country_region">Country or Region</label>
-                      <input class="form-control" id="country_region" type="text" value="United States" readonly>
-                    </div>
-                    <div class="form-group">
-                      <label for="full_name">Full Name</label>
-                      <input class="form-control" id="full_name" type="text" placeholder="Full name">
-                    </div>
-                    <div class="form-group">
-                      <label for="business_name">Business Name (if applicable)</label>
-                      <input class="form-control" id="business_name" type="text" placeholder="Business name">
-                    </div>
-                    <div class="form-group">
-                      <label for="address">Address</label>
-                      <input class="form-control" id="address" type="text" placeholder="Address">
-                    </div>
-                    <div class="form-group">
-                      <label for="address_line_2">Address Line 2 (optional)</label>
-                      <input class="form-control" id="address_line_2" type="text" placeholder="Address line 2 (optional)">
-                    </div>
-                    <div class="form-row">
-                      <div class="form-group col-md-6">
-                        <label for="city">City</label>
-                        <input class="form-control" id="city" type="text" placeholder="City">
-                      </div>
-                      <div class="form-group col-md-3">
-                        <label for="state">State</label>
-                        <input class="form-control" id="state" type="text" placeholder="State">
-                      </div>
-                      <div class="form-group col-md-3">
-                        <label for="zip_code">ZIP Code</label>
-                        <input class="form-control" id="zip_code" type="text" placeholder="ZIP code">
-                      </div>
-                    </div>
-                    <div class="text-end mt-4">
-                      <button id="save-billing-address-btn" class="btn btn-success">Save</button>
-                    </div>
-                  </div>
                 </div>
               </div>
             </div>
+
 
           <!-- 右侧内容 -->
           <div class="col-md-6">
@@ -420,7 +421,18 @@
         alert('Please select a payment method.');
       }
     });
-  
+
+    // 返回上一步
+    document.getElementById('back-btn').addEventListener('click', function() {
+      // 隐藏地址页面
+      document.getElementById('new-billing-address-form').style.display = 'none';
+
+      // Step 2 -> Step 1
+      document.getElementById('add-payment-form').style.display = 'none';
+      document.getElementById('payment-method-section').style.display = 'block';
+    });
+
+
     // 保存支付方式（第二步）
     $('#save-payment-method-btn').click(function (e) {
       e.preventDefault();
