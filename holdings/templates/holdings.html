@@ -73,25 +73,133 @@
       .jsgrid .fa-eye {
         color: gray;  /* 改为灰色 */
       }
-      #columnOptions {
-        display: none; /* 默认隐藏 */
-        position: fixed; /* 固定位置 */
-        top: 50%; /* 距顶部 50% */
-        left: 50%; /* 距左侧 50% */
-        transform: translate(-50%, -50%); /* 中心对齐 */
-        z-index: 1000; /* 确保在其他元素上方 */
-        background: #fff; /* 背景颜色 */
-        padding: 20px; /* 内边距 */
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2); /* 添加阴影效果 */
-        border-radius: 8px; /* 圆角边框 */
-        width: 300px; /* 弹窗宽度 */
-        max-width: 80%; /* 保持弹窗在小屏幕上的适配 */
-        max-height: 80vh; /* 设置最大高度为视口高度的 80% */
-        overflow-y: auto; /* 超出内容时显示滚动条 */
-        text-align: left; /* 文本左对齐 */
-      }
+      
       .jsgrid-header-row {
         padding-right: 20px; /* 根据需要增加右边距 */
+      }
+      /* 弹窗样式 */
+      #columnOptions {
+          display: none; /* 默认隐藏 */
+          position: fixed;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          z-index: 1000;
+          background: #fff;
+          padding: 20px;
+          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+          border-radius: 8px;
+          width: 400px; /* 宽度 */
+          max-height: 80vh;
+          overflow-y: auto;
+          text-align: center;
+      }
+
+      /* 分页导航按钮 */
+      #tabNavigation {
+          display: flex;
+          justify-content: space-around;
+          margin-bottom: 15px;
+      }
+
+      .tab-button {
+          background-color: #f5f5f5; /* 按钮背景色 */
+          border: 1px solid #ddd; /* 边框 */
+          border-radius: 4px;
+          padding: 10px 20px;
+          cursor: pointer;
+          transition: background-color 0.3s ease, color 0.3s ease;
+          font-size: 14px;
+      }
+
+      .tab-button:hover {
+          background-color: #e0e0e0; /* 悬停效果 */
+      }
+
+      .tab-button.active {
+          background-color: #007bff; /* 激活背景色 */
+          color: white; /* 激活文字颜色 */
+          border-color: #007bff; /* 激活边框颜色 */
+      }
+
+      /* 分页内容样式 */
+      #tabContent {
+          border-top: 1px solid #ddd; /* 内容区顶部边框 */
+          padding-top: 15px;
+      }
+
+      .tab {
+          display: none; /* 默认隐藏 */
+          padding: 10px;
+          text-align: left; /* 内容左对齐 */
+      }
+
+      .tab.active {
+          display: block; /* 激活状态下显示 */
+      }
+
+      /* 列表样式 */
+      #columnSettingsList,
+      #sortableColumnList {
+          list-style-type: none; /* 移除默认列表样式 */
+          margin: 0;
+          padding: 0;
+      }
+
+      #columnSettingsList li,
+      #sortableColumnList li {
+          margin: 8px 0;
+          padding: 10px;
+          background: #f9f9f9; /* 列表项背景色 */
+          border: 1px solid #ddd; /* 列表项边框 */
+          border-radius: 4px; /* 圆角 */
+          display: flex;
+          align-items: center;
+          cursor: pointer;
+          transition: background-color 0.3s ease, box-shadow 0.3s ease;
+      }
+
+      #columnSettingsList li:hover,
+      #sortableColumnList li:hover {
+          background-color: #f1f1f1; /* 悬停背景色 */
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* 悬停阴影 */
+      }
+
+      /* 拖动项样式增强 */
+      .sortable-item.dragging {
+          background-color: #d1e7ff; /* 拖动时的背景色 */
+          border-color: #007bff; /* 拖动时的边框颜色 */
+          opacity: 0.8; /* 半透明效果 */
+          transform: scale(1.05); /* 放大效果 */
+          box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* 添加阴影效果 */
+          z-index: 1000; /* 确保拖动项位于最上层 */
+          position: relative; /* 解决阴影层级问题 */
+      }
+
+      /* 列表项悬停效果 */
+      #sortableColumnList li:hover {
+          background-color: #f1f1f1; /* 悬停背景色 */
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* 添加悬停时的阴影 */
+      }
+
+      /* 拖动目标位置高亮 */
+      .sortable-item.drop-target {
+          border: 2px dashed #007bff; /* 目标位置的虚线边框 */
+          background-color: #eaf4ff; /* 目标位置背景色 */
+      }
+
+      /* 滚动条样式（可选） */
+      #columnOptions::-webkit-scrollbar {
+          width: 8px;
+      }
+
+      #columnOptions::-webkit-scrollbar-thumb {
+          background-color: #ccc;
+          border-radius: 4px;
+      }
+
+      #columnOptions::-webkit-scrollbar-thumb:hover {
+          background-color: #999;
       }
       
     </style>  
@@ -157,59 +265,118 @@
       </div>
     </div>
 
-    <!-- 弹窗 -->
     <div id="columnOptions" class="modal">
       <h4>Manage Columns</h4>
-      <ul id="columnSettingsList">
-        <li><label><input type="checkbox" class="column-toggle" data-column="Address" checked> Address</label></li>
-        <li><label><input type="checkbox" class="column-toggle" data-column="City" checked> City</label></li>
-        <li><label><input type="checkbox" class="column-toggle" data-column="Zip" checked> Zip</label></li>
-        <li><label><input type="checkbox" class="column-toggle" data-column="Auction Authority" checked> Auction Authority</label></li>
-        <li><label><input type="checkbox" class="column-toggle" data-column="State" checked> State</label></li>
-        <li><label><input type="checkbox" class="column-toggle" data-column="Amount In Sale" checked> Amount In Sale</label></li>
-        <li><label><input type="checkbox" class="column-toggle" data-column="Deposit Deadline" checked> Deposit Deadline</label></li>
-        <li><label><input type="checkbox" class="column-toggle" data-column="Auction Start" checked> Auction Start</label></li>
-        <li><label><input type="checkbox" class="column-toggle" data-column="Auction End" checked> Auction End</label></li>
-        <li><label><input type="checkbox" class="column-toggle" data-column="My Bid" checked> My Bid</label></li>
-        <li><label><input type="checkbox" class="column-toggle" data-column="Label" checked> Status</label></li>   
-        <!-- 新字段 -->
-        <li><label><input type="checkbox" class="column-toggle" data-column="Batch Number" checked> Batch Number</label></li>
-        <li><label><input type="checkbox" class="column-toggle" data-column="Sort No" checked> Sort No</label></li>
-        <li><label><input type="checkbox" class="column-toggle" data-column="Bankruptcy Flag" checked> Bankruptcy Flag</label></li>
-        <li><label><input type="checkbox" class="column-toggle" data-column="Parcel Number" checked> Parcel Number</label></li>
-        <li><label><input type="checkbox" class="column-toggle" data-column="Property Class" checked> Property Class</label></li>
-        <li><label><input type="checkbox" class="column-toggle" data-column="Tax Overdue" checked> Tax Overdue</label></li>
-        <li><label><input type="checkbox" class="column-toggle" data-column="Accessed Land Value" checked> Accessed Land Value</label></li>
-        <li><label><input type="checkbox" class="column-toggle" data-column="Accessed Improvement Value" checked> Accessed Improvement Value</label></li>
-        <li><label><input type="checkbox" class="column-toggle" data-column="Total Assessed Value" checked> Total Assessed Value</label></li>
-        <li><label><input type="checkbox" class="column-toggle" data-column="Tax Amount Annual" checked> Tax Amount Annual</label></li>
-        <li><label><input type="checkbox" class="column-toggle" data-column="Zillow Link" checked> Zillow Link</label></li>
-        <li><label><input type="checkbox" class="column-toggle" data-column="Redfin Link" checked> Redfin Link</label></li>
-        <li><label><input type="checkbox" class="column-toggle" data-column="Market Land Value" checked> Market Land Value</label></li>
-        <li><label><input type="checkbox" class="column-toggle" data-column="Market Improvement Value" checked> Market Improvement Value</label></li>
-        <li><label><input type="checkbox" class="column-toggle" data-column="Total Market Value" checked> Total Market Value</label></li>
-        <li><label><input type="checkbox" class="column-toggle" data-column="Year Built" checked> Year Built</label></li>
-        <li><label><input type="checkbox" class="column-toggle" data-column="Lot Size (sqft)" checked> Lot Size (sqft)</label></li>
-        <li><label><input type="checkbox" class="column-toggle" data-column="Lot Size (acres)" checked> Lot Size (acres)</label></li>
-        <li><label><input type="checkbox" class="column-toggle" data-column="Building Size (sqft)" checked> Building Size (sqft)</label></li>
-        <li><label><input type="checkbox" class="column-toggle" data-column="Bedroom Number" checked> Bedroom Number</label></li>
-        <li><label><input type="checkbox" class="column-toggle" data-column="Bathroom Number" checked> Bathroom Number</label></li>
-        <li><label><input type="checkbox" class="column-toggle" data-column="Nearby Schools" checked> Nearby Schools</label></li>
-        <li><label><input type="checkbox" class="column-toggle" data-column="Walk Score" checked> Walk Score</label></li>
-        <li><label><input type="checkbox" class="column-toggle" data-column="Transit Score" checked> Transit Score</label></li>
-        <li><label><input type="checkbox" class="column-toggle" data-column="Bike Score" checked> Bike Score</label></li>
-        <li><label><input type="checkbox" class="column-toggle" data-column="Environmental Hazard Status" checked> Environmental Hazard Status</label></li>
-        <li><label><input type="checkbox" class="column-toggle" data-column="Flood Status" checked> Flood Status</label></li>
-        <li><label><input type="checkbox" class="column-toggle" data-column="Flood Risk" checked> Flood Risk</label></li>
-        <li><label><input type="checkbox" class="column-toggle" data-column="Latest Sale Date" checked> Latest Sale Date</label></li>
-        <li><label><input type="checkbox" class="column-toggle" data-column="Latest Sale Price" checked> Latest Sale Price</label></li>
-      </ul>    
+      
+      <!-- 分页导航 -->
+      <div id="tabNavigation">
+        <button class="tab-button active" data-tab="visibility">Column Visibility</button>
+        <button class="tab-button" data-tab="sorting">Column Sorting</button>
+      </div>
+    
+      <!-- 分页内容 -->
+      <div id="tabContent">
+        <!-- 显示/隐藏列功能 -->
+        <div id="visibility" class="tab active">
+          <ul id="columnSettingsList">
+            <li><label><input type="checkbox" class="column-toggle" data-column="Address" checked> Address</label></li>
+            <li><label><input type="checkbox" class="column-toggle" data-column="City" checked> City</label></li>
+            <li><label><input type="checkbox" class="column-toggle" data-column="Zip" checked> Zip</label></li>
+            <li><label><input type="checkbox" class="column-toggle" data-column="Auction Authority" checked> Auction Authority</label></li>
+            <li><label><input type="checkbox" class="column-toggle" data-column="State" checked> State</label></li>
+            <li><label><input type="checkbox" class="column-toggle" data-column="Amount In Sale" checked> Amount In Sale</label></li>
+            <li><label><input type="checkbox" class="column-toggle" data-column="Deposit Deadline" checked> Deposit Deadline</label></li>
+            <li><label><input type="checkbox" class="column-toggle" data-column="Auction Start" checked> Auction Start</label></li>
+            <li><label><input type="checkbox" class="column-toggle" data-column="Auction End" checked> Auction End</label></li>
+            <li><label><input type="checkbox" class="column-toggle" data-column="My Bid" checked> My Bid</label></li>
+            <li><label><input type="checkbox" class="column-toggle" data-column="Label" checked> Status</label></li>
+            <!-- 新字段 -->
+            <li><label><input type="checkbox" class="column-toggle" data-column="Batch Number" checked> Batch Number</label></li>
+            <li><label><input type="checkbox" class="column-toggle" data-column="Sort No" checked> Sort No</label></li>
+            <li><label><input type="checkbox" class="column-toggle" data-column="Bankruptcy Flag" checked> Bankruptcy Flag</label></li>
+            <li><label><input type="checkbox" class="column-toggle" data-column="Parcel Number" checked> Parcel Number</label></li>
+            <li><label><input type="checkbox" class="column-toggle" data-column="Property Class" checked> Property Class</label></li>
+            <li><label><input type="checkbox" class="column-toggle" data-column="Tax Overdue" checked> Tax Overdue</label></li>
+            <li><label><input type="checkbox" class="column-toggle" data-column="Accessed Land Value" checked> Accessed Land Value</label></li>
+            <li><label><input type="checkbox" class="column-toggle" data-column="Accessed Improvement Value" checked> Accessed Improvement Value</label></li>
+            <li><label><input type="checkbox" class="column-toggle" data-column="Total Assessed Value" checked> Total Assessed Value</label></li>
+            <li><label><input type="checkbox" class="column-toggle" data-column="Tax Amount Annual" checked> Tax Amount Annual</label></li>
+            <li><label><input type="checkbox" class="column-toggle" data-column="Zillow Link" checked> Zillow Link</label></li>
+            <li><label><input type="checkbox" class="column-toggle" data-column="Redfin Link" checked> Redfin Link</label></li>
+            <li><label><input type="checkbox" class="column-toggle" data-column="Market Land Value" checked> Market Land Value</label></li>
+            <li><label><input type="checkbox" class="column-toggle" data-column="Market Improvement Value" checked> Market Improvement Value</label></li>
+            <li><label><input type="checkbox" class="column-toggle" data-column="Total Market Value" checked> Total Market Value</label></li>
+            <li><label><input type="checkbox" class="column-toggle" data-column="Year Built" checked> Year Built</label></li>
+            <li><label><input type="checkbox" class="column-toggle" data-column="Lot Size (sqft)" checked> Lot Size (sqft)</label></li>
+            <li><label><input type="checkbox" class="column-toggle" data-column="Lot Size (acres)" checked> Lot Size (acres)</label></li>
+            <li><label><input type="checkbox" class="column-toggle" data-column="Building Size (sqft)" checked> Building Size (sqft)</label></li>
+            <li><label><input type="checkbox" class="column-toggle" data-column="Bedroom Number" checked> Bedroom Number</label></li>
+            <li><label><input type="checkbox" class="column-toggle" data-column="Bathroom Number" checked> Bathroom Number</label></li>
+            <li><label><input type="checkbox" class="column-toggle" data-column="Nearby Schools" checked> Nearby Schools</label></li>
+            <li><label><input type="checkbox" class="column-toggle" data-column="Walk Score" checked> Walk Score</label></li>
+            <li><label><input type="checkbox" class="column-toggle" data-column="Transit Score" checked> Transit Score</label></li>
+            <li><label><input type="checkbox" class="column-toggle" data-column="Bike Score" checked> Bike Score</label></li>
+            <li><label><input type="checkbox" class="column-toggle" data-column="Environmental Hazard Status" checked> Environmental Hazard Status</label></li>
+            <li><label><input type="checkbox" class="column-toggle" data-column="Flood Status" checked> Flood Status</label></li>
+            <li><label><input type="checkbox" class="column-toggle" data-column="Flood Risk" checked> Flood Risk</label></li>
+            <li><label><input type="checkbox" class="column-toggle" data-column="Latest Sale Date" checked> Latest Sale Date</label></li>
+            <li><label><input type="checkbox" class="column-toggle" data-column="Latest Sale Price" checked> Latest Sale Price</label></li>
+          </ul>
+        </div>
+    
+        <!-- 列排序功能 -->
+        <div id="sorting" class="tab">
+          <ul id="sortableColumnList">
+            <li class="sortable-item" data-column="Address">Address</li>
+            <li class="sortable-item" data-column="City">City</li>
+            <li class="sortable-item" data-column="Zip">Zip</li>
+            <li class="sortable-item" data-column="Auction Authority">Auction Authority</li>
+            <li class="sortable-item" data-column="State">State</li>
+            <li class="sortable-item" data-column="Amount In Sale">Amount In Sale</li>
+            <li class="sortable-item" data-column="Deposit Deadline">Deposit Deadline</li>
+            <li class="sortable-item" data-column="Auction Start">Auction Start</li>
+            <li class="sortable-item" data-column="Auction End">Auction End</li>
+            <li class="sortable-item" data-column="My Bid">My Bid</li>
+            <li class="sortable-item" data-column="Label">Status</li>
+            <li class="sortable-item" data-column="Batch Number">Batch Number</li>
+            <li class="sortable-item" data-column="Sort No">Sort No</li>
+            <li class="sortable-item" data-column="Bankruptcy Flag">Bankruptcy Flag</li>
+            <li class="sortable-item" data-column="Parcel Number">Parcel Number</li>
+            <li class="sortable-item" data-column="Property Class">Property Class</li>
+            <li class="sortable-item" data-column="Tax Overdue">Tax Overdue</li>
+            <li class="sortable-item" data-column="Accessed Land Value">Accessed Land Value</li>
+            <li class="sortable-item" data-column="Accessed Improvement Value">Accessed Improvement Value</li>
+            <li class="sortable-item" data-column="Total Assessed Value">Total Assessed Value</li>
+            <li class="sortable-item" data-column="Tax Amount Annual">Tax Amount Annual</li>
+            <li class="sortable-item" data-column="Zillow Link">Zillow Link</li>
+            <li class="sortable-item" data-column="Redfin Link">Redfin Link</li>
+            <li class="sortable-item" data-column="Market Land Value">Market Land Value</li>
+            <li class="sortable-item" data-column="Market Improvement Value">Market Improvement Value</li>
+            <li class="sortable-item" data-column="Total Market Value">Total Market Value</li>
+            <li class="sortable-item" data-column="Year Built">Year Built</li>
+            <li class="sortable-item" data-column="Lot Size (sqft)">Lot Size (sqft)</li>
+            <li class="sortable-item" data-column="Lot Size (acres)">Lot Size (acres)</li>
+            <li class="sortable-item" data-column="Building Size (sqft)">Building Size (sqft)</li>
+            <li class="sortable-item" data-column="Bedroom Number">Bedroom Number</li>
+            <li class="sortable-item" data-column="Bathroom Number">Bathroom Number</li>
+            <li class="sortable-item" data-column="Nearby Schools">Nearby Schools</li>
+            <li class="sortable-item" data-column="Walk Score">Walk Score</li>
+            <li class="sortable-item" data-column="Transit Score">Transit Score</li>
+            <li class="sortable-item" data-column="Bike Score">Bike Score</li>
+            <li class="sortable-item" data-column="Environmental Hazard Status">Environmental Hazard Status</li>
+            <li class="sortable-item" data-column="Flood Status">Flood Status</li>
+            <li class="sortable-item" data-column="Flood Risk">Flood Risk</li>
+            <li class="sortable-item" data-column="Latest Sale Date">Latest Sale Date</li>
+            <li class="sortable-item" data-column="Latest Sale Price">Latest Sale Price</li>
+          </ul>
+        </div>
+      </div>
+    
+      <!-- 按钮 -->
       <button id="saveColumnSettings" class="btn btn-success">Save</button>
       <button id="closeColumnSettings" class="btn btn-secondary">Cancel</button>
     </div>
-
-
-  
+    
     <!-- Footer -->
     
       {% include 'footer-light.html' %}
@@ -217,96 +384,218 @@
     </div>
    
     <script>
+      document.querySelectorAll(".tab-button").forEach(button => {
+        button.addEventListener("click", function () {
+          const targetTab = this.dataset.tab;
+    
+          // 切换按钮状态
+          document.querySelectorAll(".tab-button").forEach(btn => btn.classList.remove("active"));
+          this.classList.add("active");
+    
+          // 切换内容显示
+          document.querySelectorAll(".tab").forEach(tab => tab.classList.remove("active"));
+          document.getElementById(targetTab).classList.add("active");
+        });
+      });
+    
       // 点击配置列按钮，显示弹窗
       document.getElementById("columnSettings").addEventListener("click", function () {
         const modal = document.getElementById("columnOptions");
         modal.style.display = "block"; // 显示弹窗
       });
-  
+    
       // 点击取消按钮，隐藏弹窗
       document.getElementById("closeColumnSettings").addEventListener("click", function () {
         const modal = document.getElementById("columnOptions");
         modal.style.display = "none"; // 隐藏弹窗
       });
-  
+    
       // 点击保存按钮，保存设置并更新表格
       document.getElementById("saveColumnSettings").addEventListener("click", function () {
         const grid = $("#basicScenario").data("JSGrid");
-  
+    
         // 保存列显示状态到 localStorage
         const columnSettings = {};
         document.querySelectorAll(".column-toggle").forEach(function (checkbox) {
-            const columnName = checkbox.dataset.column;
-            const isVisible = checkbox.checked;
-            columnSettings[columnName] = isVisible;
+          const columnName = checkbox.dataset.column;
+          const isVisible = checkbox.checked;
+          columnSettings[columnName] = isVisible;
         });
-        localStorage.setItem("columnSettings", JSON.stringify(columnSettings));  // 保存到 localStorage
-  
-        // 遍历复选框，更新字段的显示状态
-        document.querySelectorAll(".column-toggle").forEach(function (checkbox) {
-            const columnName = checkbox.dataset.column;
-            const isVisible = checkbox.checked;
-  
-            const fieldIndex = grid.fields.findIndex(field => field.name === columnName);
-            if (fieldIndex >= 0) {
-                grid.fields[fieldIndex].visible = isVisible; // 更新字段的 visible 属性
-            }
+        localStorage.setItem("columnSettings", JSON.stringify(columnSettings)); // 保存到 localStorage
+    
+        // 保存当前的列排序顺序到 localStorage
+        const columnOrder = [...document.querySelectorAll("#sortableColumnList .sortable-item")]
+          .filter(item => item.style.display !== "none") // 仅保存可见列
+          .map(item => item.dataset.column);
+        localStorage.setItem("columnOrder", JSON.stringify(columnOrder));
+    
+        // 按新顺序更新表格字段
+        const orderedFields = [];
+        columnOrder.forEach(columnName => {
+          const field = grid.fields.find(field => field.name === columnName);
+          if (field) {
+            field.visible = columnSettings[columnName]; // 更新显示状态
+            orderedFields.push(field); // 按顺序添加字段
+          }
         });
-  
+    
         // 更新表格字段并刷新
+        grid.fields = orderedFields;
         $("#basicScenario").jsGrid("option", "fields", grid.fields);
         $("#basicScenario").jsGrid("refresh");
-  
+    
         // 隐藏弹窗
         const modal = document.getElementById("columnOptions");
         modal.style.display = "none";
       });
-  
+    
       // 页面加载时，读取保存的列设置
-      window.addEventListener("load", function() {
+      window.addEventListener("load", function () {
         const savedColumnSettings = localStorage.getItem("columnSettings");
-        
+        const savedColumnOrder = JSON.parse(localStorage.getItem("columnOrder") || "[]");
+    
+        const grid = $("#basicScenario").data("JSGrid");
+    
         if (savedColumnSettings) {
-            const columnSettings = JSON.parse(savedColumnSettings);
-
-            // 遍历复选框并设置其状态
-            document.querySelectorAll(".column-toggle").forEach(function (checkbox) {
-                const columnName = checkbox.dataset.column;
-                const isVisible = columnSettings[columnName];
-                checkbox.checked = isVisible; // 根据保存的设置更新复选框状态
+          const columnSettings = JSON.parse(savedColumnSettings);
+    
+          // 遍历复选框并设置其状态
+          document.querySelectorAll(".column-toggle").forEach(function (checkbox) {
+            const columnName = checkbox.dataset.column;
+            const isVisible = columnSettings[columnName];
+            checkbox.checked = isVisible; // 根据保存的设置更新复选框状态
+          });
+    
+          // 如果有保存的排序，则按照顺序重新排列
+          const sortableList = document.getElementById("sortableColumnList");
+          if (savedColumnOrder.length > 0) {
+            savedColumnOrder.forEach(columnName => {
+              const item = sortableList.querySelector(`[data-column="${columnName}"]`);
+              if (item) {
+                sortableList.appendChild(item); // 按顺序追加
+              }
             });
-
-            // 初始化表格列的显示状态
-            const grid = $("#basicScenario").data("JSGrid");
-            grid.fields.forEach(function(field) {
-                if (columnSettings.hasOwnProperty(field.name)) {
-                    field.visible = columnSettings[field.name]; // 更新字段的 visible 属性
-                }
-            });
-
-            // 更新表格并刷新
-            $("#basicScenario").jsGrid("option", "fields", grid.fields);
-            $("#basicScenario").jsGrid("refresh");
+          }
+    
+          // 初始化表格列的显示状态和排序
+          const orderedFields = [];
+          savedColumnOrder.forEach(columnName => {
+            const field = grid.fields.find(field => field.name === columnName);
+            if (field) {
+              field.visible = columnSettings[columnName];
+              orderedFields.push(field);
+            }
+          });
+    
+          grid.fields = orderedFields;
+          $("#basicScenario").jsGrid("option", "fields", grid.fields);
+          $("#basicScenario").jsGrid("refresh");
         } else {
-            // 如果没有保存的列设置，确保一开始默认所有列都可见
-            document.querySelectorAll(".column-toggle").forEach(function (checkbox) {
-                checkbox.checked = true; // 默认选中所有复选框
-            });
-
-            // 获取当前的 grid 对象并确保所有列可见
-            const grid = $("#basicScenario").data("JSGrid");
-            grid.fields.forEach(function(field) {
-                field.visible = true; // 设置每列的可见性为 true
-            });
-
-            // 更新表格并刷新
-            $("#basicScenario").jsGrid("option", "fields", grid.fields);
-            $("#basicScenario").jsGrid("refresh");
+          // 如果没有保存的列设置，确保一开始默认所有列都可见
+          document.querySelectorAll(".column-toggle").forEach(function (checkbox) {
+            checkbox.checked = true; // 默认选中所有复选框
+          });
+    
+          // 获取当前的 grid 对象并确保所有列可见
+          grid.fields.forEach(function (field) {
+            field.visible = true; // 设置每列的可见性为 true
+          });
+    
+          // 更新表格并刷新
+          $("#basicScenario").jsGrid("option", "fields", grid.fields);
+          $("#basicScenario").jsGrid("refresh");
         }
+    
+        // 同步排序项状态
+        syncSortingList();
+      });
+    
+      // 同步排序项状态（隐藏已隐藏的列）
+      function syncSortingList() {
+        const columnSettings = JSON.parse(localStorage.getItem("columnSettings") || "{}");
+    
+        document.querySelectorAll("#sortableColumnList .sortable-item").forEach(function (item) {
+          const columnName = item.dataset.column;
+          const isVisible = columnSettings[columnName];
+          item.style.display = isVisible ? "block" : "none"; // 根据列显示状态同步排序项
+        });
+      }
+    
+      // 初始化拖动排序功能
+      function enableDragAndDrop() {
+        const sortableList = document.getElementById("sortableColumnList");
+        let draggedItem = null;
+        let isDragging = false;
+
+        // 阻止文字选择的事件
+        sortableList.addEventListener("mousedown", (e) => {
+          if (e.target.classList.contains("sortable-item")) {
+            e.preventDefault(); // 禁用默认行为（如文字选中）
+          }
+        });
+
+        // 鼠标按下时准备拖动
+        sortableList.addEventListener("mousedown", function (e) {
+          if (e.target.classList.contains("sortable-item")) {
+            draggedItem = e.target;
+            draggedItem.classList.add("dragging");
+            isDragging = true; // 标记正在拖动
+          }
+        });
+
+        // 鼠标抬起时结束拖动
+        sortableList.addEventListener("mouseup", function () {
+          if (draggedItem) {
+            draggedItem.classList.remove("dragging");
+            draggedItem = null;
+            isDragging = false; // 清除拖动状态
+          }
+        });
+
+        // 鼠标移动时处理拖动
+        sortableList.addEventListener("mousemove", function (e) {
+          if (isDragging) {
+            e.preventDefault(); // 阻止默认行为
+            const afterElement = getDragAfterElement(sortableList, e.clientY);
+            if (draggedItem) {
+              if (afterElement == null) {
+                sortableList.appendChild(draggedItem);
+              } else {
+                sortableList.insertBefore(draggedItem, afterElement);
+              }
+            }
+          }
+        });
+
+        // 获取拖动后的位置
+        function getDragAfterElement(container, y) {
+          const draggableElements = [...container.querySelectorAll(".sortable-item:not(.dragging)")];
+
+          return draggableElements.reduce(
+            (closest, child) => {
+              const box = child.getBoundingClientRect();
+              const offset = y - box.top - box.height / 2;
+              if (offset < 0 && offset > closest.offset) {
+                return { offset: offset, element: child };
+              } else {
+                return closest;
+              }
+            },
+            { offset: Number.NEGATIVE_INFINITY, element: null }
+          ).element;
+        }
+      }
+
+      // 页面加载时初始化拖动功能
+      window.addEventListener("load", function () {
+        enableDragAndDrop();
       });
 
-            
     </script>
+    
+    
+  
+
     <script>
       window.addEventListener('resize', () => {
         const grid = $('#grid').data('JSGrid');
