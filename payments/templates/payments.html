@@ -196,22 +196,28 @@
                       <label>Select Payment Method</label>
                       {% if payment_methods.exists %}
                       {% for method in payment_methods %}
-                      <div class="radio-option">
-                        <label>
-                          {{ method.get_method_display }}
-                          <br>
-                          <small class="text-muted">
-                            Stripe ID: {{ method.stripe_payment_method_id|default:"N/A" }}<br>
-                            Created at: {{ method.created_at|date:"Y-m-d H:i:s" }}
-                          </small>
-                        </label>
-                        <input type="radio" name="payment_method" value="{{ method.method }}">
+                      <div class="radio-option d-flex justify-content-between align-items-center">
+                        <div>
+                          <input type="radio" name="payment_method" value="{{ method.stripe_payment_method_id }}" id="payment_method_{{ forloop.counter }}">
+                          <label for="payment_method_{{ forloop.counter }}">
+                            <!-- 占位符，初始时显示“Loading...” -->
+                            <span id="brand_{{ forloop.counter }}">Loading...</span> •••• <span id="last4_{{ forloop.counter }}">...</span>
+                            <br>
+                            <small class="text-muted">Created at: {{ method.created_at|date:"Y-m-d H:i:s" }}</small>
+                          </label>
+                        </div>                     
+                        <!-- 删除按钮 -->
+                        <button type="button" class="btn btn-outline-danger btn-sm delete-card-btn" data-payment-method-id="{{ method.stripe_payment_method_id }}">
+                          🗑
+                        </button>
                       </div>
                       {% endfor %}
                       {% else %}
                       <p class="text-muted">No payment methods available. Please add one.</p>
                       {% endif %}
                     </div>
+                    
+                    
 
                     <!-- Add Payment Method -->
                     <div class="form-group mt-4">
@@ -260,13 +266,19 @@
                       <h5 class="mt-4">Billing Address</h5>
                       <div>
                         {% for address in billing_addresses %}
-                        <div class="radio-option">
-                          <input type="radio" id="billing_{{ forloop.counter }}" name="billing_address" value="{{ address.id }}">
-                          <label for="billing_{{ forloop.counter }}">
-                            <strong>{{ address.full_name }}</strong><br>
-                            {{ address.address }}{% if address.address_line_2 %}, {{ address.address_line_2 }}{% endif %}<br>
-                            {{ address.city }}, {{ address.state }}, {{ address.zip_code }}, {{ address.country_region }}
-                          </label>
+                        <div class="radio-option d-flex justify-content-between align-items-center">
+                          <div>
+                            <input type="radio" id="billing_{{ forloop.counter }}" name="billing_address" value="{{ address.id }}">
+                            <label for="billing_{{ forloop.counter }}">
+                              <strong>{{ address.full_name }}</strong><br>
+                              {{ address.address }}{% if address.address_line_2 %}, {{ address.address_line_2 }}{% endif %}<br>
+                              {{ address.city }}, {{ address.state }}, {{ address.zip_code }}, {{ address.country_region }}
+                            </label>
+                          </div>
+                          <!-- 删除图标 -->
+                          <button type="button" class="btn btn-outline-danger btn-sm delete-address-btn" data-address-id="{{ address.id }}" style="height: 36px; width: 36px; display: flex; justify-content: center; align-items: center;">
+                            🗑
+                          </button>
                         </div>
                         {% empty %}
                         <p class="text-muted">No billing addresses found. Please add one.</p>
@@ -276,6 +288,12 @@
                         <div class="mt-3">
                           <a href="#" id="add-billing-address-link" class="text-primary">Add billing address</a>
                         </div>
+
+                        <!-- Confirm Payment Button -->
+                        <div class="mt-3">
+                          <button id="confirm-payment-btn" class="btn btn-primary">Confirm Payment</button>
+                        </div>
+                      
                       </div>
                     </div>
 
@@ -393,89 +411,38 @@
 <!-- Plugin used-->
 
 <script>
-  $(document).ready(function () {
-    // 点击 "Next" 按钮切换到第二部分
-    $('#apply-btn').click(function () {
-      const paymentOptions = Array.from(document.getElementsByName('payment_method'));
-      let selectedOption = null;
-  
-      // 获取选中的支付方式
-      for (let i = 0; i < paymentOptions.length; i++) {
-        if (paymentOptions[i].checked) {
-          selectedOption = paymentOptions[i].value;
-          break;
-        }
-      }
-  
-      // 判断是否选择了支付方式
-      if (selectedOption) {
-        if (selectedOption === 'credit_card' || selectedOption === 'paypal' || selectedOption === 'add_wire_transfer') {
-          // 如果选择新增支付方式，显示支付方式表单
-          $('#payment-method-section').hide();
-          $('#add-payment-form').show();
-        } else {
-          // 已保存的支付方式（可以添加直接处理逻辑）
-          alert('Proceeding with the selected saved payment method: ' + selectedOption);
-        }
-      } else {
-        alert('Please select a payment method.');
-      }
-    });
+      $(document).ready(function () {
+        // 点击 "Next" 按钮切换到第二部分
+        $('#apply-btn').click(function () {
+            const paymentOptions = Array.from(document.getElementsByName('payment_method'));
+            let selectedOption = null;
 
-    // 返回上一步
-    document.getElementById('back-btn').addEventListener('click', function() {
+            // 获取选中的支付方式（如果有）
+            for (let i = 0; i < paymentOptions.length; i++) {
+                if (paymentOptions[i].checked) {
+                    selectedOption = paymentOptions[i].value;
+                    break;
+                }
+            }
+
+            // 调试信息（打印用户选择的支付方式）
+            console.log('Selected Payment Method:', selectedOption);
+
+            // 无论是否选择支付方式，都切换到第二部分
+            $('#payment-method-section').hide();  // 隐藏第一部分
+            $('#add-payment-form').show();       // 显示第二部分
+        });
+    
+      // 返回上一步
+      document.getElementById('back-btn').addEventListener('click', function() {
       // 隐藏地址页面
       document.getElementById('new-billing-address-form').style.display = 'none';
 
       // Step 2 -> Step 1
       document.getElementById('add-payment-form').style.display = 'none';
       document.getElementById('payment-method-section').style.display = 'block';
-    });
-
-
-    // 保存支付方式（第二步）
-    $('#save-payment-method-btn').click(function (e) {
-      e.preventDefault();
-  
-      // 获取表单数据
-      const cardName = $('#card_name').val();
-      const cardNumber = $('#card_number').val();
-      const expiryDate = $('#expiry_date').val();
-      const cvv = $('#cvv').val();
-  
-      // 校验数据
-      if (!cardName || !cardNumber || !expiryDate || !cvv) {
-        alert('Please fill all the card details!');
-        return;
-      }
-  
-      // 发送 AJAX 请求到后端保存支付方式
-      $.ajax({
-        url: '/save-payment-method/', // 后端 API 路径
-        method: 'POST',
-        contentType: 'application/json',
-        data: JSON.stringify({
-          card_name: cardName,
-          card_number: cardNumber,
-          expiry_date: expiryDate,
-          cvv: cvv,
-          csrfmiddlewaretoken: $('input[name="csrfmiddlewaretoken"]').val(),
-        }),
-        success: function (response) {
-          if (response.success) {
-            alert('Payment method saved successfully!');
-            // 隐藏支付方式表单，显示账单地址表单
-            $('#add-payment-form').hide();
-            $('#new-billing-address-form').show();
-          } else {
-            alert('Error saving payment method: ' + response.message);
-          }
-        },
-        error: function (xhr, status, error) {
-          alert('Error processing request: ' + error);
-        },
       });
-    });
+
   
     // 保存账单地址（第三步）
     $('#save-billing-address-btn').click(function (e) {
@@ -533,7 +500,7 @@
     });
   });
 </script>
-
+<!-- 第二步保存信用卡操作 -->
 <script src="https://js.stripe.com/v3/"></script>
 <script>
   document.addEventListener("DOMContentLoaded", function () {
@@ -600,81 +567,156 @@
   });
 </script>
 <script>
-  document.addEventListener("DOMContentLoaded", function () {
-    const applyButton = document.getElementById("apply-coupon-btn");  // 更新按钮ID
+  $('#confirm-payment-btn').click(async function (event) {
+    // 阻止按钮默认行为（页面刷新）
+    event.preventDefault();
+
+    // 获取充值金额
+    const addFundsAmount = $('#amount').val();
+
+    // 获取选中的账单地址
+    const selectedBillingAddress = $('input[name="billing_address"]:checked').val();
+
+    // 获取选中的支付方式 (PaymentMethod ID)
+    const selectedPaymentMethodId = $('input[name="payment_method"]:checked').val();
+
+    // 校验数据完整性
+    if (!addFundsAmount || !selectedBillingAddress || !selectedPaymentMethodId) {
+        alert('Please complete all required fields.');
+        return;
+    }
+
+    // 发起 AJAX 请求，将 PaymentMethod ID 和支付信息发送到后端
+    $.ajax({
+        url: '/process-payment/', // 后端支付接口
+        type: 'POST',
+        data: JSON.stringify({
+            payment_method_id: selectedPaymentMethodId, // PaymentMethod ID
+            billing_address_id: selectedBillingAddress, // 账单地址 ID
+            amount: addFundsAmount, // 支付金额
+        }),
+        contentType: 'application/json',
+        headers: { "X-CSRFToken": "{{ csrf_token }}" },
+        success: function (response) {
+            if (response.success) {
+                alert('Payment processed successfully!');
+                location.reload(); // 刷新页面或跳转到支付成功页面
+            } else if (response.requires_action) {
+                handleAction(response.client_secret); // 如果需要 3D Secure 验证
+            } else {
+                alert('Payment failed: ' + response.error);
+            }
+        },
+        error: function (error) {
+            alert('An error occurred: ' + error.responseText);
+        },
+    });
+  });
+
+  // 使用 Stripe.js 处理 3D Secure 验证
+  async function handleAction(clientSecret) {
+      const stripe = Stripe('your-publishable-key');
+      const { error } = await stripe.confirmCardPayment(clientSecret);
+      if (error) {
+          alert('3D Secure verification failed: ' + error.message);
+      } else {
+          alert('Payment succeeded!');
+          location.reload(); // 刷新页面
+      }
+  }
+</script>
+<script>
+  $(document).ready(function () {
+    // 动态获取每个支付方式的品牌和卡号后四位
+    $('input[name="payment_method"]').each(function (index) {
+      const paymentMethodId = $(this).val(); // 获取支付方式的 Stripe ID
+      const brandSpan = $(`#brand_${index + 1}`); // 获取品牌显示的元素
+      const last4Span = $(`#last4_${index + 1}`); // 获取卡号后四位显示的元素
   
-    applyButton.addEventListener("click", async function (event) {
-      event.preventDefault();
-    
-      // 获取选中的支付方式
-      const paymentMethods = document.getElementsByName("payment_method");
-      let selectedPaymentMethod = null;
-      for (let method of paymentMethods) {
-        if (method.checked) {
-          selectedPaymentMethod = method.value;
-          break;
-        }
-      }
-    
-      // 获取选中的账单地址
-      const billingAddresses = document.getElementsByName("billing_address");
-      let selectedBillingAddress = null;
-      for (let address of billingAddresses) {
-        if (address.checked) {
-          selectedBillingAddress = address.value;
-          break;
-        }
-      }
-    
-      // 获取输入的充值金额
-      const amountInput = document.getElementById("amount");
-      const amount = parseFloat(amountInput.value);
-    
-      // 校验数据
-      if (!selectedPaymentMethod) {
-        alert("Please select a payment method.");
-        return;
-      }
-      if (!selectedBillingAddress) {
-        alert("Please select a billing address.");
-        return;
-      }
-      if (!amount || amount <= 0) {
-        alert("Please enter a valid amount.");
-        return;
-      }
-    
-      // 发送请求到后端
-      try {
-        const response = await fetch("/process-payment/", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "X-CSRFToken": "{{ csrf_token }}",
-          },
-          body: JSON.stringify({
-            payment_method_id: selectedPaymentMethod,
-            billing_address_id: selectedBillingAddress,
-            amount: amount,
-          }),
-        });
-    
-        const result = await response.json();
-    
-        if (result.success) {
-          alert("Payment processed successfully!");
-          // 更新余额显示
-          const remainingBalanceElement = document.getElementById("remaining_balance");
-          if (remainingBalanceElement) {
-            remainingBalanceElement.value = `$${result.new_balance.toFixed(2)}`;
+      // 调用后端接口获取详细信息
+      $.ajax({
+        url: '/get-payment-method-details/', // 后端接口 URL
+        type: 'POST',
+        data: JSON.stringify({ payment_method_id: paymentMethodId }),
+        contentType: 'application/json',
+        headers: { "X-CSRFToken": "{{ csrf_token }}" }, // Django CSRF 令牌
+        success: function (response) {
+          if (response.success) {
+            // 更新品牌和卡号后四位
+            brandSpan.text(response.card_info.brand);
+            last4Span.text(response.card_info.last4);
+          } else {
+            // 如果获取失败，显示默认信息
+            brandSpan.text('Unknown');
+            last4Span.text('****');
           }
-        } else {
-          alert("Error processing payment: " + result.error);
-        }
-      } catch (error) {
-        alert("An error occurred: " + error.message);
+        },
+        error: function (error) {
+          // 处理错误
+          brandSpan.text('Error');
+          last4Span.text('****');
+          console.error('Failed to fetch payment method details:', error);
+        },
+      });
+    });
+  });
+</script>
+<script>
+  $(document).ready(function () {
+    // 删除支付方式
+    $('.delete-card-btn').click(function () {
+      const paymentMethodId = $(this).data('payment-method-id'); // 获取支付方式 ID
+  
+      if (confirm('Are you sure you want to delete this payment method?')) {
+        $.ajax({
+          url: '/delete-payment-method/', // 后端删除支付方式的接口
+          type: 'POST',
+          data: JSON.stringify({ payment_method_id: paymentMethodId }),
+          contentType: 'application/json',
+          headers: { "X-CSRFToken": "{{ csrf_token }}" }, // Django 的 CSRF 令牌
+          success: function (response) {
+            if (response.success) {
+              alert('Payment method deleted successfully!');
+              location.reload(); // 刷新页面以更新显示
+            } else {
+              alert('Failed to delete payment method: ' + response.error);
+            }
+          },
+          error: function (error) {
+            alert('An error occurred: ' + error.responseText);
+          },
+        });
       }
     });
-    
+  });
+</script>
+<script>
+  $(document).ready(function () {
+    // 监听删除地址按钮点击事件
+    $('.delete-address-btn').click(function () {
+      const addressId = $(this).data('address-id'); // 获取地址 ID
+  
+      // 确认删除操作
+      if (confirm('Are you sure you want to delete this address?')) {
+        $.ajax({
+          url: '/delete-billing-address/', // 后端接口 URL
+          type: 'POST',
+          data: JSON.stringify({ address_id: addressId }), // 传递地址 ID
+          contentType: 'application/json',
+          headers: { "X-CSRFToken": "{{ csrf_token }}" }, // Django 的 CSRF 令牌
+          success: function (response) {
+            if (response.success) {
+              alert('Address deleted successfully!');
+              location.reload(); // 刷新页面以更新显示
+            } else {
+              alert('Failed to delete address: ' + response.error);
+            }
+          },
+          error: function (error) {
+            alert('An error occurred: ' + error.responseText);
+          },
+        });
+      }
+    });
   });
 </script>
