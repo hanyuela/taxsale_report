@@ -44,7 +44,11 @@ urlpatterns = [
     path('save-payment-details/', payments_views.save_payment_details, name='save_payment_details'),
     path('save-payment-method/', payments_views.save_payment_method, name='save_payment_method'),
     path('save-billing-address/', payments_views.save_billing_address,name='save_billing_address'),
-    path('process-payment/', payments_views.process_payment,name='process_payment')
+    path('process-payment/', payments_views.process_payment,name='process_payment'),
+    path('get-payment-method-details/', payments_views.get_payment_method_details,name='get_payment_method_details'),
+    path('delete-payment-method/',payments_views.delete_payment_method,name='delete_payment_method'),
+    path('delete-billing-address/', payments_views.delete_billing_address, name='delete_billing_address'),
+
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
