@@ -12,6 +12,7 @@ from django.shortcuts import render
 from .models import Payment_history, Payment_method, BillingAddress  # 导入 BillingAddress 模型
 from django.db.models import Sum
 from django.conf import settings
+from authentication.models import UserProfile
 
 @login_required
 def payments(request):
@@ -183,57 +184,197 @@ def save_billing_address(request):
             return JsonResponse({"success": False, "message": str(e)})
 
 
+
+def get_or_create_customer(user):
+    """
+    为用户获取或创建 Stripe Customer
+    """
+    profile, created = UserProfile.objects.get_or_create(user=user)
+    if not profile.stripe_customer_id:
+        # 创建 Stripe Customer
+        customer = stripe.Customer.create(
+            email=user.email,
+            name=user.get_full_name(),
+        )
+        # 保存 Stripe Customer ID
+        profile.stripe_customer_id = customer["id"]
+        profile.save()
+    return profile.stripe_customer_id
+
 @csrf_exempt
 @login_required
 def process_payment(request):
     """
-    处理模拟支付操作
+    处理支付请求
     """
     if request.method == "POST":
         try:
             data = json.loads(request.body)
+
+            # 获取请求数据
             payment_method_id = data.get("payment_method_id")
             billing_address_id = data.get("billing_address_id")
-            amount = data.get("amount")  # 用户充值的金额
+            amount = data.get("amount")
 
             # 校验数据完整性
             if not payment_method_id or not billing_address_id or not amount:
                 return JsonResponse({"success": False, "error": "Missing required fields"})
 
-            # 校验支付方式是否属于当前用户
-            try:
-                # 假设payment_method_id是支付方式的标识符（如credit_card, paypal等）
-                payment_method = Payment_method.objects.get(user=request.user, method=payment_method_id)
-            except Payment_method.DoesNotExist:
-                return JsonResponse({"success": False, "error": "Invalid payment method"})
+            # 转换金额为分
+            amount_in_cents = int(float(amount) * 100)
 
-            # 校验账单地址是否属于当前用户
-            try:
-                billing_address = BillingAddress.objects.get(user=request.user, id=billing_address_id)
-            except BillingAddress.DoesNotExist:
-                return JsonResponse({"success": False, "error": "Invalid billing address"})
+            # 获取或创建 Stripe Customer
+            customer_id = get_or_create_customer(request.user)
 
-            # 模拟支付成功，向 Payment_history 添加记录
-            Payment_history.objects.create(
-                user=request.user,
-                amount=amount,  # 用户充值金额
-                payment_method=payment_method.method,  # 支付方式
-                billing_address=billing_address,  # 使用的账单地址
-                status="success",  # 支付状态（可自定义）
+            # 将 PaymentMethod 绑定到 Customer
+            try:
+                stripe.PaymentMethod.attach(
+                    payment_method_id,
+                    customer=customer_id,
+                )
+                # 设置为默认支付方式（可选）
+                stripe.Customer.modify(
+                    customer_id,
+                    invoice_settings={"default_payment_method": payment_method_id},
+                )
+            except stripe.error.StripeError as e:
+                return JsonResponse({"success": False, "error": f"Failed to attach PaymentMethod: {str(e)}"})
+
+            # 创建 PaymentIntent
+            payment_intent = stripe.PaymentIntent.create(
+                amount=amount_in_cents,
+                currency="usd",
+                customer=customer_id,  # 指定 Customer
+                payment_method=payment_method_id,  # 指定绑定的 PaymentMethod
+                off_session=True,  # 如果是后台处理支付
+                confirm=True,  # 立即确认支付
             )
 
-            # 重新计算用户的 remaining_balance
-            remaining_balance = Payment_history.objects.filter(user=request.user).aggregate(
-                total_amount=Sum('amount')
-            )['total_amount'] or 0
+            # 检查支付状态
+            if payment_intent.status == "requires_action":
+                # 如果需要用户完成额外验证（例如 3D Secure）
+                return JsonResponse({
+                    "success": False,
+                    "requires_action": True,
+                    "client_secret": payment_intent.client_secret,
+                })
+            elif payment_intent.status == "succeeded":
+                # 支付成功，记录到数据库
+                Payment_history.objects.create(
+                    user=request.user,
+                    amount=amount,
+                    time=datetime.now().time(),
+                    date=datetime.now().date(),
+                    method="credit_card",
+                    type="add_funds",
+                )
+                return JsonResponse({"success": True, "message": "Payment succeeded!"})
 
-            return JsonResponse({
-                "success": True,
-                "message": "Payment processed successfully!",
-                "new_balance": remaining_balance,  # 返回新的总余额
-            })
+            # 其他支付失败状态
+            return JsonResponse({"success": False, "error": f"Payment failed: {payment_intent.status}"})
+
+        except stripe.error.CardError as e:
+            # Stripe 卡片错误（如卡片被拒）
+            return JsonResponse({"success": False, "error": f"Card error: {str(e)}"})
+        except stripe.error.StripeError as e:
+            # Stripe 相关的其他错误
+            return JsonResponse({"success": False, "error": f"Stripe error: {str(e)}"})
+        except Exception as e:
+            # 捕获其他未预见的错误
+            return JsonResponse({"success": False, "error": f"An unexpected error occurred: {str(e)}"})
+
+    # 如果请求方法不是 POST
+    return JsonResponse({"success": False, "error": "Invalid request method"})
+
+
+@csrf_exempt
+@login_required
+def get_payment_method_details(request):
+    """
+    获取指定 PaymentMethod 的详细信息 (卡号后四位和品牌)
+    """
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            payment_method_id = data.get("payment_method_id")
+
+            if not payment_method_id:
+                return JsonResponse({"success": False, "error": "Missing payment method ID."})
+
+            # 使用 Stripe API 获取支付方式详细信息
+            stripe.api_key = settings.STRIPE_TEST_SECRET_KEY
+            payment_method = stripe.PaymentMethod.retrieve(payment_method_id)
+
+            # 提取卡片信息
+            card_info = {
+                "brand": payment_method["card"]["brand"].capitalize(),
+                "last4": payment_method["card"]["last4"],
+            }
+
+            return JsonResponse({"success": True, "card_info": card_info})
+        except stripe.error.InvalidRequestError as e:
+            return JsonResponse({"success": False, "error": str(e)})
+        except Exception as e:
+            return JsonResponse({"success": False, "error": f"An error occurred: {str(e)}"})
+
+    return JsonResponse({"success": False, "error": "Invalid request method."})
+
+
+@csrf_exempt
+@login_required
+def delete_payment_method(request):
+    """
+    删除数据库中的支付方式记录
+    """
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            payment_method_id = data.get("payment_method_id")
+
+            if not payment_method_id:
+                return JsonResponse({"success": False, "error": "Missing payment method ID."})
+
+            # 从数据库中查找支付方式
+            payment_method = Payment_method.objects.filter(user=request.user, stripe_payment_method_id=payment_method_id).first()
+            if not payment_method:
+                return JsonResponse({"success": False, "error": "Invalid payment method ID."})
+
+            # 删除支付方式记录
+            payment_method.delete()
+
+            return JsonResponse({"success": True, "message": "Payment method deleted successfully."})
 
         except Exception as e:
             return JsonResponse({"success": False, "error": f"An error occurred: {str(e)}"})
 
-    return JsonResponse({"success": False, "error": "Invalid request method"})
+    return JsonResponse({"success": False, "error": "Invalid request method."})
+
+@csrf_exempt
+@login_required
+def delete_billing_address(request):
+    """
+    删除用户的账单地址
+    """
+    if request.method == "POST":
+        try:
+            # 获取请求数据
+            data = json.loads(request.body)
+            address_id = data.get("address_id")
+
+            if not address_id:
+                return JsonResponse({"success": False, "error": "Missing address ID."})
+
+            # 从数据库中查找地址
+            address = BillingAddress.objects.filter(user=request.user, id=address_id).first()
+            if not address:
+                return JsonResponse({"success": False, "error": "Invalid address ID."})
+
+            # 删除地址
+            address.delete()
+
+            return JsonResponse({"success": True, "message": "Address deleted successfully."})
+
+        except Exception as e:
+            return JsonResponse({"success": False, "error": f"An error occurred: {str(e)}"})
+
+    return JsonResponse({"success": False, "error": "Invalid request method."})
