@@ -163,30 +163,7 @@
       #sortableColumnList li:hover {
           background-color: #f1f1f1; /* 悬停背景色 */
           box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* 悬停阴影 */
-      }
-
-      /* 拖动项样式增强 */
-      .sortable-item.dragging {
-          background-color: #d1e7ff; /* 拖动时的背景色 */
-          border-color: #007bff; /* 拖动时的边框颜色 */
-          opacity: 0.8; /* 半透明效果 */
-          transform: scale(1.05); /* 放大效果 */
-          box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* 添加阴影效果 */
-          z-index: 1000; /* 确保拖动项位于最上层 */
-          position: relative; /* 解决阴影层级问题 */
-      }
-
-      /* 列表项悬停效果 */
-      #sortableColumnList li:hover {
-          background-color: #f1f1f1; /* 悬停背景色 */
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* 添加悬停时的阴影 */
-      }
-
-      /* 拖动目标位置高亮 */
-      .sortable-item.drop-target {
-          border: 2px dashed #007bff; /* 目标位置的虚线边框 */
-          background-color: #eaf4ff; /* 目标位置背景色 */
-      }
+      } 
 
       /* 滚动条样式（可选） */
       #columnOptions::-webkit-scrollbar {
@@ -200,6 +177,65 @@
 
       #columnOptions::-webkit-scrollbar-thumb:hover {
           background-color: #999;
+      }
+      /* 针对 #columnSettingsList 和 #sortableColumnList 设置三列布局 */
+      #columnSettingsList,
+      #sortableColumnList {
+        column-count: 3; /* 设置为三列 */
+        column-gap: 20px; /* 列之间的间距 */
+        list-style: none; /* 去掉默认的列表样式 */
+        padding: 0;
+        margin: 0;
+      }
+
+      /* 列表项的样式调整 */
+      #columnSettingsList li,
+      #sortableColumnList li {
+        break-inside: avoid; /* 防止列内的列表项拆分 */
+        margin-bottom: 10px; /* 列表项之间的间距 */
+      }
+
+      /* 可选：为排序项添加鼠标手势和拖动视觉效果 */
+      #sortableColumnList li {
+        cursor: move; /* 鼠标拖动效果 */
+        padding: 5px;
+        border: 1px solid #ddd; /* 为拖动项增加边框方便视觉识别 */
+        border-radius: 5px;
+        background-color: #f9f9f9; /* 背景色 */
+        margin-bottom: 10px; /* 列表项之间的间距 */
+      }
+      /* 排序项的基础样式 */
+      #sortableColumnList li {
+        cursor: move; /* 鼠标拖动效果 */
+        padding: 5px;
+        border: 1px solid #ddd; /* 为拖动项增加边框方便视觉识别 */
+        border-radius: 5px;
+        background-color: #f9f9f9; /* 背景色 */
+        margin-bottom: 10px; /* 列表项之间的间距 */
+        transition: background-color 0.3s ease; /* 添加平滑的颜色过渡效果 */
+      }
+
+      /* 拖动中的样式：背景变成深绿色 */
+      #sortableColumnList li.sortable-chosen {
+        background-color: #006400; /* 深绿色 */
+        color: #fff; /* 字体颜色变成白色，确保对比清晰 */
+      }
+
+      /* 鼠标拖动时的样式：透明度变化 */
+      #sortableColumnList li.sortable-drag {
+        opacity: 0.8; /* 拖动项变得稍微透明，增加拖动感 */
+      }
+      #modalFooter {
+        position: sticky; /* 固定在父容器底部 */
+        bottom: -20px;
+        left: 0;
+        right: 0;
+        background: #fff;
+        padding: 10px;
+        border-top: 1px solid #ddd; /* 添加顶部边框分隔 */
+        display: flex;
+        justify-content: space-between; /* 按钮两端对齐 */
+        z-index: 10; /* 确保按钮位于内容上方 */
       }
       
     </style>  
@@ -371,10 +407,11 @@
           </ul>
         </div>
       </div>
-    
-      <!-- 按钮 -->
-      <button id="saveColumnSettings" class="btn btn-success">Save</button>
-      <button id="closeColumnSettings" class="btn btn-secondary">Cancel</button>
+      <!-- 按钮区域 -->
+      <div id="modalFooter">
+        <button id="saveColumnSettings" class="btn btn-success">Save</button>
+        <button id="closeColumnSettings" class="btn btn-secondary">Cancel</button>
+      </div>
     </div>
     
     <!-- Footer -->
@@ -384,226 +421,293 @@
     </div>
    
     <script>
-      document.querySelectorAll(".tab-button").forEach(button => {
-        button.addEventListener("click", function () {
-          const targetTab = this.dataset.tab;
-    
-          // 切换按钮状态
-          document.querySelectorAll(".tab-button").forEach(btn => btn.classList.remove("active"));
-          this.classList.add("active");
-    
-          // 切换内容显示
-          document.querySelectorAll(".tab").forEach(tab => tab.classList.remove("active"));
-          document.getElementById(targetTab).classList.add("active");
-        });
-      });
-    
-      // 点击配置列按钮，显示弹窗
-      document.getElementById("columnSettings").addEventListener("click", function () {
-        const modal = document.getElementById("columnOptions");
-        modal.style.display = "block"; // 显示弹窗
-      });
-    
-      // 点击取消按钮，隐藏弹窗
-      document.getElementById("closeColumnSettings").addEventListener("click", function () {
-        const modal = document.getElementById("columnOptions");
-        modal.style.display = "none"; // 隐藏弹窗
-      });
-    
-      // 点击保存按钮，保存设置并更新表格
-      document.getElementById("saveColumnSettings").addEventListener("click", function () {
+      document.addEventListener("DOMContentLoaded", function () {
         const grid = $("#basicScenario").data("JSGrid");
     
-        // 保存列显示状态到 localStorage
-        const columnSettings = {};
-        document.querySelectorAll(".column-toggle").forEach(function (checkbox) {
-          const columnName = checkbox.dataset.column;
-          const isVisible = checkbox.checked;
-          columnSettings[columnName] = isVisible;
+        // 点击配置列按钮，显示弹窗
+        document.getElementById("columnSettings").addEventListener("click", function () {
+          const modal = document.getElementById("columnOptions");
+          modal.style.display = "block"; // 显示弹窗
         });
-        localStorage.setItem("columnSettings", JSON.stringify(columnSettings)); // 保存到 localStorage
     
-        // 保存当前的列排序顺序到 localStorage
-        const columnOrder = [...document.querySelectorAll("#sortableColumnList .sortable-item")]
-          .filter(item => item.style.display !== "none") // 仅保存可见列
-          .map(item => item.dataset.column);
-        localStorage.setItem("columnOrder", JSON.stringify(columnOrder));
+        // 点击取消按钮，隐藏弹窗
+        document.getElementById("closeColumnSettings").addEventListener("click", function () {
+          const modal = document.getElementById("columnOptions");
+          modal.style.display = "none"; // 隐藏弹窗
+        });
     
-        // 按新顺序更新表格字段
-        const orderedFields = [];
-        columnOrder.forEach(columnName => {
-          const field = grid.fields.find(field => field.name === columnName);
-          if (field) {
-            field.visible = columnSettings[columnName]; // 更新显示状态
-            orderedFields.push(field); // 按顺序添加字段
+        // 点击空白处关闭弹窗
+        document.addEventListener("click", function (event) {
+          const modal = document.getElementById("columnOptions");
+          if (modal && modal.style.display === "block" && !modal.contains(event.target) && !event.target.closest("#columnSettings")) {
+            modal.style.display = "none"; // 关闭模态框
           }
         });
     
-        // 更新表格字段并刷新
-        grid.fields = orderedFields;
-        $("#basicScenario").jsGrid("option", "fields", grid.fields);
-        $("#basicScenario").jsGrid("refresh");
+        // 防止模态框内部点击触发关闭
+        const modalContent = document.getElementById("columnOptions");
+        if (modalContent) {
+          modalContent.addEventListener("click", function (event) {
+            event.stopPropagation(); // 阻止事件冒泡
+          });
+        }
     
-        // 隐藏弹窗
-        const modal = document.getElementById("columnOptions");
-        modal.style.display = "none";
-      });
+        // 实时更新列的显示/隐藏状态
+        document.querySelectorAll(".column-toggle").forEach(function (checkbox) {
+          checkbox.addEventListener("change", function () {
+            const columnName = this.dataset.column;
+            const isVisible = this.checked;
     
-      // 页面加载时，读取保存的列设置
-      window.addEventListener("load", function () {
-        const savedColumnSettings = localStorage.getItem("columnSettings");
-        const savedColumnOrder = JSON.parse(localStorage.getItem("columnOrder") || "[]");
+            // 实时更新表格中的列显示/隐藏状态
+            const fieldIndex = grid.fields.findIndex((field) => field.name === columnName);
+            if (fieldIndex >= 0) {
+              grid.fields[fieldIndex].visible = isVisible;
+              $("#basicScenario").jsGrid("option", "fields", grid.fields);
+              $("#basicScenario").jsGrid("refresh");
+            }
+          });
+        });
     
-        const grid = $("#basicScenario").data("JSGrid");
+        // 点击保存按钮，保存设置到 localStorage
+        document.getElementById("saveColumnSettings").addEventListener("click", function () {
+          const columnSettings = {};
     
-        if (savedColumnSettings) {
-          const columnSettings = JSON.parse(savedColumnSettings);
-    
-          // 遍历复选框并设置其状态
+          // 获取当前的列显示状态
           document.querySelectorAll(".column-toggle").forEach(function (checkbox) {
             const columnName = checkbox.dataset.column;
-            const isVisible = columnSettings[columnName];
-            checkbox.checked = isVisible; // 根据保存的设置更新复选框状态
+            const isVisible = checkbox.checked;
+    
+            // 保存列的显示状态
+            columnSettings[columnName] = isVisible;
           });
     
-          // 如果有保存的排序，则按照顺序重新排列
-          const sortableList = document.getElementById("sortableColumnList");
-          if (savedColumnOrder.length > 0) {
-            savedColumnOrder.forEach(columnName => {
-              const item = sortableList.querySelector(`[data-column="${columnName}"]`);
-              if (item) {
-                sortableList.appendChild(item); // 按顺序追加
+          // 保存到 localStorage
+          localStorage.setItem("columnSettings", JSON.stringify(columnSettings));
+    
+          // 提示保存成功
+          alert("Settings saved successfully!");
+    
+          // 隐藏弹窗
+          const modal = document.getElementById("columnOptions");
+          modal.style.display = "none";
+        });
+    
+        // 页面加载时，恢复列设置
+        window.addEventListener("load", function () {
+          const savedSettings = localStorage.getItem("columnSettings");
+    
+          if (savedSettings) {
+            const columnSettings = JSON.parse(savedSettings);
+    
+            // 恢复复选框和表格列的显示状态
+            document.querySelectorAll(".column-toggle").forEach(function (checkbox) {
+              const columnName = checkbox.dataset.column;
+              const isVisible = columnSettings[columnName];
+    
+              checkbox.checked = isVisible; // 根据保存的设置更新复选框状态
+    
+              // 恢复表格列的显示/隐藏状态
+              const fieldIndex = grid.fields.findIndex((field) => field.name === columnName);
+              if (fieldIndex >= 0) {
+                grid.fields[fieldIndex].visible = isVisible;
               }
             });
+    
+            // 更新表格字段并刷新
+            $("#basicScenario").jsGrid("option", "fields", grid.fields);
+            $("#basicScenario").jsGrid("refresh");
           }
-    
-          // 初始化表格列的显示状态和排序
-          const orderedFields = [];
-          savedColumnOrder.forEach(columnName => {
-            const field = grid.fields.find(field => field.name === columnName);
-            if (field) {
-              field.visible = columnSettings[columnName];
-              orderedFields.push(field);
-            }
-          });
-    
-          grid.fields = orderedFields;
-          $("#basicScenario").jsGrid("option", "fields", grid.fields);
-          $("#basicScenario").jsGrid("refresh");
-        } else {
-          // 如果没有保存的列设置，确保一开始默认所有列都可见
-          document.querySelectorAll(".column-toggle").forEach(function (checkbox) {
-            checkbox.checked = true; // 默认选中所有复选框
-          });
-    
-          // 获取当前的 grid 对象并确保所有列可见
-          grid.fields.forEach(function (field) {
-            field.visible = true; // 设置每列的可见性为 true
-          });
-    
-          // 更新表格并刷新
-          $("#basicScenario").jsGrid("option", "fields", grid.fields);
-          $("#basicScenario").jsGrid("refresh");
-        }
-    
-        // 同步排序项状态
-        syncSortingList();
+        });
       });
-    
-      // 同步排序项状态（隐藏已隐藏的列）
-      function syncSortingList() {
-        const columnSettings = JSON.parse(localStorage.getItem("columnSettings") || "{}");
-    
-        document.querySelectorAll("#sortableColumnList .sortable-item").forEach(function (item) {
-          const columnName = item.dataset.column;
-          const isVisible = columnSettings[columnName];
-          item.style.display = isVisible ? "block" : "none"; // 根据列显示状态同步排序项
-        });
-      }
-    
-      // 初始化拖动排序功能
-      function enableDragAndDrop() {
-        const sortableList = document.getElementById("sortableColumnList");
-        let draggedItem = null;
-        let isDragging = false;
-
-        // 阻止文字选择的事件
-        sortableList.addEventListener("mousedown", (e) => {
-          if (e.target.classList.contains("sortable-item")) {
-            e.preventDefault(); // 禁用默认行为（如文字选中）
-          }
-        });
-
-        // 鼠标按下时准备拖动
-        sortableList.addEventListener("mousedown", function (e) {
-          if (e.target.classList.contains("sortable-item")) {
-            draggedItem = e.target;
-            draggedItem.classList.add("dragging");
-            isDragging = true; // 标记正在拖动
-          }
-        });
-
-        // 鼠标抬起时结束拖动
-        sortableList.addEventListener("mouseup", function () {
-          if (draggedItem) {
-            draggedItem.classList.remove("dragging");
-            draggedItem = null;
-            isDragging = false; // 清除拖动状态
-          }
-        });
-
-        // 鼠标移动时处理拖动
-        sortableList.addEventListener("mousemove", function (e) {
-          if (isDragging) {
-            e.preventDefault(); // 阻止默认行为
-            const afterElement = getDragAfterElement(sortableList, e.clientY);
-            if (draggedItem) {
-              if (afterElement == null) {
-                sortableList.appendChild(draggedItem);
-              } else {
-                sortableList.insertBefore(draggedItem, afterElement);
-              }
-            }
-          }
-        });
-
-        // 获取拖动后的位置
-        function getDragAfterElement(container, y) {
-          const draggableElements = [...container.querySelectorAll(".sortable-item:not(.dragging)")];
-
-          return draggableElements.reduce(
-            (closest, child) => {
-              const box = child.getBoundingClientRect();
-              const offset = y - box.top - box.height / 2;
-              if (offset < 0 && offset > closest.offset) {
-                return { offset: offset, element: child };
-              } else {
-                return closest;
-              }
-            },
-            { offset: Number.NEGATIVE_INFINITY, element: null }
-          ).element;
-        }
-      }
-
-      // 页面加载时初始化拖动功能
-      window.addEventListener("load", function () {
-        enableDragAndDrop();
-      });
-
     </script>
     
     
-  
-
+    <!--拖动排序功能-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        let tempSortedColumns = []; // 临时存储拖动后的列顺序
+      
+        // 初始化拖动排序功能（使用SortableJS库）
+        const sortable = new Sortable(document.getElementById("sortableColumnList"), {
+          animation: 150,
+          onEnd: function () {
+            updateTempColumnOrder(); // 拖动结束后更新临时列顺序
+            syncSortingWithVisibility(); // 同步更新第一页的顺序
+          },
+        });
+        
+        // 同步第一页的顺序与第二页的排序
+        function syncSortingWithVisibility() {
+          const columnSettingsList = document.getElementById("columnSettingsList");
+          const visibilityItems = Array.from(columnSettingsList.querySelectorAll("li"));
+        
+          tempSortedColumns.forEach((column) => {
+            const matchingItem = visibilityItems.find(
+              (item) => item.querySelector(".column-toggle").dataset.column === column
+            );
+            if (matchingItem) {
+              columnSettingsList.appendChild(matchingItem); // 调整顺序
+            }
+          });
+        }
+      
+        // 更新临时列顺序（但不保存）
+        function updateTempColumnOrder() {
+          tempSortedColumns = Array.from(
+            document.querySelectorAll("#sortableColumnList .sortable-item")
+          ).map((item) => item.getAttribute("data-column"));
+      
+          // 实时更新表格列顺序（但不保存到localStorage）
+          const grid = $("#basicScenario").data("JSGrid");
+          const newFields = [];
+      
+          // 确保所有字段包括 control
+          const allFields = [...grid.fields];
+          tempSortedColumns.forEach((column) => {
+            const field = allFields.find((f) => f.name === column);
+            if (field) newFields.push(field);
+          });
+      
+          // 保证没有遗漏 control 列
+          const controlField = allFields.find((f) => f.type === "control");
+          if (controlField && !newFields.includes(controlField)) {
+            newFields.push(controlField); // 确保 control 列在最后
+          }
+      
+          // 更新 jsGrid 的 fields 配置并刷新表格
+          grid.fields = newFields;
+          $("#basicScenario").jsGrid("option", "fields", grid.fields);
+          $("#basicScenario").jsGrid("refresh");
+        }
+      
+        // 点击保存按钮，保存显示状态和排序到 localStorage
+        document.getElementById("saveColumnSettings").addEventListener("click", function () {
+          const columnSettings = {};
+      
+          // 保存列显示状态
+          document.querySelectorAll(".column-toggle").forEach(function (checkbox) {
+            const columnName = checkbox.dataset.column;
+            const isVisible = checkbox.checked;
+            columnSettings[columnName] = isVisible;
+          });
+      
+          // 保存排序顺序
+          const sortedColumnsToSave = tempSortedColumns.length
+            ? tempSortedColumns // 如果有拖动排序，保存临时排序
+            : Array.from(document.querySelectorAll("#sortableColumnList .sortable-item")).map((item) =>
+                item.getAttribute("data-column")
+              );
+      
+          // 保存到 localStorage
+          localStorage.setItem("columnSettings", JSON.stringify(columnSettings));
+          localStorage.setItem("sortedColumns", JSON.stringify(sortedColumnsToSave));
+      
+          // 提示保存成功
+          alert("Settings saved successfully!");
+      
+          // 隐藏弹窗
+          document.getElementById("columnOptions").style.display = "none";
+        });
+      
+        // 页面加载时，恢复列设置和排序
+        const savedSettings = localStorage.getItem("columnSettings");
+        const savedSorting = localStorage.getItem("sortedColumns");
+      
+        if (savedSettings && savedSorting) {
+          const columnSettings = JSON.parse(savedSettings);
+          const sortedColumns = JSON.parse(savedSorting);
+          const grid = $("#basicScenario").data("JSGrid");
+      
+          // 恢复列显示状态
+          document.querySelectorAll(".column-toggle").forEach(function (checkbox) {
+            const columnName = checkbox.dataset.column;
+            const isVisible = columnSettings[columnName];
+            checkbox.checked = isVisible;
+      
+            // 隐藏/显示对应列
+            const sortingItem = document.querySelector(
+              `#sortableColumnList [data-column="${columnName}"]`
+            );
+            if (sortingItem) {
+              sortingItem.style.display = isVisible ? "block" : "none";
+            }
+          });
+      
+          // 恢复排序
+          const newFields = [];
+          sortedColumns.forEach((column) => {
+            const sortingItem = document.querySelector(
+              `#sortableColumnList [data-column="${column}"]`
+            );
+            if (sortingItem) {
+              document.getElementById("sortableColumnList").appendChild(sortingItem); // 调整顺序
+            }
+      
+            const visibilityItem = document
+              .querySelector(
+                `#columnSettingsList .column-toggle[data-column="${column}"]`
+              )
+              .closest("li");
+            if (visibilityItem) {
+              document.getElementById("columnSettingsList").appendChild(visibilityItem); // 调整顺序
+            }
+      
+            // 更新 jsGrid 的 fields 配置
+            const field = grid.fields.find((f) => f.name === column);
+            if (field) newFields.push(field);
+          });
+      
+          // 确保 control 列存在
+          const controlField = grid.fields.find((f) => f.type === "control");
+          if (controlField && !newFields.includes(controlField)) {
+            newFields.push(controlField); // 确保 control 列在最后
+          }
+      
+          grid.fields = newFields;
+          $("#basicScenario").jsGrid("option", "fields", grid.fields);
+          $("#basicScenario").jsGrid("refresh");
+        }
+      
+        // 点击Tab切换
+        document.querySelectorAll(".tab-button").forEach((button) => {
+          button.addEventListener("click", function () {
+            document.querySelectorAll(".tab-button").forEach((btn) =>
+              btn.classList.remove("active")
+            );
+            this.classList.add("active");
+      
+            const tabName = this.dataset.tab;
+            document.querySelectorAll(".tab").forEach((tab) => (tab.style.display = "none"));
+            document.getElementById(tabName).style.display = "block";
+          });
+        });
+      
+        // 同步隐藏列与排序列表
+        document.querySelectorAll(".column-toggle").forEach(function (checkbox) {
+          checkbox.addEventListener("change", function () {
+            const columnName = this.dataset.column;
+            const isVisible = this.checked;
+      
+            // 同步隐藏/显示
+            const sortingItem = document.querySelector(
+              `#sortableColumnList [data-column="${columnName}"]`
+            );
+            if (sortingItem) {
+              sortingItem.style.display = isVisible ? "block" : "none";
+            }
+          });
+        });
+      });
+    </script>
+    <!--渲染表格-->
     <script>
       window.addEventListener('resize', () => {
         const grid = $('#grid').data('JSGrid');
         if (grid) {
           grid.refresh(); // 重新渲染表格
         }
-      });
-      
+      });   
     </script> 
     <!-- latest jquery-->
     <script src="{% static 'js/jquery.min.js' %}"></script>
