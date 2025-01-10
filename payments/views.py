@@ -185,22 +185,6 @@ def save_billing_address(request):
 
 
 
-def get_or_create_customer(user):
-    """
-    为用户获取或创建 Stripe Customer
-    """
-    profile, created = UserProfile.objects.get_or_create(user=user)
-    if not profile.stripe_customer_id:
-        # 创建 Stripe Customer
-        customer = stripe.Customer.create(
-            email=user.email,
-            name=user.get_full_name(),
-        )
-        # 保存 Stripe Customer ID
-        profile.stripe_customer_id = customer["id"]
-        profile.save()
-    return profile.stripe_customer_id
-
 @csrf_exempt
 @login_required
 def process_payment(request):
@@ -223,68 +207,47 @@ def process_payment(request):
             # 转换金额为分
             amount_in_cents = int(float(amount) * 100)
 
-            # 获取或创建 Stripe Customer
-            customer_id = get_or_create_customer(request.user)
-
-            # 将 PaymentMethod 绑定到 Customer
+            # 直接使用 payment_method 进行支付，不绑定 Stripe Customer
             try:
-                stripe.PaymentMethod.attach(
-                    payment_method_id,
-                    customer=customer_id,
+                # 创建 PaymentIntent，直接使用 payment_method_id 进行支付
+                payment_intent = stripe.PaymentIntent.create(
+                    amount=amount_in_cents,
+                    currency="usd",
+                    payment_method=payment_method_id,  # 指定绑定的 PaymentMethod
+                    off_session=True,  # 后台支付
+                    confirm=True,  # 立即确认支付
                 )
-                # 设置为默认支付方式（可选）
-                stripe.Customer.modify(
-                    customer_id,
-                    invoice_settings={"default_payment_method": payment_method_id},
-                )
+
+                # 检查支付状态
+                if payment_intent.status == "requires_action":
+                    # 如果需要用户完成额外验证（例如 3D Secure）
+                    return JsonResponse({
+                        "success": False,
+                        "requires_action": True,
+                        "client_secret": payment_intent.client_secret,
+                    })
+                elif payment_intent.status == "succeeded":
+                    # 支付成功，记录到数据库
+                    Payment_history.objects.create(
+                        user=request.user,
+                        amount=amount,
+                        time=datetime.now().time(),
+                        date=datetime.now().date(),
+                        method="credit_card",
+                        type="add_funds",
+                    )
+                    return JsonResponse({"success": True, "message": "Payment succeeded!"})
+
+                # 其他支付失败状态
+                return JsonResponse({"success": False, "error": f"Payment failed: {payment_intent.status}"})
             except stripe.error.StripeError as e:
-                return JsonResponse({"success": False, "error": f"Failed to attach PaymentMethod: {str(e)}"})
+                return JsonResponse({"success": False, "error": f"Failed to process payment: {str(e)}"})
 
-            # 创建 PaymentIntent
-            payment_intent = stripe.PaymentIntent.create(
-                amount=amount_in_cents,
-                currency="usd",
-                customer=customer_id,  # 指定 Customer
-                payment_method=payment_method_id,  # 指定绑定的 PaymentMethod
-                off_session=True,  # 如果是后台处理支付
-                confirm=True,  # 立即确认支付
-            )
-
-            # 检查支付状态
-            if payment_intent.status == "requires_action":
-                # 如果需要用户完成额外验证（例如 3D Secure）
-                return JsonResponse({
-                    "success": False,
-                    "requires_action": True,
-                    "client_secret": payment_intent.client_secret,
-                })
-            elif payment_intent.status == "succeeded":
-                # 支付成功，记录到数据库
-                Payment_history.objects.create(
-                    user=request.user,
-                    amount=amount,
-                    time=datetime.now().time(),
-                    date=datetime.now().date(),
-                    method="credit_card",
-                    type="add_funds",
-                )
-                return JsonResponse({"success": True, "message": "Payment succeeded!"})
-
-            # 其他支付失败状态
-            return JsonResponse({"success": False, "error": f"Payment failed: {payment_intent.status}"})
-
-        except stripe.error.CardError as e:
-            # Stripe 卡片错误（如卡片被拒）
-            return JsonResponse({"success": False, "error": f"Card error: {str(e)}"})
-        except stripe.error.StripeError as e:
-            # Stripe 相关的其他错误
-            return JsonResponse({"success": False, "error": f"Stripe error: {str(e)}"})
         except Exception as e:
-            # 捕获其他未预见的错误
             return JsonResponse({"success": False, "error": f"An unexpected error occurred: {str(e)}"})
 
-    # 如果请求方法不是 POST
     return JsonResponse({"success": False, "error": "Invalid request method"})
+
 
 
 @csrf_exempt
