@@ -215,39 +215,63 @@
                       {% else %}
                       <p class="text-muted">No payment methods available. Please add one.</p>
                       {% endif %}
+                      <!-- Billing Address -->
+                      <h5 class="mt-4">Billing Address</h5>
+                      <div>
+                          {% for address in billing_addresses %}
+                          <div class="radio-option d-flex justify-content-between align-items-center">
+                            <div>
+                              <input type="radio" id="billing_{{ forloop.counter }}" name="billing_address" value="{{ address.id }}">
+                              <label for="billing_{{ forloop.counter }}">
+                                <strong>{{ address.full_name }}</strong><br>
+                                {{ address.address }}{% if address.address_line_2 %}, {{ address.address_line_2 }}{% endif %}<br>
+                                {{ address.city }}, {{ address.state }}, {{ address.zip_code }}, {{ address.country_region }}
+                              </label>
+                            </div>
+                            <!-- 删除图标 -->
+                            <button type="button" class="btn btn-outline-danger btn-sm delete-address-btn" data-address-id="{{ address.id }}" style="height: 36px; width: 36px; display: flex; justify-content: center; align-items: center;">
+                              🗑
+                            </button>
+                          </div>
+                          {% empty %}
+                          <p class="text-muted">No billing addresses found. Please add one.</p>
+                          {% endfor %}
+                      </div>
+                    <!-- Confirm Payment Button --> 
+                    <div class="mt-3">
+                      <button id="confirm-payment-btn" class="btn btn-primary">Confirm Payment</button>
                     </div>
-                    
-                    
-
-                    <!-- Add Payment Method -->
-                    <div class="form-group mt-4">
-                      <label>Add Payment Method</label>
-                      <div class="radio-option">
-                        <p>Debit or Credit Card</p>
-                        <input type="radio" name="payment_method" value="credit_card">
-                      </div>
-                      <div class="radio-option">
-                        <p>PayPal</p>
-                        <input type="radio" name="payment_method" value="paypal">
-                      </div>
-                      <div class="radio-option">
-                        <p>Wire Transfer</p>
-                        <input type="radio" name="payment_method" value="add_wire_transfer">
-                      </div>
                     </div>
 
                     <!-- Next 按钮 -->
                     <div class="text-end mt-4">
-                      <button id="apply-btn" class="btn btn-primary">Next</button>
+                      <button id="apply-btn" class="btn btn-primary">Add Payment Method</button>
                     </div>
                   </div>
 
                   <!-- Form for Step 2 and Step 3 -->
                   <form id="payment-form" method="POST">
                     {% csrf_token %}
-
+                    
                     <!-- Step 2: Add Payment Method -->
+                    
                     <div id="add-payment-form" style="display: none;">
+                       <!-- Add Payment Method -->
+                      <div class="form-group mt-4">
+                        <label>Add Payment Method</label>
+                        <div class="radio-option">
+                          <p>Debit or Credit Card</p>
+                          <input type="radio" name="payment_method" value="credit_card">
+                        </div>
+                        <div class="radio-option">
+                          <p>PayPal</p>
+                          <input type="radio" name="payment_method" value="paypal">
+                        </div>
+                        <div class="radio-option">
+                          <p>Wire Transfer</p>
+                          <input type="radio" name="payment_method" value="add_wire_transfer">
+                        </div>
+                      </div>
                       <h4>Debit or Credit Card</h4>
 
                       <!-- 显示 Stripe.js 创建的信用卡输入框 -->
@@ -262,39 +286,11 @@
                         <button id="save-payment-method-btn" class="btn btn-primary">Save</button>
                       </div>
 
-                      <!-- Billing Address -->
-                      <h5 class="mt-4">Billing Address</h5>
-                      <div>
-                        {% for address in billing_addresses %}
-                        <div class="radio-option d-flex justify-content-between align-items-center">
-                          <div>
-                            <input type="radio" id="billing_{{ forloop.counter }}" name="billing_address" value="{{ address.id }}">
-                            <label for="billing_{{ forloop.counter }}">
-                              <strong>{{ address.full_name }}</strong><br>
-                              {{ address.address }}{% if address.address_line_2 %}, {{ address.address_line_2 }}{% endif %}<br>
-                              {{ address.city }}, {{ address.state }}, {{ address.zip_code }}, {{ address.country_region }}
-                            </label>
-                          </div>
-                          <!-- 删除图标 -->
-                          <button type="button" class="btn btn-outline-danger btn-sm delete-address-btn" data-address-id="{{ address.id }}" style="height: 36px; width: 36px; display: flex; justify-content: center; align-items: center;">
-                            🗑
-                          </button>
-                        </div>
-                        {% empty %}
-                        <p class="text-muted">No billing addresses found. Please add one.</p>
-                        {% endfor %}
-
                         <!-- Add New Billing Address -->
                         <div class="mt-3">
                           <a href="#" id="add-billing-address-link" class="text-primary">Add billing address</a>
                         </div>
-
-                        <!-- Confirm Payment Button -->
-                        <div class="mt-3">
-                          <button id="confirm-payment-btn" class="btn btn-primary">Confirm Payment</button>
-                        </div>
                       
-                      </div>
                     </div>
 
                     <!-- Step 3: Add Billing Address -->
@@ -447,7 +443,7 @@
     // 保存账单地址（第三步）
     $('#save-billing-address-btn').click(function (e) {
       e.preventDefault();
-  
+
       // 获取账单地址数据
       const countryRegion = $('#country_region').val();
       const fullName = $('#full_name').val();
@@ -457,13 +453,13 @@
       const city = $('#city').val();
       const state = $('#state').val();
       const zipCode = $('#zip_code').val();
-  
+
       // 校验数据
       if (!fullName || !address || !city || !state || !zipCode) {
         alert('Please fill all required address details!');
         return;
       }
-  
+
       // 发送 AJAX 请求到后端保存账单地址
       $.ajax({
         url: '/save-billing-address/', // 后端 API 路径
@@ -483,6 +479,7 @@
         success: function (response) {
           if (response.success) {
             alert('Billing address saved successfully!');
+            location.reload();  // 保存成功后刷新页面
           } else {
             alert('Error saving billing address: ' + response.message);
           }
@@ -492,12 +489,13 @@
         },
       });
     });
-  
+
     // 显示/隐藏账单地址表单
     $('#add-billing-address-link').click(function (e) {
       e.preventDefault();
       $('#new-billing-address-form').toggle();
     });
+
   });
 </script>
 <!-- 第二步保存信用卡操作 -->
@@ -506,9 +504,9 @@
   document.addEventListener("DOMContentLoaded", function () {
     // 从后端获取 Publishable Key
     const stripe = Stripe("{{ stripe_publishable_key }}");
-
+  
     const elements = stripe.elements();
-
+  
     // 创建信用卡输入框
     const cardElement = elements.create("card", {
       style: {
@@ -521,23 +519,23 @@
       },
     });
     cardElement.mount("#card-element");
-
+  
     // 保存 PaymentMethod
     const form = document.getElementById("add-payment-form");
     const saveButton = document.getElementById("save-payment-method-btn");
-
+  
     saveButton.addEventListener("click", async (event) => {
       event.preventDefault();
-
+  
       // 禁用按钮防止重复提交
       saveButton.disabled = true;
-
+  
       // 创建 PaymentMethod
       const { paymentMethod, error } = await stripe.createPaymentMethod({
         type: "card",
         card: cardElement,
       });
-
+  
       if (error) {
         // 显示错误信息
         document.getElementById("card-errors").textContent = error.message;
@@ -552,19 +550,21 @@
           },
           body: JSON.stringify({ payment_method_id: paymentMethod.id }),
         });
-
+  
         const result = await response.json();
         if (result.success) {
           alert("Payment method saved successfully!");
+          location.reload();  // 保存成功后刷新页面
         } else {
           alert("Error saving payment method: " + result.error);
         }
-
+  
         // 重新启用按钮
         saveButton.disabled = false;
       }
     });
   });
+  
 </script>
 <script>
   $('#confirm-payment-btn').click(async function (event) {
