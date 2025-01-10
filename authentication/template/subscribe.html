@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pricing Plans</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+        }
+        .pricing-container {
+            max-width: 400px;
+            margin: 50px auto;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #fff;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        .toggle-switch {
+            display: flex;
+            justify-content: center;
+            padding: 15px;
+            background-color: #f1f1f1;
+            border-bottom: 1px solid #ddd;
+        }
+        .toggle-switch button {
+            background: none;
+            border: none;
+            font-size: 16px;
+            padding: 8px 15px;
+            cursor: pointer;
+            color: #555;
+        }
+        .toggle-switch button.active {
+            color: #fff;
+            background-color: #007bff;
+            border-radius: 20px;
+        }
+        .pricing-plan {
+            padding: 20px;
+            text-align: center;
+        }
+        .pricing-plan h2 {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        .pricing-plan p {
+            color: #555;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+        .price {
+            font-size: 36px;
+            color: #007bff;
+            margin: 20px 0;
+        }
+        .price small {
+            font-size: 16px;
+            color: #555;
+        }
+        .cta-button {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 10px 20px;
+            color: #fff;
+            background-color: #007bff;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .cta-button:hover {
+            background-color: #0056b3;
+        }
+        .features {
+            text-align: left;
+            margin-top: 20px;
+            padding: 0 20px;
+        }
+        .features li {
+            margin-bottom: 10px;
+            list-style: none;
+            position: relative;
+            padding-left: 25px;
+        }
+        .features li:before {
+            content: '✔';
+            color: #28a745;
+            font-weight: bold;
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="pricing-container">
+        <div class="toggle-switch">
+            <button class="active" onclick="togglePlan('monthly')">Billed Monthly</button>
+            <button onclick="togglePlan('yearly')">Billed Yearly</button>
+        </div>
+        <div id="monthly-plan" class="pricing-plan">
+            <h2>Monthly Plan</h2>
+            <p>For tax sale hobbyist</p>
+            <div class="price">$5 <small>/mo</small></div>
+            <a href="#" class="cta-button">Let's Start Researching!</a>
+            <ul class="features">
+                <li>Access filtered auction data.</li>
+                <li>Evaluate foreclosure possibilities with insights from our AI algorithms.</li>
+                <li>Unlimited access to recommended property types, addresses and basic auction information based on your filters.</li>
+                <li>Create tasks to efficiently track your work.</li>
+                <li>Organize and manage your existing purchased data.</li>
+                <li>Unlock detailed property information for an additional fee.</li>
+            </ul>
+        </div>
+        <div id="yearly-plan" class="pricing-plan" style="display: none;">
+            <h2>Annual Plan</h2>
+            <p>For tax sale hobbyist</p>
+            <div class="price">$50 <small>/year</small></div>
+            <p>Billed Yearly at $50. Get two months free!</p>
+            <a href="#" class="cta-button">Let's Start Researching!</a>
+            <ul class="features">
+                <li>Get two months free with our annual plan!</li>
+                <li>Access filtered auction data.</li>
+                <li>Evaluate foreclosure possibilities with insights from our AI algorithms.</li>
+                <li>Unlimited access to recommended property types, addresses and basic auction information based on your filters.</li>
+                <li>Create tasks to efficiently track your work.</li>
+                <li>Organize and manage your existing purchased data.</li>
+                <li>Unlock detailed property information for an additional fee.</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        function togglePlan(plan) {
+            const monthlyPlan = document.getElementById('monthly-plan');
+            const yearlyPlan = document.getElementById('yearly-plan');
+            const buttons = document.querySelectorAll('.toggle-switch button');
+            
+            if (plan === 'monthly') {
+                monthlyPlan.style.display = 'block';
+                yearlyPlan.style.display = 'none';
+                buttons[0].classList.add('active');
+                buttons[1].classList.remove('active');
+            } else {
+                monthlyPlan.style.display = 'none';
+                yearlyPlan.style.display = 'block';
+                buttons[1].classList.add('active');
+                buttons[0].classList.remove('active');
+            }
+        }
+    </script>
+</body>
+</html>
