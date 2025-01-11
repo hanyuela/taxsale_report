@@ -12,9 +12,16 @@
         {% endfor %}
     </div>
     {% endif %} 
-    <!-- loader starts-->
-    {% include 'base.html' %}
-    <!-- latest jquery-->
     
+    <!-- 根据用户的会员状态判断显示不同的模板 -->
+    {% if request.user.profile.member == 0 %}
+        {% include 'subscribe.html' %}
+    {% else %}
+        {% include 'base.html' %}
+    {% endif %}
+    
+    <!-- latest jquery-->
+    <script src="{% static 'js/jquery.min.js' %}"></script>
+    <!-- 其他 JS 和资源 -->
   </body>
 </html>
