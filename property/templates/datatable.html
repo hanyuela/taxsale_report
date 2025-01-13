@@ -216,39 +216,6 @@
         </div> 
     <!-- 弹出窗口 -->
     <!-- jQuery -->
-    <script>
-        $(document).ready(function() {
-            // 监听全选复选框的点击事件
-            $('#select_all').click(function() {
-                var isChecked = $(this).prop('checked');  // 获取全选框的状态
-                $('.row-select').prop('checked', isChecked);  // 设置所有行的复选框为相同状态
-            });
-    
-            // 监听每一行的点击事件，排除购物车按钮点击
-            $('#keytable tbody tr').click(function(e) {
-                // 如果点击的是购物车按钮，直接返回，不做处理
-                if ($(e.target).closest('.delete a').length > 0) {
-                    return;
-                }
-                var checkbox = $(this).find('.row-select');  // 获取当前行的复选框
-                checkbox.prop('checked', !checkbox.prop('checked'));  // 反转选中状态
-            });
-    
-            // 监听每个复选框的点击事件，防止影响到行点击的事件
-            $('.row-select').click(function(e) {
-                e.stopPropagation();  // 阻止点击事件冒泡到行上
-            });
-    
-            // 购物车按钮的点击事件
-            $('.delete a').click(function(e) {
-                e.preventDefault();  // 阻止默认行为
-                // 单独执行购物车的逻辑
-                console.log("购物车按钮被点击！");
-            });
-        });
-    </script>
-    
-      
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>   
     <script src="{% static 'js/jquery.min.js' %}"></script>
     <!-- Bootstrap js-->
@@ -314,6 +281,47 @@
     
             // 添加“统一购买”按钮到分页控件的最后
             $(".dataTables_paginate").append('<button class="bulk-purchase-btn btn btn-primary" style="margin-left: 10px;"><i class="fa fa-shopping-cart"></i></button>');
+            
+            // 防止全选复选框误触跳转
+            $('#select_all').click(function(event) {
+                event.stopPropagation(); // 阻止事件冒泡，防止误触导致跳转
+                var isChecked = $(this).prop('checked'); // 获取全选框的状态
+
+                // 获取 DataTable 实例
+                var table = $('#keytable').DataTable();
+
+                // 只操作当前页未禁用的复选框
+                table.rows({ page: 'current' }).nodes().each(function(row) {
+                    var checkbox = $(row).find('.row-select'); // 获取复选框
+                    if (!checkbox.prop('disabled')) { // 跳过已禁用的复选框
+                        checkbox.prop('checked', isChecked); // 设置当前页未禁用复选框的状态
+                    }
+                });
+            });
+
+
+    
+            // 监听每一行的点击事件，排除购物车按钮点击
+            $('#keytable tbody').on('click', 'tr', function(e) {
+                // 如果点击的是购物车按钮，直接返回，不做处理
+                if ($(e.target).closest('.delete a').length > 0) {
+                    return;
+                }
+                var checkbox = $(this).find('.row-select'); // 获取当前行的复选框
+                checkbox.prop('checked', !checkbox.prop('checked')); // 反转选中状态
+            });
+    
+            // 监听每个复选框的点击事件，防止影响到行点击的事件
+            $('#keytable tbody').on('click', '.row-select', function(e) {
+                e.stopPropagation(); // 阻止点击事件冒泡到行上
+            });
+    
+            // 购物车按钮的点击事件
+            $('#keytable tbody').on('click', '.delete a', function(e) {
+                e.preventDefault(); // 阻止默认行为
+                console.log("购物车按钮被点击！");
+            });
+
             // 添加购物车按钮函数
             function addBulkPurchaseButton() {
                 if (!$(".bulk-purchase-btn").length) { // 检查按钮是否已经存在
@@ -328,6 +336,8 @@
             $('#keytable').on('draw.dt', function() {
                 addBulkPurchaseButton();
             });
+            
+            
             
             // 绑定“统一购买”按钮的点击事件
             $(document).on('click', '.bulk-purchase-btn', function() {
@@ -413,7 +423,6 @@
             });
     
             // 弹窗中“同意”按钮的逻辑
-            // 弹窗中“同意”按钮的逻辑
             $('#agree-button').off('click').on('click', function() {
                 if (window.bulkSelectedData && window.bulkSelectedData.length > 0) {
                     var requests = [];
@@ -476,7 +485,7 @@
                         console.error("处理部分选中项时出错！");
                     });
                 } else {
-                    alert("没有找到需要处理的数据！");
+                    
                 }
             });
 
@@ -492,35 +501,48 @@
     <script>
         $(document).ready(function() {
             // 页面加载时检查哪些数据已存在，但不打开报告页面
-            $('.delete a').each(function() {
-                var propertyId = $(this).data('property-id');
-                var userId = $(this).data('user-id');
-    
-                // 发送请求检查是否已存在同意记录
-                $.ajax({
-                    url: '/check-agreement/',  // 后端检查记录的URL
-                    method: 'GET',
-                    data: {
-                        property_id: propertyId,
-                        user_id: userId,
-                        csrfmiddlewaretoken: '{{ csrf_token }}'  // 防止跨站请求伪造
-                    },
-                    success: function(response) {
-                        if (response.success && response.agreement_exists) {
-                            // 如果同意记录已存在，更新图标为√
-                            var icon = $('.delete a[data-property-id="' + propertyId + '"] i');
-                            icon.removeClass('fa fa-shopping-cart').addClass('icon-eye');  // 更新图标为√
+            var table = $('#keytable').DataTable(); // 初始化 DataTable 实例
+            
+            // 遍历所有行，检查是否已存在同意记录
+            table.rows().every(function () {
+                var row = $(this.node()); // 获取行的 DOM 节点
+                var propertyId = row.find('.delete a').data('property-id');
+                var userId = row.find('.delete a').data('user-id');
+        
+                // 确保 propertyId 和 userId 存在
+                if (propertyId && userId) {
+                    // 发送 AJAX 请求检查是否已存在同意记录
+                    $.ajax({
+                        url: '/check-agreement/', // 后端检查记录的 URL
+                        method: 'GET',
+                        data: {
+                            property_id: propertyId,
+                            user_id: userId,
+                            csrfmiddlewaretoken: '{{ csrf_token }}' // 防止跨站请求伪造
+                        },
+                        success: function (response) {
+                            if (response.success && response.agreement_exists) {
+                                // 如果同意记录已存在，更新图标为 √
+                                var icon = row.find('.delete a i'); // 找到当前行的图标
+                                icon.removeClass('fa fa-shopping-cart').addClass('icon-eye'); // 更新图标为 √
+                                var auctionCell = row.find('.row-select').closest('td'); // 找到复选框所在的单元格
+                                row.find('.row-select').prop('disabled', true); // 禁用复选框
+                                auctionCell.css({
+                                    'background-color': '#f0f0f0', // 设置单元格灰色背景
+                                    'opacity': '0.5' // 设置透明度
+                                });
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            console.log("检查失败: " + error);
                         }
-                    },
-                    error: function(xhr, status, error) {
-                        console.log("检查失败: " + error);
-                    }
-                });
+                    });
+                }
             });
     
 
             // 点击眼睛图标的点击事件
-            $('.delete a').click(function(e) {
+            $('#keytable tbody').on('click', '.delete a', function(e) {
                 e.preventDefault(); // 阻止默认行为
 
                 var propertyId = $(this).data('property-id');
