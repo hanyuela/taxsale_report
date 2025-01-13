@@ -40,6 +40,16 @@ def holdings_data(request):
     # 获取当前登录用户
     user = request.user
 
+    # 获取筛选参数
+    label_filter = request.GET.get('Label', '')  # 前端传递的筛选条件
+
+    # 从 Holding 表中获取当前用户的唯一 property_id
+    holdings_query = Holding.objects.filter(user=user)
+
+    # 如果有 Label 筛选条件，则根据 status 字段进行过滤
+    if label_filter and label_filter != "All":  # 忽略 "All"，返回所有
+        holdings_query = holdings_query.filter(status=label_filter)
+
     # 从 Holding 表中获取当前用户的唯一 property_id
     property_ids = Holding.objects.filter(user=user).values_list('property_id', flat=True).distinct()
 
@@ -56,6 +66,14 @@ def holdings_data(request):
     seen_property_ids = set()
 
     for property in properties:
+
+        # 获取与此 Property 相关的 Holding 数据（已经根据 label_filter 筛选过）
+        holding = holdings_query.filter(property=property).first()
+
+        # 只有符合筛选条件的 Holding 才能加入最终列表
+        if not holding:
+            continue
+        
         # 确保每个 property 只处理一次
         if property.id in seen_property_ids:
             continue
@@ -178,51 +196,51 @@ def update_holding_status(request):
     try:
         # 解析传入的 JSON 数据
         data = json.loads(request.body)
-        
+
         # 获取传递的数据
-        property_id = data.get('property_id')  # 获取传递的 property_id
-        label = data.get('Label')  # 获取传递的 Label 数据
-        note = data.get('Note')  # 获取传递的 Note 数据
-        my_bid = data.get('My Bid')  # 获取传递的 My Bid 数据
-        
-        # 打印调试信息，查看接收到的参数
-        print("Received data:")
-        print(f"property_id: {property_id}")
-        print(f"Label: {label}")
-        print(f"Note: {note}")
-        print(f"My Bid: {my_bid}")
-        
-        # 确保传递的数据有效
+        property_id = data.get('property_id')
+        label = data.get('Label')
+        note = data.get('Note')
+        my_bid = data.get('My Bid')
+
+        # 打印调试信息
+        print("Received data:", data)
+
+        # 确保 property_id 存在
         if not property_id:
             return JsonResponse({'status': 'error', 'message': 'Missing property_id'})
-        
-        # 限制 note 字段最多 50 个字符
+
+        # 验证 Label 是否为预期值
+        valid_labels = ["Bid", "Won", "Foreclosed", "Archived"]
+        if label and label not in valid_labels:
+            return JsonResponse({'status': 'error', 'message': 'Invalid Label value'})
+
+        # 限制 note 字段的长度
         if note and len(note) > 1000:
             return JsonResponse({'status': 'error', 'message': 'Note cannot exceed 1000 characters'})
-        
+
         # 查找对应的 Holding 数据
-        try:
-            holding = Holding.objects.get(property_id=property_id)  # 查找对应的 Holding 数据
-            
-            # 更新字段
-            if label:
-                holding.status = label  # 更新 status 字段为传递的 Label
-            if note:
-                holding.note = note  # 更新 note 字段
-            if my_bid:
-                try:
-                    holding.my_bid = float(my_bid)  # 转换 My Bid 为浮点数并更新
-                except ValueError:
-                    return JsonResponse({'status': 'error', 'message': 'Invalid My Bid value'})
-            
-            holding.save()  # 保存更新后的状态
-            
-        except Holding.DoesNotExist:
+        holding = Holding.objects.filter(property_id=property_id).first()
+        if not holding:
             return JsonResponse({'status': 'error', 'message': 'Holding not found'})
+
+        # 更新字段
+        if label:
+            holding.status = label
+        if note:
+            holding.note = note
+        if my_bid:
+            try:
+                holding.my_bid = float(my_bid)
+            except ValueError:
+                return JsonResponse({'status': 'error', 'message': 'Invalid My Bid value'})
+
+        holding.save()
 
         return JsonResponse({'status': 'success', 'message': 'Holding data updated successfully'})
 
     except Exception as e:
+        print("Error:", str(e))  # 打印错误信息
         return JsonResponse({'status': 'error', 'message': str(e)})
 
 
