@@ -168,6 +168,60 @@
         },
         fields: [
             {
+                name: "Label",
+                title: "Status",
+                width: 120,
+                headerTemplate: function () {
+                    const $header = $("<div>").text("Status");
+                    const $select = $("<select>")
+                        .addClass("status-filter form-select form-select-sm ms-2")
+                        .append($("<option>").val("All").text("All"))
+                        .append($("<option>").val("Bid").text("Bid"))
+                        .append($("<option>").val("Won").text("Won"))
+                        .append($("<option>").val("Foreclosed").text("Foreclosed"))
+                        .append($("<optgroup>").attr("label", "------"))  // 虚线分隔符
+                        .append($("<option>").val("Archived").text("Archived")) // 添加 Archived 选项
+                        .on("click", function(event) {
+                            event.stopPropagation(); // 阻止事件冒泡，防止触发其他表头功能
+                        })
+                        .on("change", function () {
+                            const selectedValue = $(this).val();
+                            if (selectedValue === "All") {
+                                $("#basicScenario").jsGrid("loadData", { Label: "" });
+                                $(".archived-row").hide(); // 隐藏所有 Archived 行
+                            } else if (selectedValue === "Archived") {
+                                $("#basicScenario").jsGrid("loadData", { Label: "Archived" });
+                                $(".archived-row").show(); // 显示所有 Archived 行
+                            } else {
+                                $("#basicScenario").jsGrid("loadData", { Label: selectedValue });
+                                $(".archived-row").hide(); // 隐藏 Archived 行
+                            }
+                        });
+                    $select.val("All"); // 设置默认值为 "All"
+                    return $("<div>").append($header).append($select);
+                },
+                // 编辑时显示下拉框
+                editTemplate: function (value) {
+                    const $select = $("<select>").addClass("form-select form-select-sm");
+                    const options = ["Bid", "Won", "Foreclosed", "Archived"];
+                    options.forEach(function (option) {
+                        const $option = $("<option>").val(option).text(option);
+                        if (option === value) {
+                            $option.prop("selected", true); // 设置默认值
+                        }
+                        $select.append($option);
+                    });
+        
+                    // 将下拉框保存到 this.$select 中
+                    this.$select = $select;
+                    return $select;
+                },
+                // 返回编辑时的值
+                editValue: function () {
+                    return this.$select.val();  // 获取当前选中的值
+                }
+            },
+            {
                 name: "Address",
                 type: "text",
                 width: 150,
@@ -823,57 +877,7 @@
             },                          
             // 隐藏的字段，不显示在表格中
             { name: "property_user_agreement_id", type: "text", width: 150, editing: false, visible: false },
-            {
-                name: "Label",
-                title: "Status",
-                width: 120,
-                headerTemplate: function () {
-                    const $header = $("<div>").text("Status");
-                    const $select = $("<select>")
-                        .addClass("status-filter form-select form-select-sm ms-2")
-                        .append($("<option>").val("All").text("All"))
-                        .append($("<option>").val("Bid").text("Bid"))
-                        .append($("<option>").val("Won").text("Won"))
-                        .append($("<option>").val("Foreclosed").text("Foreclosed"))
-                        .append($("<optgroup>").attr("label", "------"))  // 虚线分隔符
-                        .append($("<option>").val("Archived").text("Archived")) // 添加 Archived 选项
-                        .on("change", function () {
-                            const selectedValue = $(this).val();
-                            if (selectedValue === "All") {
-                                $("#basicScenario").jsGrid("loadData", { Label: "" });
-                                $(".archived-row").hide(); // 隐藏所有 Archived 行
-                            } else if (selectedValue === "Archived") {
-                                $("#basicScenario").jsGrid("loadData", { Label: "Archived" });
-                                $(".archived-row").show(); // 显示所有 Archived 行
-                            } else {
-                                $("#basicScenario").jsGrid("loadData", { Label: selectedValue });
-                                $(".archived-row").hide(); // 隐藏 Archived 行
-                            }
-                        });
-                    $select.val("All"); // 设置默认值为 "All"
-                    return $("<div>").append($header).append($select);
-                },
-                // 编辑时显示下拉框
-                editTemplate: function (value) {
-                    const $select = $("<select>").addClass("form-select form-select-sm");
-                    const options = ["Bid", "Won", "Foreclosed", "Archived"];
-                    options.forEach(function (option) {
-                        const $option = $("<option>").val(option).text(option);
-                        if (option === value) {
-                            $option.prop("selected", true); // 设置默认值
-                        }
-                        $select.append($option);
-                    });
-        
-                    // 将下拉框保存到 this.$select 中
-                    this.$select = $select;
-                    return $select;
-                },
-                // 返回编辑时的值
-                editValue: function () {
-                    return this.$select.val();  // 获取当前选中的值
-                }
-            },
+            
             { 
                 type: "control", 
                 width: 150, 
