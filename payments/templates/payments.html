@@ -215,6 +215,26 @@
                       {% else %}
                       <p class="text-muted">No payment methods available. Please add one.</p>
                       {% endif %}
+                      <!-- Add New Billing Address -->
+                      <div class="mt-3">
+                        <a href="#" id="add-new-payment-method-link" class="text-primary">Add a new payment method</a>
+                      </div>
+                      <!-- New Payment Method Selection Form (Initially Hidden) -->
+                      <div id="payment-method-form" class="form-group mt-4" style="display: none;">
+                        <label>Add Payment Method</label>
+                        <div class="radio-option">
+                          <p>Debit or Credit Card</p>
+                          <input type="radio" name="payment_method" value="credit_card">
+                        </div>
+                        <div class="radio-option">
+                          <p>PayPal</p>
+                          <input type="radio" name="payment_method" value="paypal">
+                        </div>
+                        <div class="radio-option">
+                          <p>Wire Transfer</p>
+                          <input type="radio" name="payment_method" value="add_wire_transfer">
+                        </div>
+                      </div>
                       <!-- Billing Address -->
                       <h5 class="mt-4">Billing Address</h5>
                       <div>
@@ -236,105 +256,95 @@
                           {% empty %}
                           <p class="text-muted">No billing addresses found. Please add one.</p>
                           {% endfor %}
+                          <!-- Add New Billing Address -->
+                          <div class="mt-3">
+                            <a href="#" id="add-billing-address-link" class="text-primary">Add billing address</a>
+                          </div>
+                          <!-- Step 3: Add Billing Address -->
+                          <div id="new-billing-address-form" style="display: none;">
+                            <h5>Add Billing Address</h5>
+                            <div class="form-group">
+                              <label for="country_region">Country or Region</label>
+                              <input class="form-control" id="country_region" type="text" value="United States" readonly>
+                            </div>
+                            <div class="form-group">
+                              <label for="full_name">Full Name</label>
+                              <input class="form-control" id="full_name" type="text" placeholder="Full name">
+                            </div>
+                            <div class="form-group">
+                              <label for="business_name">Business Name (if applicable)</label>
+                              <input class="form-control" id="business_name" type="text" placeholder="Business name">
+                            </div>
+                            <div class="form-group">
+                              <label for="address">Address</label>
+                              <input class="form-control" id="address" type="text" placeholder="Address">
+                            </div>
+                            <div class="form-group">
+                              <label for="address_line_2">Address Line 2 (optional)</label>
+                              <input class="form-control" id="address_line_2" type="text" placeholder="Address line 2 (optional)">
+                            </div>
+                            <div class="form-row">
+                              <div class="form-group col-md-6">
+                                <label for="city">City</label>
+                                <input class="form-control" id="city" type="text" placeholder="City">
+                              </div>
+                              <div class="form-group col-md-3">
+                                <label for="state">State</label>
+                                <input class="form-control" id="state" type="text" placeholder="State">
+                              </div>
+                              <div class="form-group col-md-3">
+                                <label for="zip_code">ZIP Code</label>
+                                <input class="form-control" id="zip_code" type="text" placeholder="ZIP code">
+                              </div>
+                            </div>
+                            <div class="text-end mt-4">
+                              <button id="save-billing-address-btn" class="btn btn-primary">Save</button>
+                            </div>
+                          </div>
                       </div>
+                    </div>
                     <!-- Confirm Payment Button --> 
-                    <div class="mt-3">
+                    <div class="text-end mt-4">
                       <button id="confirm-payment-btn" class="btn btn-primary">Confirm Payment</button>
                     </div>
-                    </div>
-
                     <!-- Next 按钮 -->
                     <div class="text-end mt-4">
-                      <button id="apply-btn" class="btn btn-primary">Add Payment Method</button>
+                      <button id="apply-btn" class="btn btn-primary">Next</button>
                     </div>
                   </div>
 
-                  <!-- Form for Step 2 and Step 3 -->
-                  <form id="payment-form" method="POST">
-                    {% csrf_token %}
-                    
-                    <!-- Step 2: Add Payment Method -->
-                    
-                    <div id="add-payment-form" style="display: none;">
-                       <!-- Add Payment Method -->
-                      <div class="form-group mt-4">
-                        <label>Add Payment Method</label>
-                        <div class="radio-option">
-                          <p>Debit or Credit Card</p>
-                          <input type="radio" name="payment_method" value="credit_card">
+                  <!-- Modal for Credit Card -->
+                  <div class="modal fade" id="credit-card-modal" tabindex="-1" role="dialog" aria-labelledby="creditCardModalLabel" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <h5 class="modal-title" id="creditCardModalLabel">Enter Your Credit Card Details</h5>
+                          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                          </button>
                         </div>
-                        <div class="radio-option">
-                          <p>PayPal</p>
-                          <input type="radio" name="payment_method" value="paypal">
+                        <div class="modal-body">
+                          <!-- 原有的 Stripe.js 卡片输入表单 -->
+                          <form id="payment-form" method="POST">
+                            {% csrf_token %}
+                            <div id="add-payment-form">
+                              <h4>Debit or Credit Card</h4>
+                              <!-- 显示 Stripe.js 创建的信用卡输入框 -->
+                              <div id="card-element" class="form-control" style="padding: 10px; border: 1px solid #ced4da; border-radius: 5px;">
+                                <!-- Stripe.js 将在这里挂载信用卡表单 -->
+                              </div>
+                              <div id="card-errors" class="text-danger mt-2" role="alert"></div>
+                            </div>
+                          </form>
                         </div>
-                        <div class="radio-option">
-                          <p>Wire Transfer</p>
-                          <input type="radio" name="payment_method" value="add_wire_transfer">
+                        <div class="modal-footer">
+                          <button type="button" id="back-btn" class="btn btn-secondary">Back</button>
+                          <button type="button" id="save-payment-method-btn" class="btn btn-primary">Save</button>
                         </div>
-                      </div>
-                      <h4>Debit or Credit Card</h4>
-
-                      <!-- 显示 Stripe.js 创建的信用卡输入框 -->
-                      <div id="card-element" class="form-control" style="padding: 10px; border: 1px solid #ced4da; border-radius: 5px;">
-                        <!-- Stripe.js 将在这里挂载信用卡表单 -->
-                      </div>
-                      <div id="card-errors" class="text-danger mt-2" role="alert"></div>
-
-                      <!-- Back 和 Save 按钮 -->
-                      <div class="text-end mt-4">
-                        <button type="button" id="back-btn" class="btn btn-outline-success me-2">Back</button>
-                        <button id="save-payment-method-btn" class="btn btn-primary">Save</button>
-                      </div>
-
-                        <!-- Add New Billing Address -->
-                        <div class="mt-3">
-                          <a href="#" id="add-billing-address-link" class="text-primary">Add billing address</a>
-                        </div>
-                      
-                    </div>
-
-                    <!-- Step 3: Add Billing Address -->
-                    <div id="new-billing-address-form" style="display: none;">
-                      <h5>Add Billing Address</h5>
-                      <div class="form-group">
-                        <label for="country_region">Country or Region</label>
-                        <input class="form-control" id="country_region" type="text" value="United States" readonly>
-                      </div>
-                      <div class="form-group">
-                        <label for="full_name">Full Name</label>
-                        <input class="form-control" id="full_name" type="text" placeholder="Full name">
-                      </div>
-                      <div class="form-group">
-                        <label for="business_name">Business Name (if applicable)</label>
-                        <input class="form-control" id="business_name" type="text" placeholder="Business name">
-                      </div>
-                      <div class="form-group">
-                        <label for="address">Address</label>
-                        <input class="form-control" id="address" type="text" placeholder="Address">
-                      </div>
-                      <div class="form-group">
-                        <label for="address_line_2">Address Line 2 (optional)</label>
-                        <input class="form-control" id="address_line_2" type="text" placeholder="Address line 2 (optional)">
-                      </div>
-                      <div class="form-row">
-                        <div class="form-group col-md-6">
-                          <label for="city">City</label>
-                          <input class="form-control" id="city" type="text" placeholder="City">
-                        </div>
-                        <div class="form-group col-md-3">
-                          <label for="state">State</label>
-                          <input class="form-control" id="state" type="text" placeholder="State">
-                        </div>
-                        <div class="form-group col-md-3">
-                          <label for="zip_code">ZIP Code</label>
-                          <input class="form-control" id="zip_code" type="text" placeholder="ZIP code">
-                        </div>
-                      </div>
-                      <div class="text-end mt-4">
-                        <button id="save-billing-address-btn" class="btn btn-primary">Save</button>
                       </div>
                     </div>
-                  </form>
+                  </div>
+
                 </div>
               </div>
             </div>
@@ -407,27 +417,39 @@
 <!-- Plugin used-->
 
 <script>
-      $(document).ready(function () {
-        // 点击 "Next" 按钮切换到第二部分
-        $('#apply-btn').click(function () {
-            const paymentOptions = Array.from(document.getElementsByName('payment_method'));
-            let selectedOption = null;
+    $(document).ready(function () {
+      // 点击 "Next" 按钮弹出支付方式输入弹窗
+      $('#apply-btn').click(function (e) {
+          e.preventDefault(); // 阻止表单默认提交行为
 
-            // 获取选中的支付方式（如果有）
-            for (let i = 0; i < paymentOptions.length; i++) {
-                if (paymentOptions[i].checked) {
-                    selectedOption = paymentOptions[i].value;
-                    break;
-                }
-            }
+          const paymentOptions = Array.from(document.getElementsByName('payment_method'));
+          let selectedOption = null;
 
-            // 调试信息（打印用户选择的支付方式）
-            console.log('Selected Payment Method:', selectedOption);
+          // 获取选中的支付方式
+          for (let i = 0; i < paymentOptions.length; i++) {
+              if (paymentOptions[i].checked) {
+                  selectedOption = paymentOptions[i].value;
+                  break;
+              }
+          }
 
-            // 无论是否选择支付方式，都切换到第二部分
-            $('#payment-method-section').hide();  // 隐藏第一部分
-            $('#add-payment-form').show();       // 显示第二部分
-        });
+          // 检查是否选择了支付方式
+          if (selectedOption === 'credit_card') {
+              // 如果选择了 Debit or Credit Card，弹出模态框
+              $('#credit-card-modal').modal('show'); // 显示弹窗
+          } else {
+              alert('Please select Debit or Credit Card to proceed.');
+          }
+      });
+
+      // 点击 "Back" 按钮返回到第一步
+      $('#back-btn').click(function () {
+          $('#credit-card-modal').modal('hide'); // 隐藏弹窗
+          // 可选：如果需要返回显示第一部分
+          $('#payment-method-section').show();
+      });
+
+
     
       // 返回上一步
       document.getElementById('back-btn').addEventListener('click', function() {
@@ -478,7 +500,7 @@
         }),
         success: function (response) {
           if (response.success) {
-            alert('Billing address saved successfully!');
+            //alert('Billing address saved successfully!');
             location.reload();  // 保存成功后刷新页面
           } else {
             alert('Error saving billing address: ' + response.message);
@@ -553,7 +575,7 @@
   
         const result = await response.json();
         if (result.success) {
-          alert("Payment method saved successfully!");
+          //alert("Payment method saved successfully!");
           location.reload();  // 保存成功后刷新页面
         } else {
           alert("Error saving payment method: " + result.error);
@@ -599,7 +621,7 @@
         headers: { "X-CSRFToken": "{{ csrf_token }}" },
         success: function (response) {
             if (response.success) {
-                alert('Payment processed successfully!');
+                //alert('Payment processed successfully!');
                 location.reload(); // 刷新页面或跳转到支付成功页面
             } else if (response.requires_action) {
                 handleAction(response.client_secret); // 如果需要 3D Secure 验证
@@ -676,7 +698,7 @@
           headers: { "X-CSRFToken": "{{ csrf_token }}" }, // Django 的 CSRF 令牌
           success: function (response) {
             if (response.success) {
-              alert('Payment method deleted successfully!');
+              //alert('Payment method deleted successfully!');
               location.reload(); // 刷新页面以更新显示
             } else {
               alert('Failed to delete payment method: ' + response.error);
@@ -706,7 +728,7 @@
           headers: { "X-CSRFToken": "{{ csrf_token }}" }, // Django 的 CSRF 令牌
           success: function (response) {
             if (response.success) {
-              alert('Address deleted successfully!');
+              //alert('Address deleted successfully!');
               location.reload(); // 刷新页面以更新显示
             } else {
               alert('Failed to delete address: ' + response.error);
@@ -718,5 +740,20 @@
         });
       }
     });
+  });
+</script>
+<script>
+  document.getElementById('add-new-payment-method-link').addEventListener('click', function(e) {
+    e.preventDefault();  // 阻止链接的默认行为
+    
+    // 获取支付方式表单
+    var paymentMethodForm = document.getElementById('payment-method-form');
+    
+    // 检查当前表单的显示状态并切换显示/隐藏
+    if (paymentMethodForm.style.display === 'none' || paymentMethodForm.style.display === '') {
+      paymentMethodForm.style.display = 'block';  // 显示表单
+    } else {
+      paymentMethodForm.style.display = 'none';  // 隐藏表单
+    }
   });
 </script>
