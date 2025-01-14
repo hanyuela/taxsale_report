@@ -217,22 +217,40 @@
                       {% endif %}
                       <!-- Add New Billing Address -->
                       <div class="mt-3">
-                        <a href="#" id="add-new-payment-method-link" class="text-primary">Add a new payment method</a>
+                        <a href="#" id="add-new-payment-method-link" class="text-primary" data-bs-toggle="modal" data-bs-target="#paymentMethodModal">Add a new payment method</a>
                       </div>
-                      <!-- New Payment Method Selection Form (Initially Hidden) -->
-                      <div id="payment-method-form" class="form-group mt-4" style="display: none;">
-                        <label>Add Payment Method</label>
-                        <div class="radio-option">
-                          <p>Debit or Credit Card</p>
-                          <input type="radio" name="payment_method" value="credit_card">
-                        </div>
-                        <div class="radio-option">
-                          <p>PayPal</p>
-                          <input type="radio" name="payment_method" value="paypal">
-                        </div>
-                        <div class="radio-option">
-                          <p>Wire Transfer</p>
-                          <input type="radio" name="payment_method" value="add_wire_transfer">
+
+                      <!-- Modal -->
+                      <div class="modal fade" id="paymentMethodModal" tabindex="-1" aria-labelledby="paymentMethodModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                          <div class="modal-content">
+                            <div class="modal-header">
+                              <h5 class="modal-title" id="paymentMethodModalLabel">Add Payment Method</h5>
+                              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                              <!-- New Payment Method Selection Form -->
+                              <div class="form-group">
+                                <div class="radio-option">
+                                  <p>Debit or Credit Card</p>
+                                  <input type="radio" name="payment_method" value="credit_card">
+                                </div>
+                                <div class="radio-option">
+                                  <p>PayPal</p>
+                                  <input type="radio" name="payment_method" value="paypal">
+                                </div>
+                                <div class="radio-option">
+                                  <p>Wire Transfer</p>
+                                  <input type="radio" name="payment_method" value="add_wire_transfer">
+                                </div>
+                              </div>
+                            </div>
+                            <div class="modal-footer">
+                              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                              <!-- Next 按钮 -->
+                              <button id="apply-btn" class="btn btn-primary">Next</button>
+                            </div>
+                          </div>
                         </div>
                       </div>
                       <!-- Billing Address -->
@@ -258,59 +276,69 @@
                           {% endfor %}
                           <!-- Add New Billing Address -->
                           <div class="mt-3">
-                            <a href="#" id="add-billing-address-link" class="text-primary">Add billing address</a>
+                            <a href="#" id="add-billing-address-link" class="text-primary" data-bs-toggle="modal" data-bs-target="#billingAddressModal">Add a new billing address</a>
                           </div>
-                          <!-- Step 3: Add Billing Address -->
-                          <div id="new-billing-address-form" style="display: none;">
-                            <h5>Add Billing Address</h5>
-                            <div class="form-group">
-                              <label for="country_region">Country or Region</label>
-                              <input class="form-control" id="country_region" type="text" value="United States" readonly>
-                            </div>
-                            <div class="form-group">
-                              <label for="full_name">Full Name</label>
-                              <input class="form-control" id="full_name" type="text" placeholder="Full name">
-                            </div>
-                            <div class="form-group">
-                              <label for="business_name">Business Name (if applicable)</label>
-                              <input class="form-control" id="business_name" type="text" placeholder="Business name">
-                            </div>
-                            <div class="form-group">
-                              <label for="address">Address</label>
-                              <input class="form-control" id="address" type="text" placeholder="Address">
-                            </div>
-                            <div class="form-group">
-                              <label for="address_line_2">Address Line 2 (optional)</label>
-                              <input class="form-control" id="address_line_2" type="text" placeholder="Address line 2 (optional)">
-                            </div>
-                            <div class="form-row">
-                              <div class="form-group col-md-6">
-                                <label for="city">City</label>
-                                <input class="form-control" id="city" type="text" placeholder="City">
+
+                          <!-- Modal -->
+                          <div class="modal fade" id="billingAddressModal" tabindex="-1" aria-labelledby="billingAddressModalLabel" aria-hidden="true">
+                            <div class="modal-dialog modal-lg">
+                              <div class="modal-content">
+                                <div class="modal-header">
+                                  <h5 class="modal-title" id="billingAddressModalLabel">Add Billing Address</h5>
+                                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                  <!-- Step 3: Add Billing Address Form -->
+                                  <div class="form-group">
+                                    <label for="country_region">Country or Region</label>
+                                    <input class="form-control" id="country_region" type="text" value="United States" readonly>
+                                  </div>
+                                  <div class="form-group">
+                                    <label for="full_name">Full Name</label>
+                                    <input class="form-control" id="full_name" type="text" placeholder="Full name">
+                                  </div>
+                                  <div class="form-group">
+                                    <label for="business_name">Business Name (if applicable)</label>
+                                    <input class="form-control" id="business_name" type="text" placeholder="Business name">
+                                  </div>
+                                  <div class="form-group">
+                                    <label for="address">Address</label>
+                                    <input class="form-control" id="address" type="text" placeholder="Address">
+                                  </div>
+                                  <div class="form-group">
+                                    <label for="address_line_2">Address Line 2 (optional)</label>
+                                    <input class="form-control" id="address_line_2" type="text" placeholder="Address line 2 (optional)">
+                                  </div>
+                                  <div class="form-row">
+                                    <div class="form-group col-md-6">
+                                      <label for="city">City</label>
+                                      <input class="form-control" id="city" type="text" placeholder="City">
+                                    </div>
+                                    <div class="form-group col-md-3">
+                                      <label for="state">State</label>
+                                      <input class="form-control" id="state" type="text" placeholder="State">
+                                    </div>
+                                    <div class="form-group col-md-3">
+                                      <label for="zip_code">ZIP Code</label>
+                                      <input class="form-control" id="zip_code" type="text" placeholder="ZIP code">
+                                    </div>
+                                  </div>
+                                </div>
+                                <div class="modal-footer">
+                                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                  <button id="save-billing-address-btn" class="btn btn-primary">Save</button>
+                                </div>
                               </div>
-                              <div class="form-group col-md-3">
-                                <label for="state">State</label>
-                                <input class="form-control" id="state" type="text" placeholder="State">
-                              </div>
-                              <div class="form-group col-md-3">
-                                <label for="zip_code">ZIP Code</label>
-                                <input class="form-control" id="zip_code" type="text" placeholder="ZIP code">
-                              </div>
-                            </div>
-                            <div class="text-end mt-4">
-                              <button id="save-billing-address-btn" class="btn btn-primary">Save</button>
                             </div>
                           </div>
+
                       </div>
                     </div>
                     <!-- Confirm Payment Button --> 
                     <div class="text-end mt-4">
                       <button id="confirm-payment-btn" class="btn btn-primary">Confirm Payment</button>
                     </div>
-                    <!-- Next 按钮 -->
-                    <div class="text-end mt-4">
-                      <button id="apply-btn" class="btn btn-primary">Next</button>
-                    </div>
+                    
                   </div>
 
                   <!-- Modal for Credit Card -->
