@@ -27,6 +27,7 @@ from django.conf import settings
 from django.contrib.auth import update_session_auth_hash
 import os
 from django.core.files.storage import FileSystemStorage
+import stripe
 # 注册页面
 def register(request):
     if request.method == 'POST':
@@ -64,10 +65,11 @@ def logout(request):
 @login_required
 def index(request):
     if request.user.is_authenticated:
-        return render(request, 'index.html')  # 用户已登录，渲染 index.html
+        return render(request, 'index.html', {
+            'stripe_publishable_key': settings.STRIPE_TEST_PUBLISHABLE_KEY  # 将密钥传递到模板上下文
+        })
     else:
-        return redirect('login')  # 用户未登录，重定向到登录页面
-    
+        return redirect('login')
 
 
 
@@ -462,3 +464,47 @@ def update_avatar(request):
 
     # 如果请求不是文件上传，返回失败
     return JsonResponse({'success': False, 'error': 'No avatar uploaded'})
+
+
+stripe.api_key = settings.STRIPE_TEST_SECRET_KEY
+
+@csrf_exempt
+def create_checkout_session(request):
+    if request.method == 'POST':
+        try:
+            # 根据前端传递的计划类型，选择对应的价格 ID
+            data = json.loads(request.body)
+            plan = data.get('plan')
+
+            # 定义实际的价格 ID
+            price_id = ''
+            if plan == 'monthly':
+                price_id = 'price_1NKkXn2eZvKYlo2CbPTM2cDk'  # 替换为月付价格 ID
+            elif plan == 'yearly':
+                price_id = 'price_1NKkXn2eZvKYlo2CbPTM2cEf'  # 替换为年付价格 ID
+            else:
+                return JsonResponse({'error': 'Invalid plan'}, status=400)
+
+            # 创建 Checkout Session
+            session = stripe.checkout.Session.create(
+                payment_method_types=['card'],
+                mode='subscription',
+                line_items=[{
+                    'price': price_id,
+                    'quantity': 1,
+                }],
+                success_url='/success',
+                cancel_url='/cancel',
+            )
+            return JsonResponse({'id': session.id})
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=400)
+    return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+
+
+def success(request):
+    return render(request, 'success.html')
+
+def canceled(request):
+    return render(request, 'canceled.html')

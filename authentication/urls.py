@@ -48,7 +48,9 @@ urlpatterns = [
     path('get-payment-method-details/', payments_views.get_payment_method_details,name='get_payment_method_details'),
     path('delete-payment-method/',payments_views.delete_payment_method,name='delete_payment_method'),
     path('delete-billing-address/', payments_views.delete_billing_address, name='delete_billing_address'),
-
+    path('create-checkout-session/', views.create_checkout_session, name='create_checkout_session'),
+    path('success/', views.success, name='success'),
+    path('canceled/', views.canceled, name='canceled'),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
