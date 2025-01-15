@@ -48,7 +48,14 @@ def holdings_data(request):
 
     # 如果有 Label 筛选条件，则根据 status 字段进行过滤
     if label_filter and label_filter != "All":  # 忽略 "All"，返回所有
-        holdings_query = holdings_query.filter(status=label_filter)
+        if label_filter == "Archived":  # 处理 Archived 的特殊逻辑
+            holdings_query = holdings_query.filter(status="Archived")
+        else:
+            holdings_query = holdings_query.exclude(status="Archived").filter(status=label_filter)
+    else:
+        # 如果是 All，排除 Archived 的行
+        holdings_query = holdings_query.exclude(status="Archived")
+
 
     # 从 Holding 表中获取当前用户的唯一 property_id
     property_ids = Holding.objects.filter(user=user).values_list('property_id', flat=True).distinct()
