@@ -28,6 +28,8 @@ class UserProfile(models.Model):
     # 新增字段
     member = models.IntegerField(choices=MEMBERSHIP_CHOICES, default=1)  # 会员类型，默认为按月付费用户
     member_start = models.DateTimeField(null=True, blank=True)  # 会员开始时间
+    # 新增字段
+    customer_id = models.CharField(max_length=255, blank=True, null=True)  # Stripe Customer ID
     
     def __str__(self):
         return f"{self.user.username}'s Profile"
