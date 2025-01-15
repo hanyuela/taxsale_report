@@ -347,16 +347,13 @@
                       <div class="modal-content">
                         <div class="modal-header">
                           <h5 class="modal-title" id="creditCardModalLabel">Enter Your Credit Card Details</h5>
-                          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                          </button>
                         </div>
                         <div class="modal-body">
                           <!-- 原有的 Stripe.js 卡片输入表单 -->
                           <form id="payment-form" method="POST">
                             {% csrf_token %}
                             <div id="add-payment-form">
-                              <h4>Debit or Credit Card</h4>
+                              <h4>Debit or Credit Card</h4> 
                               <!-- 显示 Stripe.js 创建的信用卡输入框 -->
                               <div id="card-element" class="form-control" style="padding: 10px; border: 1px solid #ced4da; border-radius: 5px;">
                                 <!-- Stripe.js 将在这里挂载信用卡表单 -->
@@ -463,6 +460,9 @@
 
           // 检查是否选择了支付方式
           if (selectedOption === 'credit_card') {
+              // 关闭当前模态框
+              $('#paymentMethodModal').modal('hide');
+
               // 如果选择了 Debit or Credit Card，弹出模态框
               $('#credit-card-modal').modal('show'); // 显示弹窗
           } else {
@@ -470,11 +470,11 @@
           }
       });
 
-      // 点击 "Back" 按钮返回到第一步
-      $('#back-btn').click(function () {
-          $('#credit-card-modal').modal('hide'); // 隐藏弹窗
-          // 可选：如果需要返回显示第一部分
-          $('#payment-method-section').show();
+
+        // 点击 "Back" 按钮返回到第一步 
+        $('#back-btn').click(function () {
+          $('#credit-card-modal').modal('hide'); // 隐藏当前信用卡输入窗口
+          $('#paymentMethodModal').modal('show'); // 重新显示支付方式选择窗口
       });
 
 
