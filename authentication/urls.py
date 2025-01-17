@@ -10,7 +10,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 urlpatterns = [
-    path('', views.user_login, name='login'),
+    path('', views.home, name='home'),  # 默认显示 landing-page 或 index 页面
     path('register/', views.register, name='register'),
     path('login/', views.user_login, name='login'),
     path('logout/', views.logout, name='logout'),
@@ -50,7 +50,7 @@ urlpatterns = [
     path('delete-billing-address/', payments_views.delete_billing_address, name='delete_billing_address'),
     path('create-checkout-session/', views.create_checkout_session, name='create_checkout_session'),
     path('success/', views.success, name='success'),
-    path('canceled/', views.canceled, name='canceled'),
+    path('canceled/', views.canceled, name='canceled'), 
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

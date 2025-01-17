@@ -62,14 +62,22 @@ def logout(request):
     messages.success(request, "You have successfully exited")
     return redirect("index")  # 重定向到 index 视图，确保该视图渲染 base.html
 
+def landing_page(request):
+    # 显示 landing-page 页面，适用于未登录的用户
+    return render(request, 'landing-page.html')
+
 @login_required
 def index(request):
+    # 已登录的用户展示 index 页面
+    return render(request, 'index.html', {
+        'stripe_publishable_key': settings.STRIPE_TEST_PUBLISHABLE_KEY  # 将密钥传递到模板上下文
+    })
+
+def home(request):
     if request.user.is_authenticated:
-        return render(request, 'index.html', {
-            'stripe_publishable_key': settings.STRIPE_TEST_PUBLISHABLE_KEY  # 将密钥传递到模板上下文
-        })
+        return redirect('index')  # 登录后跳转到 index
     else:
-        return redirect('login')
+        return landing_page(request)  # 未登录时显示 landing-page
 
 
 
