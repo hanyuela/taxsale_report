@@ -13,6 +13,7 @@ from .models import Payment_history, Payment_method, BillingAddress  # 导入 Bi
 from django.db.models import Sum
 from django.conf import settings
 from authentication.models import UserProfile
+from datetime import timedelta
 
 @login_required
 def payments(request):
@@ -31,13 +32,48 @@ def payments(request):
     # 计算用户的 remaining_balance（总余额）
     remaining_balance = Payment_history.objects.filter(user=user).aggregate(total_amount=Sum('amount'))['total_amount'] or 0
 
-    # 示例的订阅信息
-    subscription = {
-        "member_since": "11/22/2024",  # 示例数据
-        "payment_interval": "Monthly",  # 示例数据
-        "next_payment_on": "12/21/2024",  # 示例数据
-        "next_payment_amount": 5.00  # 示例数据
-    }
+    # 获取用户的订阅信息
+    try:
+        user_profile = UserProfile.objects.get(user=user)
+    except UserProfile.DoesNotExist:
+        user_profile = None
+
+    if user_profile:
+        if user_profile.member == 0:
+            subscription = {
+                "member_since": "Canceled",  # 取消订阅
+                "payment_interval": "Non-Paid",  # 未付费
+                "next_payment_on": "-",
+                "next_payment_amount": "-"
+            }
+        elif user_profile.member == 1:  # Monthly
+            subscription = {
+                "member_since": user_profile.member_start.strftime('%m/%d/%Y'),  # 使用 member_start 日期
+                "payment_interval": "Monthly",
+                "next_payment_on": get_next_payment_date(user_profile.member_start, monthly=True),
+                "next_payment_amount": 5.00  # 你可以根据实际情况修改金额
+            }
+        elif user_profile.member == 2:  # Annually
+            subscription = {
+                "member_since": user_profile.member_start.strftime('%m/%d/%Y'),
+                "payment_interval": "Annually",
+                "next_payment_on": get_next_payment_date(user_profile.member_start, monthly=False),
+                "next_payment_amount": 5.00
+            }
+        else:
+            subscription = {
+                "member_since": "Unknown",
+                "payment_interval": "Unknown",
+                "next_payment_on": "-",
+                "next_payment_amount": "-"
+            }
+    else:
+        subscription = {
+            "member_since": "Unknown",
+            "payment_interval": "Unknown",
+            "next_payment_on": "-",
+            "next_payment_amount": "-"
+        }
 
     # 渲染数据到前端模板
     context = {
@@ -50,6 +86,24 @@ def payments(request):
     }
     return render(request, 'payments.html', context)
 
+def get_next_payment_date(start_date, monthly=True):
+    """
+    根据开始日期计算下一次付款日期
+    :param start_date: 订阅开始日期
+    :param monthly: 如果是True，表示按月计算，否则表示按年计算
+    :return: 下一次付款日期
+    """
+    if monthly:
+        # 每月同一天支付，如果没有31号，提前调整
+        next_payment = start_date.replace(year=start_date.year + (start_date.month == 12), month=(start_date.month % 12) + 1)
+        if next_payment.day != start_date.day:
+            # 调整为前一个月的最后一天
+            next_payment = next_payment.replace(day=1) - timedelta(days=1)
+    else:
+        # 每年同一天支付
+        next_payment = start_date.replace(year=start_date.year + 1)
+
+    return next_payment.strftime('%m/%d/%Y')
 
 @csrf_exempt
 def save_payment_details(request):
