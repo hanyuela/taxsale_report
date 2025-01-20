@@ -134,6 +134,30 @@
       margin-left: 10px;
       line-height: 1.7;
     }
+    .delete-card-btn {
+      background-color: transparent;  /* 初始背景透明 */
+      border: none;  /* 初始无边框 */
+      color: #6c757d;  /* 灰色文字和图标 */
+      transition: background-color 0.3s ease, border 0.3s ease;  /* 添加平滑过渡效果 */
+    }
+    
+    /* 触碰时显示边框和背景颜色 */
+    .delete-card-btn:hover {
+      background-color: #f8f9fa;  /* 触碰时背景颜色变为浅灰色 */
+      border: 1px solid #6c757d;  /* 触碰时添加灰色边框 */
+    }
+    
+    .delete-address-btn{
+      background-color: transparent;  /* 初始背景透明 */
+      border: none;  /* 初始无边框 */
+      color: #6c757d;  /* 灰色文字和图标 */
+      transition: background-color 0.3s ease, border 0.3s ease;  /* 添加平滑过渡效果 */
+    }
+    /* 触碰时显示边框和背景颜色 */
+    .delete-address-btn:hover {
+      background-color: #f8f9fa;  /* 触碰时背景颜色变为浅灰色 */
+      border: 1px solid #6c757d;  /* 触碰时添加灰色边框 */
+    }
   </style>
 <body>
 
@@ -207,7 +231,7 @@
                           </label>
                         </div>                     
                         <!-- 删除按钮 -->
-                        <button type="button" class="btn btn-outline-danger btn-sm delete-card-btn" data-payment-method-id="{{ method.stripe_payment_method_id }}">
+                        <button type="button" class="btn  btn-sm delete-card-btn" data-payment-method-id="{{ method.stripe_payment_method_id }}">
                           🗑
                         </button>
                       </div>
@@ -267,7 +291,7 @@
                               </label>
                             </div>
                             <!-- 删除图标 -->
-                            <button type="button" class="btn btn-outline-danger btn-sm delete-address-btn" data-address-id="{{ address.id }}" style="height: 36px; width: 36px; display: flex; justify-content: center; align-items: center;">
+                            <button type="button" class="btn  btn-sm delete-address-btn" data-address-id="{{ address.id }}" style="height: 36px; width: 36px; display: flex; justify-content: center; align-items: center;">
                               🗑
                             </button>
                           </div>
@@ -382,23 +406,26 @@
                 <div class="form-group">
                   <label>Subscription Information</label>
                   <p>Current Subscription</p>
-                  <p>Member Since: 11/22/2024</p>
-                  <p>Payment Interval: Monthly / Yearly</p>
-                  <p>Next Payment On: 12/21/2024</p>
-                  <p>Next Payment Amount: $5.00</p>
+                  
+                  <!-- 动态显示订阅信息 -->
+                  <p>Member Since: {{ subscription.member_since }}</p>
+                  <p>Payment Interval: {{ subscription.payment_interval }}</p>
+                  <p>Next Payment On: {{ subscription.next_payment_on }}</p>
+                  <p>Next Payment Amount: ${{ subscription.next_payment_amount }}</p>
                 </div>
+                
                 <div class="form-group">
                   <button class="btn btn-primary" style="margin-top: 15px; margin-bottom: 15px; margin-left: 10px;">
                     Cancel Next Subscription
                   </button>
                 </div>
+
                 <div class="form-group mt-4">
                   <label for="coupon">Use Coupon</label>
                   <div style="display: flex; align-items: center;">
                     <input class="form-control" id="coupon" type="text" placeholder="Enter coupon code" style="flex: 1; margin-right: 10px; height: 38px;">
                     <button id="apply-coupon-btn" class="btn btn-primary" style="height: 38px; margin-bottom: 20px;">Apply</button>
                   </div>
-                  
                 </div>
               </div>
             </div>
