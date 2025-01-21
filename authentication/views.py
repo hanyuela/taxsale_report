@@ -487,9 +487,9 @@ def create_checkout_session(request):
             # 定义实际的价格 ID
             price_id = ''
             if plan == 'monthly':
-                price_id = 'price_1NKkXn2eZvKYlo2CbPTM2cDk'  # 替换为月付价格 ID
+                price_id = 'price_1QjAJuHzoCY5vXyDUdLOXHRy'  # 替换为月付价格 ID
             elif plan == 'yearly':
-                price_id = 'price_1NKkXn2eZvKYlo2CbPTM2cEf'  # 替换为年付价格 ID
+                price_id = 'price_1QjAOKHzoCY5vXyDQoYPLCio'  # 替换为年付价格 ID
             else:
                 return JsonResponse({'error': 'Invalid plan'}, status=400)
 
@@ -501,8 +501,8 @@ def create_checkout_session(request):
                     'price': price_id,
                     'quantity': 1,
                 }],
-                success_url='/success',
-                cancel_url='/cancel',
+                success_url='http://127.0.0.1:8000/success/',
+                cancel_url='http://127.0.0.1:8000/canceled/',
             )
             return JsonResponse({'id': session.id})
         except Exception as e:
