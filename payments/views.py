@@ -46,20 +46,36 @@ def payments(request):
                 "next_payment_on": "-",
                 "next_payment_amount": "-"
             }
-        elif user_profile.member == 1:  # Monthly
-            subscription = {
-                "member_since": user_profile.member_start.strftime('%m/%d/%Y'),  # 使用 member_start 日期
-                "payment_interval": "Monthly",
-                "next_payment_on": get_next_payment_date(user_profile.member_start, monthly=True),
-                "next_payment_amount": 5.00  # 你可以根据实际情况修改金额
-            }
-        elif user_profile.member == 2:  # Annually
-            subscription = {
-                "member_since": user_profile.member_start.strftime('%m/%d/%Y'),
-                "payment_interval": "Annually",
-                "next_payment_on": get_next_payment_date(user_profile.member_start, monthly=False),
-                "next_payment_amount": 5.00
-            }
+        elif user_profile.member == 1:  # 每月订阅
+            if user_profile.member_start:  # 确保 member_start 不是 None
+                subscription = {
+                    "member_since": user_profile.member_start.strftime('%m/%d/%Y'),
+                    "payment_interval": "Monthly",
+                    "next_payment_on": get_next_payment_date(user_profile.member_start, monthly=True),
+                    "next_payment_amount": 5.00  # 你可以根据实际情况调整金额
+                }
+            else:
+                subscription = {
+                    "member_since": "Unknown",
+                    "payment_interval": "Unknown",
+                    "next_payment_on": "-",
+                    "next_payment_amount": "-"
+                }
+        elif user_profile.member == 2:  # 年度订阅
+            if user_profile.member_start:  # 确保 member_start 不是 None
+                subscription = {
+                    "member_since": user_profile.member_start.strftime('%m/%d/%Y'),
+                    "payment_interval": "Annually",
+                    "next_payment_on": get_next_payment_date(user_profile.member_start, monthly=False),
+                    "next_payment_amount": 5.00
+                }
+            else:
+                subscription = {
+                    "member_since": "Unknown",
+                    "payment_interval": "Unknown",
+                    "next_payment_on": "-",
+                    "next_payment_amount": "-"
+                }
         else:
             subscription = {
                 "member_since": "Unknown",
@@ -74,6 +90,7 @@ def payments(request):
             "next_payment_on": "-",
             "next_payment_amount": "-"
         }
+
 
     # 渲染数据到前端模板
     context = {
