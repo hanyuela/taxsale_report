@@ -51,6 +51,8 @@ urlpatterns = [
     path('create-checkout-session/', views.create_checkout_session, name='create_checkout_session'),
     path('success/', views.success, name='success'),
     path('canceled/', views.canceled, name='canceled'), 
+    path('transactions/',payments_views.transactions,name='transactions'),
+    path('invoice/',payments_views.invoice,name='invoice'),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
