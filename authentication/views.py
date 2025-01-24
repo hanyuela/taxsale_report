@@ -1,438 +1,581 @@
 from django.shortcuts import render, redirect
-from django.http import JsonResponse
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.forms import AuthenticationForm
+from .forms import UserRegistrationForm
+from django.contrib.auth.models import User  # 导入 User 模型
+from django.contrib import messages  # 导入 messages 模块
+from django.contrib.auth import logout as django_logout
 from django.contrib.auth.decorators import login_required
-from payments.models import Payment_method, Payment_history, BillingAddress
-import stripe
-from django.views.decorators.csrf import csrf_exempt
-from django.utils.timezone import now
-import json
-from datetime import datetime
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
-from .models import Payment_history, Payment_method, BillingAddress  # 导入 BillingAddress 模型
-from django.db.models import Sum
 from django.conf import settings
-from authentication.models import UserProfile
-from datetime import timedelta
+from django.core.mail import send_mail
+from criterion.models import Criterion, States
+from .models import UserProfile
+from email.mime.text import MIMEText
+from email.header import Header
+from email.utils import formataddr
+import smtplib
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes, force_str
+from django.contrib.auth.tokens import default_token_generator
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+import json
+from django.db import transaction
+from django.shortcuts import render, get_object_or_404
+from django.contrib.sites.shortcuts import get_current_site
+from django.conf import settings
+from django.contrib.auth import update_session_auth_hash
+import os
+from django.core.files.storage import FileSystemStorage
+import stripe
+from payments.models import Payment_history
+from datetime import datetime
+# 注册页面
+def register(request):
+    if request.method == 'POST':
+        form = UserRegistrationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('login')
+    else:
+        form = UserRegistrationForm()
+    return render(request, 'sign-up-wizard.html', {'form': form})
+
+def user_login(request):
+    if request.method == "POST":
+        email = request.POST.get("email")
+        password = request.POST.get("password")
+        user = authenticate(request, username=email, password=password)
+
+        if user is not None:
+            login(request, user)
+            messages.success(request, "Login successful!")
+            return redirect("index")
+        else:
+            messages.error(request, "Invalid email or password, please try again.")
+            return redirect("login")
+    
+    return render(request, "login.html")
+
+
+
+def logout(request):
+    django_logout(request)
+    messages.success(request, "You have successfully exited")
+    return redirect("index")  # 重定向到 index 视图，确保该视图渲染 base.html
+
+def landing_page(request):
+    # 显示 landing-page 页面，适用于未登录的用户
+    return render(request, 'landing-page.html')
 
 @login_required
-def payments(request):
-    """
-    显示支付中心
-    """
-    user = request.user
+def index(request):
+    # 已登录的用户展示 index 页面
+    return render(request, 'index.html', {
+        'stripe_publishable_key': settings.STRIPE_TEST_PUBLISHABLE_KEY  # 将密钥传递到模板上下文
+    })
 
-    # 查询用户的付款记录和支付方式
-    payment_history = Payment_history.objects.filter(user=user).order_by('-date', '-time')
-    payment_methods = Payment_method.objects.filter(user=user)
-
-    # 查询用户的账单地址
-    billing_addresses = BillingAddress.objects.filter(user=user)
-
-    # 计算用户的 remaining_balance（总余额）
-    remaining_balance = Payment_history.objects.filter(user=user).aggregate(total_amount=Sum('amount'))['total_amount'] or 0
-
-    # 获取用户的订阅信息
-    try:
-        user_profile = UserProfile.objects.get(user=user)
-    except UserProfile.DoesNotExist:
-        user_profile = None
-
-    if user_profile:
-        if user_profile.member == 0:
-            subscription = {
-                "member_since": "Canceled",  # 取消订阅
-                "payment_interval": "Non-Paid",  # 未付费
-                "next_payment_on": "-",
-                "next_payment_amount": "-"
-            }
-        elif user_profile.member == 1:  # Monthly
-            subscription = {
-                "member_since": user_profile.member_start.strftime('%m/%d/%Y'),  # 使用 member_start 日期
-                "payment_interval": "Monthly",
-                "next_payment_on": get_next_payment_date(user_profile.member_start, monthly=True),
-                "next_payment_amount": 5.00  # 你可以根据实际情况修改金额
-            }
-        elif user_profile.member == 2:  # Annually
-            subscription = {
-                "member_since": user_profile.member_start.strftime('%m/%d/%Y'),
-                "payment_interval": "Annually",
-                "next_payment_on": get_next_payment_date(user_profile.member_start, monthly=False),
-                "next_payment_amount": 5.00
-            }
-        else:
-            subscription = {
-                "member_since": "Unknown",
-                "payment_interval": "Unknown",
-                "next_payment_on": "-",
-                "next_payment_amount": "-"
-            }
+def home(request):
+    if request.user.is_authenticated:
+        return redirect('index')  # 登录后跳转到 index
     else:
-        subscription = {
-            "member_since": "Unknown",
-            "payment_interval": "Unknown",
-            "next_payment_on": "-",
-            "next_payment_amount": "-"
+        return landing_page(request)  # 未登录时显示 landing-page
+
+
+
+
+# 错误页面
+def error_503(request):
+    return render(request, 'error-503.html')
+
+
+
+def signup_wizard(request):
+    if request.method == 'POST':
+        # 获取用户提交的表单数据
+        email = request.POST.get('email', '').strip()
+        password = request.POST.get('password', '').strip()
+        confirm_password = request.POST.get('confirm_password', '').strip()
+
+        # 获取其他字段
+        auction_types = request.POST.getlist('auction_type')  # 获取 auction_type 的多选列表
+        is_online_modes = request.POST.getlist('is_online')  # 获取 is_online 的多选列表
+        investment_purpose = request.POST.get('investment_purpose', '').strip()
+        property_types = request.POST.getlist('property_type')  # 获取选择字段列表
+        Total_Market_Value_min = request.POST.get('Total_Market_Value_min')
+        Total_Market_Value_max = request.POST.get('Total_Market_Value_max')
+        selected_states = request.POST.getlist('states')  # 前端传递的州缩写
+
+        # 初始化上下文以保留已填写数据
+        context = {
+            'email': email,
+            'auction_type': auction_types,  # 保留 auction_type 的多选值
+            'is_online': is_online_modes,  # 保留 is_online 的多选值
+            'investment_purpose': investment_purpose,
+            'property_type': property_types,  # 保留选择值
+            'Total_Market_Value_min':Total_Market_Value_min,
+            'Total_Market_Value_max':Total_Market_Value_max,
+            'states': selected_states,
+            'first_name': request.POST.get('first_name', '').strip(),
+            'last_name': request.POST.get('last_name', '').strip(),
+            'phone_number': request.POST.get('phone_number', '').strip(),
+            'investment_amount': request.POST.get('investment_amount', '').strip(),
         }
 
-    # 渲染数据到前端模板
-    context = {
-        "payment_history": payment_history,
-        "payment_methods": payment_methods,
-        "billing_addresses": billing_addresses,  # 将账单地址传递到模板
-        "remaining_balance": remaining_balance,  # 将余额传递到模板
-        "subscription": subscription,
-        "stripe_publishable_key": settings.STRIPE_TEST_PUBLISHABLE_KEY,
-    }
-    return render(request, 'payments.html', context)
+        # 验证用户输入
+        if not email:
+            messages.error(request, "Email is required.")
+            return render(request, 'sign-up-wizard.html', context)
 
-def get_next_payment_date(start_date, monthly=True):
-    """
-    根据开始日期计算下一次付款日期
-    :param start_date: 订阅开始日期
-    :param monthly: 如果是True，表示按月计算，否则表示按年计算
-    :return: 下一次付款日期
-    """
-    if monthly:
-        # 每月同一天支付，如果没有31号，提前调整
-        next_payment = start_date.replace(year=start_date.year + (start_date.month == 12), month=(start_date.month % 12) + 1)
-        if next_payment.day != start_date.day:
-            # 调整为前一个月的最后一天
-            next_payment = next_payment.replace(day=1) - timedelta(days=1)
-    else:
-        # 每年同一天支付
-        next_payment = start_date.replace(year=start_date.year + 1)
+        if not password:
+            messages.error(request, "Password is required.")
+            return render(request, 'sign-up-wizard.html', context)
 
-    return next_payment.strftime('%m/%d/%Y')
+        if password != confirm_password:
+            messages.error(request, "Passwords do not match.")
+            return render(request, 'sign-up-wizard.html', context)
 
-@csrf_exempt
-def save_payment_details(request):
-    if request.method == 'POST':
-        # 获取支付方式相关字段
-        payment_type = request.POST.get('payment_type')
-        payment_amount = request.POST.get('payment_amount')
-        payment_time = request.POST.get('payment_time')
-        payment_date = request.POST.get('payment_date')
-        payment_method = request.POST.get('payment_method')
-        
-        # 获取支付方式信息
-        stripe_payment_method_id = request.POST.get('stripe_payment_method_id', '')
-        
-        # 获取账单地址相关字段
-        full_name = request.POST.get('full_name')
-        business_name = request.POST.get('business_name', '')
-        address = request.POST.get('address')
-        address_line_2 = request.POST.get('address_line_2', '')
-        city = request.POST.get('city')
-        state = request.POST.get('state')
-        zip_code = request.POST.get('zip_code')
-        country_region = request.POST.get('country_region', 'United States')
+        if User.objects.filter(username=email).exists():
+            messages.error(request, "This email is already registered.")
+            return render(request, 'sign-up-wizard.html', context)
 
         try:
-            # 保存 Payment_history 记录
-            payment = Payment_history.objects.create(
-                user=request.user,
-                amount=payment_amount,
-                time=datetime.strptime(payment_time, '%H:%M').time(),
-                date=datetime.strptime(payment_date, '%Y-%m-%d').date(),
-                method=payment_method,
-                type=payment_type
-            )
+            with transaction.atomic():
+                # 创建用户
+                user = User.objects.create_user(username=email, email=email, password=password)
+                user.save()
 
-            # 保存 Payment_method 记录
-            if payment_method == 'stripe':
-                Payment_method.objects.create(
-                    user=request.user,
-                    method=payment_method,
-                    stripe_payment_method_id=stripe_payment_method_id
-                )
-            else:
-                Payment_method.objects.create(
-                    user=request.user,
-                    method=payment_method
+                # 保存 UserProfile 信息
+                UserProfile.objects.create(
+                    user=user,
+                    first_name=request.POST.get('first_name', '').strip(),
+                    last_name=request.POST.get('last_name', '').strip(),
+                    phone_number=request.POST.get('phone_number', '').strip(),
+                    investment_amount=request.POST.get('investment_amount', '').strip() or None,
+                    goal=investment_purpose,
                 )
 
-            # 保存 BillingAddress 记录
-            BillingAddress.objects.create(
-                user=request.user,
-                full_name=full_name,
-                business_name=business_name,
-                address=address,
-                address_line_2=address_line_2,
-                city=city,
-                state=state,
-                zip_code=zip_code,
-                country_region=country_region
-            )
+                # 保存 Criterion 信息
+                criterion = Criterion.objects.create(
+                    user=user,
 
-            return JsonResponse({'success': True, 'message': 'Payment details saved successfully!'})
+                    Total_Market_Value_min =Total_Market_Value_min or None,
+                    Total_Market_Value_max =Total_Market_Value_max or None
+                )
+
+                # 保存 Auction Type 信息
+                if auction_types:
+                    criterion.auction_type = auction_types  # 多选存储为列表形式
+                else:
+                    criterion.auction_type = []  # 如果未选择，清空列表
+
+                # 保存 Auction Mode 信息
+                if is_online_modes:
+                    criterion.is_online = is_online_modes  # 多选存储为列表形式
+                else:
+                    criterion.is_online = []  # 如果未选择，清空列表
+
+                # 保存 Property Type 信息
+                if property_types:
+                    criterion.property_type = property_types  # 多选存储为列表形式
+                else:
+                    criterion.property_type = []  # 如果未选择，清空列表
+
+                # 获取选中的 States
+                if selected_states:
+                    states = States.objects.filter(abbreviation__in=selected_states)
+                    criterion.states.add(*states)
+
+                criterion.save()
+
         except Exception as e:
-            return JsonResponse({'success': False, 'message': str(e)})
+            messages.error(request, f"An error occurred: {e}")
+            return render(request, 'sign-up-wizard.html', context)
 
-    return JsonResponse({'success': False, 'message': 'Invalid request method.'})
+        # 自动登录用户
+        user = authenticate(username=email, password=password)
+        if user is not None:
+            login(request, user)
+            return redirect('index')
+
+    # GET 请求：渲染表单页面并提供所有州数据
+    states = States.objects.all()
+    return render(request, 'sign-up-wizard.html', {'states': states})
 
 
+
+@csrf_exempt  # 允许不经过 CSRF 验证，前端已提供 CSRF token
+def check_email(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            email = data.get('email', '').strip()
+            exists = User.objects.filter(username=email).exists()
+            return JsonResponse({'exists': exists})
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=400)
+    return JsonResponse({'error': 'Invalid request method.'}, status=405)
+
+# 处理第一步：请求重置密码链接
+def request_password_reset(request):
+    if request.method == 'POST':
+        email = request.POST['email']
+        
+        # 检查邮箱是否在数据库中
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            # 如果没有找到该邮箱，返回错误消息
+            messages.error(request, 'Email address does not exist in our system.')
+            return redirect('request_password_reset')
+        
+       # 生成重置链接
+        token = default_token_generator.make_token(user)
+        uid = urlsafe_base64_encode(force_bytes(user.pk))
+        reset_link = request.build_absolute_uri(f"/reset/{uid}/{token}/")
+        
+        # 使用SMTP发送邮件
+        subject = 'Password Reset Request'
+        body = f'Click the link to reset your password: {reset_link}'
+
+        # 构建 MIME 邮件
+        sender_email = settings.EMAIL_HOST_USER
+        receiver_email = email
+        msg = MIMEText(body, 'plain', 'utf-8')
+        msg['From'] = formataddr((str(Header("Soyhome.app", 'utf-8')), sender_email))
+        msg['To'] = receiver_email
+        msg['Subject'] = Header(subject, 'utf-8')
+
+        try:
+            smtp_server = settings.EMAIL_HOST
+            smtp_port = settings.EMAIL_PORT
+            smtp_user = settings.EMAIL_HOST_USER
+            smtp_password = settings.EMAIL_HOST_PASSWORD
+
+            with smtplib.SMTP_SSL(smtp_server, smtp_port) as server:
+                server.login(smtp_user, smtp_password)
+                server.sendmail(sender_email, [receiver_email], msg.as_string())
+            
+            messages.success(request, 'Password reset link has been sent to your email.')
+            return redirect('request_password_reset')
+        except Exception as e:
+            messages.error(request, f'An error occurred while sending the message: {e}')
+            return redirect('request_password_reset')
+    
+    return render(request, 'request_password_reset.html')
+
+
+def reset_password(request, uidb64, token):
+    try:
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        user = User.objects.get(pk=uid)
+    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+        user = None
+
+    if user is not None and default_token_generator.check_token(user, token):
+        if request.method == 'POST':
+            new_password = request.POST['new_password']
+            confirm_password = request.POST['confirm_password']
+            if new_password == confirm_password:
+                user.set_password(new_password)
+                user.save()
+                messages.success(request, 'Your password has been reset successfully.')
+                return redirect('login')
+            else:
+                messages.error(request, 'Passwords do not match.')
+        return render(request, 'forget-password.html', {'uidb64': uidb64, 'token': token})
+    else:
+        messages.error(request, 'Invalid or expired reset link.')
+        return redirect('request_password_reset')
+
+
+
+@login_required
+def footer_light(request):
+    return render(request, 'footer-light.html')
+
+
+@login_required
+def profile(request):
+    user_profile = UserProfile.objects.get(user=request.user)  # 获取当前登录用户的个人资料
+
+    if request.method == "POST":
+        # 更新用户资料
+        user_profile.first_name = request.POST.get('first_name', user_profile.first_name)
+        user_profile.last_name = request.POST.get('last_name', user_profile.last_name)
+        user_profile.phone_number = request.POST.get('phone_number', user_profile.phone_number)
+        user_profile.investment_amount = request.POST.get('investment_amount', user_profile.investment_amount)
+        user_profile.goal = request.POST.get('goal', user_profile.goal)
+
+        # 保存更新后的数据
+        user_profile.save()
+
+        return redirect('profile')  # 重定向回当前页面，显示更新后的数据
+
+    return render(request, 'profile.html', {'user_profile': user_profile})
+
+
+@login_required
+def profile_update(request):
+    # 获取当前登录用户的 UserProfile
+    user_profile = UserProfile.objects.get(user=request.user)
+
+    if request.method == 'POST':
+        # 获取表单数据
+        first_name = request.POST.get('first_name')
+        last_name = request.POST.get('last_name')
+        phone_number = request.POST.get('phone_number')
+        # 获取表单数据
+        investment_amount = request.POST.get('investment_amount', None)
+
+        # 将空字符串转换为 None
+        if investment_amount == '':
+            investment_amount = None
+        
+        goal = request.POST.get('goal')
+        default = request.POST.get('default') == 'on'  # 如果复选框被选中，则为True，否则为False
+
+        # 更新 UserProfile 对象
+        user_profile.first_name = first_name
+        user_profile.last_name = last_name
+        user_profile.phone_number = phone_number
+        user_profile.investment_amount = investment_amount
+        user_profile.goal = goal
+        user_profile.default = default
+        user_profile.save()  # 保存更新后的数据
+
+        return redirect('profile')  # 更新后重定向到个人资料页面
+
+    # 如果是 GET 请求，则渲染当前用户的资料
+    return render(request, 'profile_update.html', {'user_profile': user_profile})
+
+
+@login_required
+def update_email_request(request):
+    if request.method == "POST" and 'update-email' in request.POST:
+        new_email = request.POST.get("new_email")
+        user = request.user
+
+        # 1. 验证邮箱是否已存在（检查 username 字段）
+        if User.objects.filter(username=new_email).exists():
+            messages.error(request, "The new email you entered is already registered.")
+            return redirect("profile")
+
+        # 2. 生成验证链接
+        token = default_token_generator.make_token(user)
+        uid = urlsafe_base64_encode(str(user.pk).encode())
+        verification_link = (
+            f"{request.scheme}://{request.get_host()}/verify-new-email/{uid}/{token}/?email={new_email}"
+        )
+
+        # 3. 构建邮件内容
+        subject = "Soyhome.app - New Email Verification"
+        body = (
+            f"Hello {user.username},\n\n"
+            f"Please click the link below to verify your new email address:\n\n"
+            f"{verification_link}\n\n"
+            "Best regards,\nSoyhome.app Team"
+        )
+        sender_email = settings.EMAIL_HOST_USER
+        sender_name = "Soyhome.app"
+
+        # 4. 发送验证邮件
+        try:
+            msg = MIMEText(body, 'plain', 'utf-8')
+            msg['Subject'] = Header(subject, 'utf-8')
+            msg['From'] = formataddr((str(Header(sender_name, 'utf-8')), sender_email))
+            msg['To'] = new_email
+
+            connection = smtplib.SMTP_SSL(settings.EMAIL_HOST, settings.EMAIL_PORT)
+            connection.login(sender_email, settings.EMAIL_HOST_PASSWORD)
+            connection.sendmail(sender_email, [new_email], msg.as_string())
+            connection.quit()
+
+            messages.success(request, "A verification email has been sent to your new email address.")
+        except Exception as e:
+            messages.error(request, f"An error occurred while sending the email: {e}")
+
+        return redirect("profile")
+
+    return render(request, "profile.html")
+
+
+def verify_new_email(request, uid, token):
+    new_email = request.GET.get("email")
+    try:
+        # 1. 解码用户 ID 并获取用户
+        user_id = urlsafe_base64_decode(uid).decode()
+        user = User.objects.get(pk=user_id)
+
+        # 2. 验证 Token 是否有效
+        if default_token_generator.check_token(user, token):
+            if not request.user.is_authenticated:
+                # 如果未登录，自动登录用户
+                login(request, user)
+
+            # 3. 更新 username 而不是 email
+            user.username = new_email
+            user.save()
+
+            messages.success(request, "Your email has been successfully verified and updated.")
+            return redirect("profile")
+        else:
+            messages.error(request, "Invalid or expired verification link.")
+            return redirect("login")
+
+    except (User.DoesNotExist, ValueError, TypeError):
+        messages.error(request, "Invalid verification link.")
+        return redirect("login")
+    
+
+@login_required
+def change_password(request):
+    if request.method == "POST":
+        password = request.POST.get("password")
+        repeat_password = request.POST.get("repeat_password")
+        user = request.user
+
+        # 验证两次密码是否一致
+        if password != repeat_password:
+            messages.error(request, "Passwords do not match.")
+            return redirect("profile")
+
+        # 更新密码
+        user.set_password(password)
+        user.save()
+
+        # 保持用户登录状态
+        update_session_auth_hash(request, user)
+        messages.success(request, "Your password has been successfully updated.")
+        return redirect("profile")
+
+    return redirect("profile")
+
+
+@login_required
+def update_avatar(request):
+    if request.method == 'POST' and request.FILES.get('avatar'):
+        avatar = request.FILES['avatar']
+
+        # 设置文件存储路径
+        fs = FileSystemStorage(location=os.path.join(settings.BASE_DIR, 'static/images/avatars'))
+        filename = fs.save(avatar.name, avatar)  # 保存文件并获取文件名
+        file_url = f'/static/images/avatars/{filename}'  # 拼接文件的相对路径
+
+        # 获取或创建用户档案
+        profile, created = UserProfile.objects.get_or_create(user=request.user)
+
+        # 将文件路径存入数据库
+        profile.avatar_path = file_url
+        profile.save()  # 保存更改
+
+        # 返回 JSON 响应
+        return JsonResponse({'success': True, 'avatar_url': file_url})
+
+    # 如果请求不是文件上传，返回失败
+    return JsonResponse({'success': False, 'error': 'No avatar uploaded'})
 
 
 stripe.api_key = settings.STRIPE_TEST_SECRET_KEY
 
 @csrf_exempt
-@login_required
-def save_payment_method(request):
-    """
-    接收前端发送的 PaymentMethod ID 并保存
-    """
-    if request.method == "POST":
-        try:
-            data = json.loads(request.body)
-            payment_method_id = data.get("payment_method_id")
-
-            if not payment_method_id:
-                return JsonResponse({"success": False, "error": "No PaymentMethod ID provided"})
-
-            # 验证 PaymentMethod 是否存在于 Stripe
-            try:
-                payment_method = stripe.PaymentMethod.retrieve(payment_method_id)
-            except stripe.error.InvalidRequestError:
-                return JsonResponse({"success": False, "error": "Invalid PaymentMethod ID"})
-
-            # 保存到数据库
-            Payment_method.objects.create(
-                user=request.user,
-                method="stripe",  # 标记支付方式类型为 Stripe
-                stripe_payment_method_id=payment_method_id,
-            )
-
-            return JsonResponse({"success": True, "message": "Payment method saved successfully!"})
-
-        except stripe.error.StripeError as e:
-            # 捕获 Stripe API 错误
-            return JsonResponse({"success": False, "error": f"Stripe error: {e.user_message}"})
-        except Exception as e:
-            # 捕获其他异常
-            return JsonResponse({"success": False, "error": f"An error occurred: {str(e)}"})
-
-    return JsonResponse({"success": False, "error": "Invalid request method"})
-
-@csrf_exempt
-def save_billing_address(request):
+@login_required  # 确保用户已登录
+def create_checkout_session(request):
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
+            plan = data.get('plan')
 
-            # 保存到数据库
-            BillingAddress.objects.create(
-                user=request.user,
-                full_name=data.get("full_name"),
-                business_name=data.get("business_name", ""),
-                address=data.get("address"),
-                address_line_2=data.get("address_line_2", ""),
-                city=data.get("city"),
-                state=data.get("state"),
-                zip_code=data.get("zip_code"),
-                country_region=data.get("country_region", "United States"),
+            # 根据计划选择价格 ID 和金额
+            price_id = ''
+            if plan == 'monthly':
+                price_id = 'price_1QjwKIHzoCY5vXyDQErW5avg'  # 月度计划价格 ID
+            elif plan == 'yearly':
+                price_id = 'price_1QjwLuHzoCY5vXyDxQ7nXr1l'  # 年度计划价格 ID
+            else:
+                return JsonResponse({'error': 'Invalid plan'}, status=400)
+
+            # 创建 Checkout Session
+            session = stripe.checkout.Session.create(
+                payment_method_types=['card'],
+                mode='subscription',
+                line_items=[{
+                    'price': price_id,
+                    'quantity': 1,
+                }],
+                success_url=f'http://127.0.0.1:8000/success/?session_id={{CHECKOUT_SESSION_ID}}',
+                cancel_url='http://127.0.0.1:8000/canceled/',
             )
 
-            return JsonResponse({"success": True, "message": "Billing address saved successfully!"})
+            return JsonResponse({'id': session.id})
+
         except Exception as e:
-            return JsonResponse({"success": False, "message": str(e)})
+            return JsonResponse({'error': str(e)}, status=400)
+
+    return JsonResponse({'error': 'Invalid request method'}, status=405)
 
 
 
-@csrf_exempt
+
 @login_required
-def process_payment(request):
-    """
-    处理支付请求
-    """
-    if request.method == "POST":
-        try:
-            data = json.loads(request.body)
+def success(request):
+    session_id = request.GET.get('session_id')  # 获取 Checkout Session ID
+    if not session_id:
+        return render(request, 'success.html', {'message': 'Session ID is missing!'})
 
-            # 获取请求数据
-            payment_method_id = data.get("payment_method_id")
-            billing_address_id = data.get("billing_address_id")
-            amount = data.get("amount")
+    try:
+        # 使用 Stripe API 获取会话信息
+        session = stripe.checkout.Session.retrieve(session_id)
 
-            # 校验数据完整性
-            if not payment_method_id or not billing_address_id or not amount:
-                return JsonResponse({"success": False, "error": "Missing required fields"})
+        # 确认支付状态
+        if session['payment_status'] == 'paid':  # 确认支付成功
+            user = request.user  # 当前登录用户
 
-            # 转换金额为分
-            amount_in_cents = int(float(amount) * 100)
-
-            # 获取当前用户的 UserProfile
-            try:
-                user_profile = UserProfile.objects.get(user=request.user)
-            except UserProfile.DoesNotExist:
-                return JsonResponse({"success": False, "error": "User profile not found."})
-
-            # 检查或创建 Stripe Customer
-            if not user_profile.customer_id:
-                # 创建 Stripe Customer
-                customer = stripe.Customer.create(
-                    email=request.user.email,
-                    name=f"{request.user.first_name} {request.user.last_name}",
-                )
-                user_profile.customer_id = customer.id
-                user_profile.save()
-
-            # 确保 PaymentMethod 绑定到 Customer
-            try:
-                stripe.PaymentMethod.attach(
-                    payment_method_id,
-                    customer=user_profile.customer_id,
-                )
-            except stripe.error.InvalidRequestError as e:
-                return JsonResponse({"success": False, "error": f"Failed to attach PaymentMethod: {e.user_message}"})
-
-            # 设置 PaymentMethod 为默认支付方式
-            try:
-                stripe.Customer.modify(
-                    user_profile.customer_id,
-                    invoice_settings={
-                        "default_payment_method": payment_method_id,
-                    },
-                )
-            except stripe.error.InvalidRequestError as e:
-                return JsonResponse({"success": False, "error": f"Failed to set default PaymentMethod: {e.user_message}"})
-
-            # 创建 PaymentIntent，使用绑定的 PaymentMethod
-            try:
-                payment_intent = stripe.PaymentIntent.create(
-                    amount=amount_in_cents,
-                    currency="usd",
-                    customer=user_profile.customer_id,  # 使用绑定的 Customer
-                    payment_method=payment_method_id,  # 绑定的 PaymentMethod
-                    off_session=True,  # 后台支付
-                    confirm=True,  # 立即确认支付
-                )
-            except stripe.error.CardError as e:
-                return JsonResponse({"success": False, "error": f"Card error: {e.user_message}"})
-            except stripe.error.InvalidRequestError as e:
-                return JsonResponse({"success": False, "error": f"Invalid request: {e.user_message}"})
-            except stripe.error.StripeError as e:
-                return JsonResponse({"success": False, "error": f"Stripe error: {e.user_message}"})
-
-            # 检查支付状态
-            if payment_intent.status == "requires_action":
-                # 如果需要用户完成额外验证（例如 3D Secure）
-                return JsonResponse({
-                    "success": False,
-                    "requires_action": True,
-                    "client_secret": payment_intent.client_secret,
-                })
-            elif payment_intent.status == "succeeded":
-                # 支付成功，记录到数据库
+            # 检查是否已经记录过此支付历史，避免重复记录
+            if not Payment_history.objects.filter(user=user, time=datetime.now().time(), date=datetime.now().date()).exists():
+                # 记录支付历史
                 Payment_history.objects.create(
-                    user=request.user,
-                    amount=amount,
+                    user=user,
+                    amount=session['amount_total'] / 100,  # Stripe 金额以分为单位，需转换为美元
                     time=datetime.now().time(),
                     date=datetime.now().date(),
-                    method="credit_card",
-                    type="add_funds",
+                    method='credit_card',
+                    type='member_fee',
                 )
-                return JsonResponse({"success": True, "message": "Payment succeeded!"})
 
-            # 其他支付失败状态
-            return JsonResponse({"success": False, "error": f"Payment failed: {payment_intent.status}"})
+            # 更新 UserProfile 的 member 值
+            try:
+                # 查询订阅详情
+                subscription_id = session['subscription']
+                subscription = stripe.Subscription.retrieve(subscription_id)
 
-        except Exception as e:
-            return JsonResponse({"success": False, "error": f"An unexpected error occurred: {str(e)}"})
+                # 获取价格 ID
+                price_id = subscription['items']['data'][0]['price']['id']
 
-    return JsonResponse({"success": False, "error": "Invalid request method"})
+                # 直接查询 UserProfile 实例
+                user_profile = UserProfile.objects.get(user=user)
 
+                # 判断是月付还是年付
+                if price_id == 'price_1QjwKIHzoCY5vXyDQErW5avg':
+                    user_profile.member = 1  # 月付会员
+                elif price_id == 'price_1QjwLuHzoCY5vXyDxQ7nXr1l':
+                    user_profile.member = 2  # 年付会员
+                user_profile.save()
+            except UserProfile.DoesNotExist:
+                return render(request, 'success.html', {'message': 'UserProfile does not exist!'})
+            except Exception as e:
+                return render(request, 'success.html', {'message': f'Error retrieving subscription: {str(e)}'})
 
+            return render(request, 'success.html', {'message': 'Payment successful!'})
 
+        else:
+            return render(request, 'success.html', {'message': 'Payment not completed or failed.'})
 
-@csrf_exempt
-@login_required
-def get_payment_method_details(request):
-    """
-    获取指定 PaymentMethod 的详细信息 (卡号后四位和品牌)
-    """
-    if request.method == "POST":
-        try:
-            data = json.loads(request.body)
-            payment_method_id = data.get("payment_method_id")
-
-            if not payment_method_id:
-                return JsonResponse({"success": False, "error": "Missing payment method ID."})
-
-            # 使用 Stripe API 获取支付方式详细信息
-            stripe.api_key = settings.STRIPE_TEST_SECRET_KEY
-            payment_method = stripe.PaymentMethod.retrieve(payment_method_id)
-
-            # 提取卡片信息
-            card_info = {
-                "brand": payment_method["card"]["brand"].capitalize(),
-                "last4": payment_method["card"]["last4"],
-            }
-
-            return JsonResponse({"success": True, "card_info": card_info})
-        except stripe.error.InvalidRequestError as e:
-            return JsonResponse({"success": False, "error": str(e)})
-        except Exception as e:
-            return JsonResponse({"success": False, "error": f"An error occurred: {str(e)}"})
-
-    return JsonResponse({"success": False, "error": "Invalid request method."})
+    except Exception as e:
+        # 捕获 Stripe API 或其他异常并返回错误信息
+        return render(request, 'success.html', {'message': f'Error: {str(e)}'})
 
 
-@csrf_exempt
-@login_required
-def delete_payment_method(request):
-    """
-    删除数据库中的支付方式记录
-    """
-    if request.method == "POST":
-        try:
-            data = json.loads(request.body)
-            payment_method_id = data.get("payment_method_id")
 
-            if not payment_method_id:
-                return JsonResponse({"success": False, "error": "Missing payment method ID."})
-
-            # 从数据库中查找支付方式
-            payment_method = Payment_method.objects.filter(user=request.user, stripe_payment_method_id=payment_method_id).first()
-            if not payment_method:
-                return JsonResponse({"success": False, "error": "Invalid payment method ID."})
-
-            # 删除支付方式记录
-            payment_method.delete()
-
-            return JsonResponse({"success": True, "message": "Payment method deleted successfully."})
-
-        except Exception as e:
-            return JsonResponse({"success": False, "error": f"An error occurred: {str(e)}"})
-
-    return JsonResponse({"success": False, "error": "Invalid request method."})
-
-@csrf_exempt
-@login_required
-def delete_billing_address(request):
-    """
-    删除用户的账单地址
-    """
-    if request.method == "POST":
-        try:
-            # 获取请求数据
-            data = json.loads(request.body)
-            address_id = data.get("address_id")
-
-            if not address_id:
-                return JsonResponse({"success": False, "error": "Missing address ID."})
-
-            # 从数据库中查找地址
-            address = BillingAddress.objects.filter(user=request.user, id=address_id).first()
-            if not address:
-                return JsonResponse({"success": False, "error": "Invalid address ID."})
-
-            # 删除地址
-            address.delete()
-
-            return JsonResponse({"success": True, "message": "Address deleted successfully."})
-
-        except Exception as e:
-            return JsonResponse({"success": False, "error": f"An error occurred: {str(e)}"})
-
-    return JsonResponse({"success": False, "error": "Invalid request method."})
+def canceled(request):
+    return render(request, 'canceled.html')
