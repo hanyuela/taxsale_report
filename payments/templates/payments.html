@@ -202,7 +202,10 @@
                   <!-- Remaining Balance -->
                   <div class="form-group">
                     <label for="remaining_balance">Remaining Balance</label>
-                    <input class="form-control" id="remaining_balance" type="text" value="${{ remaining_balance }}" disabled>
+                    <div class="d-flex align-items-center">
+                      <input class="form-control w-auto" id="remaining_balance" type="text" value="${{ remaining_balance }}" disabled>
+                      <a href="{% url 'transactions' %}" class="ml-2 text-primary align-self-center">See transactions</a>
+                    </div>
                   </div>
 
                   <!-- 分隔线 -->
