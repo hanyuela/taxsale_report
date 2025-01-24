@@ -453,3 +453,14 @@ def delete_billing_address(request):
             return JsonResponse({"success": False, "error": f"An error occurred: {str(e)}"})
 
     return JsonResponse({"success": False, "error": "Invalid request method."})
+
+def transactions(request):
+    # Get all payment records
+    payments = Payment_history.objects.all()
+
+    return render(request, 'transactions.html',{'payments': payments})
+
+def invoice(request):
+    # Get all payment records
+    
+    return render(request, 'invoice.html')
