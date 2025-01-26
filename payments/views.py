@@ -464,3 +464,18 @@ def invoice(request):
     # Get all payment records
     
     return render(request, 'invoice.html')
+
+@login_required
+def cancel_subscription(request):
+    try:
+        # 获取当前用户的关联 UserProfile
+        user_profile = request.user.profile  # 通过 OneToOne 关联获取 UserProfile
+        user_profile.member = 0  # 设置为非付费用户
+        user_profile.save()  # 保存更新
+
+        # 任务完成后，跳转到主页或其他页面
+        return redirect('index')  # 修改为适当的 URL
+
+    except UserProfile.DoesNotExist:
+        # 如果找不到 UserProfile，返回错误信息或默认行为
+        return redirect('error_page')  # 你可以修改为你自己的错误页面或默认页面
