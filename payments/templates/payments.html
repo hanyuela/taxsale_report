@@ -202,10 +202,10 @@
                   <!-- Remaining Balance -->
                   <div class="form-group">
                     <label for="remaining_balance">Remaining Balance</label>
-                    <div class="d-flex align-items-center">
+                    <div class="d-flex align-items-center justify-content-between">
                       <input class="form-control w-auto" id="remaining_balance" type="text" value="${{ remaining_balance }}" disabled>
                       <a href="{% url 'transactions' %}" class="ml-2 text-primary align-self-center">See transactions</a>
-                    </div>
+                    </div>  
                   </div>
 
                   <!-- 分隔线 -->
@@ -417,11 +417,14 @@
                   <p>Next Payment Amount: ${{ subscription.next_payment_amount }}</p>
                 </div>
                 
-                <div class="form-group">
-                  <button class="btn btn-primary" style="margin-top: 15px; margin-bottom: 15px; margin-left: 10px;">
-                    Cancel Next Subscription
-                  </button>
-                </div>
+                <form method="POST" action="{% url 'cancel_subscription' %}">
+                  {% csrf_token %}
+                  <div class="form-group">
+                      <button class="btn btn-primary" style="margin-top: 15px; margin-bottom: 15px; margin-left: 10px;" type="submit">
+                          Cancel Next Subscription
+                      </button>
+                  </div>
+                </form>             
 
                 <div class="form-group mt-4">
                   <label for="coupon">Use Coupon</label>
@@ -813,5 +816,26 @@
     } else {
       paymentMethodForm.style.display = 'none';  // 隐藏表单
     }
+  });
+</script>
+<!--取消订阅-->
+<script>
+  document.getElementById('cancel-subscription-btn').addEventListener('click', function() {
+      fetch('{% url 'cancel_subscription' %}', {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+          },
+          body: JSON.stringify({}),
+      })
+      .then(response => response.json())
+      .then(data => {
+          if (data.success) {
+              alert('Subscription canceled, user type set to 0');
+          } else {
+              alert('Failed to cancel subscription');
+          }
+      });
   });
 </script>
