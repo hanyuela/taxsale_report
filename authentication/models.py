@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.core.validators import MaxValueValidator
+from django.utils import timezone
 
 class UserProfile(models.Model):
     # 定义会员类型
@@ -33,3 +34,9 @@ class UserProfile(models.Model):
     
     def __str__(self):
         return f"{self.user.username}'s Profile"
+
+    def save(self, *args, **kwargs):
+        if not self.member_start:
+            # 仅保留日期部分，并将时间部分设置为00:00:00
+            self.member_start = timezone.now().date()  # 获取当前日期，时分秒部分为00:00:00
+        super().save(*args, **kwargs)

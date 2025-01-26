@@ -53,6 +53,7 @@ urlpatterns = [
     path('canceled/', views.canceled, name='canceled'), 
     path('transactions/',payments_views.transactions,name='transactions'),
     path('invoice/',payments_views.invoice,name='invoice'),
+    path('subscription-trial/',views.subscription_trial,name='subscription_trial'),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

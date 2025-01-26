@@ -579,3 +579,8 @@ def success(request):
 
 def canceled(request):
     return render(request, 'canceled.html')
+
+
+
+def subscription_trial(request):
+    return render(request, 'subscription_trial.html')
