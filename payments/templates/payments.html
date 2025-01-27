@@ -832,9 +832,9 @@
       .then(response => response.json())
       .then(data => {
           if (data.success) {
-              alert('Subscription canceled, user type set to 0');
+              alert('订阅已取消，用户类型已设置为 0');
           } else {
-              alert('Failed to cancel subscription');
+              alert('取消订阅失败: ' + (data.error || '未知错误'));
           }
       });
   });
