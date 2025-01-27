@@ -2,7 +2,60 @@
 <html lang="en">
   <head>
     {% load static %}
+    <meta charset="utf-8" />
+    <title>Stripe Checkout Sample</title>
+    <meta name="description" content="A demo of Stripe Payment Intents" />
+    <link rel="icon" href="favicon.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="{% static 'css/normalize.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/global.css' %}" />
+    
+    <style>
+      /* 弹窗背景 */
+      .modal {
+        display: none; /* 默认隐藏 */
+        position: fixed;
+        z-index: 1;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        overflow: auto;
+        padding-top: 60px;
+      }
+
+      /* 弹窗内容 */
+      .modal-content {
+        background-color: #fff;
+        margin: 5% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 80%;
+        max-width: 500px;
+        text-align: center;
+      }
+
+      /* 关闭按钮 */
+      .close {
+        color: #aaa;
+        font-size: 28px;
+        font-weight: bold;
+        position: absolute;
+        top: 10px;
+        right: 25px;
+        background: none;
+        border: none;
+      }
+
+      .close:hover,
+      .close:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+      }
+    </style>
   </head>
+  
   <body>
     <!-- 顶部显示通知 -->
     {% if messages %}
@@ -19,9 +72,55 @@
     {% else %}
         {% include 'base.html' %}
     {% endif %}
+
+    <!-- 弹窗 -->
+    <div id="payment-modal" class="modal">
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <h1 id="payment-modal-title"></h1>
+        <p id="payment-modal-message"></p>
+        <button onclick="window.location.href = '/';">Go to Home</button>
+      </div>
+    </div>
     
     <!-- latest jquery-->
     <script src="{% static 'js/jquery.min.js' %}"></script>
     <!-- 其他 JS 和资源 -->
+    
+    <script>
+      window.onload = function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const paymentSuccess = urlParams.get('payment_success');
+        const paymentError = urlParams.get('payment_error');
+
+        const modal = document.getElementById('payment-modal');
+        const closeButton = document.getElementsByClassName('close')[0];
+        const title = document.getElementById('payment-modal-title');
+        const message = document.getElementById('payment-modal-message');
+
+        // 如果查询参数中包含 payment_success 或 payment_error
+        if (paymentSuccess) {
+          title.textContent = 'Payment Successful!';
+          message.textContent = 'Thank you for your subscription!';
+          modal.style.display = 'block';
+        } else if (paymentError) {
+          title.textContent = 'Payment Error';
+          message.textContent = 'There was an issue with your payment. Please try again.';
+          modal.style.display = 'block';
+        }
+
+        // 点击关闭按钮时关闭弹窗
+        closeButton.onclick = function() {
+          modal.style.display = 'none';
+        }
+
+        // 点击弹窗外部时关闭弹窗
+        window.onclick = function(event) {
+          if (event.target == modal) {
+            modal.style.display = 'none';
+          }
+        }
+      };
+    </script>
   </body>
 </html>
