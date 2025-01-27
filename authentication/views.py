@@ -30,6 +30,7 @@ from django.core.files.storage import FileSystemStorage
 import stripe
 from payments.models import Payment_history
 from datetime import datetime
+from django.urls import reverse
 # 注册页面
 def register(request):
     if request.method == 'POST':
@@ -521,7 +522,7 @@ def create_checkout_session(request):
 def success(request):
     session_id = request.GET.get('session_id')  # 获取 Checkout Session ID
     if not session_id:
-        return render(request, 'success.html', {'message': 'Session ID is missing!'})
+        return redirect(reverse('index') + '?payment_error=true')
 
     try:
         # 使用 Stripe API 获取会话信息
@@ -562,18 +563,19 @@ def success(request):
                     user_profile.member = 2  # 年付会员
                 user_profile.save()
             except UserProfile.DoesNotExist:
-                return render(request, 'success.html', {'message': 'UserProfile does not exist!'})
+                return redirect(reverse('index') + '?payment_error=true')
             except Exception as e:
-                return render(request, 'success.html', {'message': f'Error retrieving subscription: {str(e)}'})
+                return redirect(reverse('index') + '?payment_error=true')
 
-            return render(request, 'success.html', {'message': 'Payment successful!'})
+            # 支付成功后，重定向到首页并传递成功标志
+            return redirect(reverse('index') + '?payment_success=true')
 
         else:
-            return render(request, 'success.html', {'message': 'Payment not completed or failed.'})
+            return redirect(reverse('index') + '?payment_error=true')
 
     except Exception as e:
         # 捕获 Stripe API 或其他异常并返回错误信息
-        return render(request, 'success.html', {'message': f'Error: {str(e)}'})
+        return redirect(reverse('index') + '?payment_error=true')
 
 
 
