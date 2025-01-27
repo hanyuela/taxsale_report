@@ -67,7 +67,7 @@ def payments(request):
                     "member_since": user_profile.member_start.strftime('%m/%d/%Y'),
                     "payment_interval": "Annually",
                     "next_payment_on": get_next_payment_date(user_profile.member_start, monthly=False),
-                    "next_payment_amount": 5.00
+                    "next_payment_amount": 50.00
                 }
             else:
                 subscription = {
@@ -471,11 +471,20 @@ def cancel_subscription(request):
         # 获取当前用户的关联 UserProfile
         user_profile = request.user.profile  # 通过 OneToOne 关联获取 UserProfile
         user_profile.member = 0  # 设置为非付费用户
+        user_profile.member_start = None  # 清空会员开始时间
+        
+        # 调试信息，查看当前数据
+        print(f"User profile before saving: {user_profile.member_start}")
+        
         user_profile.save()  # 保存更新
 
-        # 任务完成后，跳转到主页或其他页面
-        return redirect('index')  # 修改为适当的 URL
+        # 调试信息，查看保存后的数据
+        print(f"User profile after saving: {user_profile.member_start}")
+
+        # 返回成功的 JSON 响应
+        return JsonResponse({'success': True})
 
     except UserProfile.DoesNotExist:
-        # 如果找不到 UserProfile，返回错误信息或默认行为
-        return redirect('error_page')  # 你可以修改为你自己的错误页面或默认页面
+        # 如果找不到 UserProfile，返回失败的 JSON 响应
+        return JsonResponse({'success': False, 'error': 'UserProfile 未找到'})
+
