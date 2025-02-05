@@ -10,10 +10,18 @@ from django.http import Http404
 from .models import Property, User
 from authentication.models import UserProfile
 from holdings.models import Holding
+from django.shortcuts import redirect
 # Create your views here.
 
 @login_required
 def datatable(request):
+    # 获取当前用户的 UserProfile
+    user_profile = request.user.profile
+
+    # 检查 member 字段的值
+    if user_profile.member == 0:
+        return redirect('subscription_trial')  # 重定向到订阅页面
+
     PROPERTY_TYPE_MAPPING = {
         "single_family_residential": "Single Family Residential",
         "multi_family_residential": "Multi-Family",
