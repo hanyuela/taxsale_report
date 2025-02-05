@@ -20,7 +20,7 @@ def datatable(request):
 
     # 检查 member 字段的值
     if user_profile.member == 0:
-        return redirect('subscription_trial')  # 重定向到订阅页面
+        return redirect('index')  # 重定向到订阅页面
 
     PROPERTY_TYPE_MAPPING = {
         "single_family_residential": "Single Family Residential",
