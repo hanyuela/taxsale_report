@@ -28,7 +28,7 @@ from django.contrib.auth import update_session_auth_hash
 import os
 from django.core.files.storage import FileSystemStorage
 import stripe
-from payments.models import Payment_history
+from payments.models import Payment_history,Payment_method,BillingAddress
 from datetime import datetime
 from django.urls import reverse
 # 注册页面
@@ -496,6 +496,20 @@ def create_checkout_session(request):
             else:
                 return JsonResponse({'error': 'Invalid plan'}, status=400)
 
+            # 获取当前用户
+            user = request.user
+
+            # 获取用户的电子邮件
+            email = user.email
+
+            # 获取最新的支付方式和账单地址
+            payment_method = Payment_method.objects.filter(user=user).order_by('-created_at').first()
+            billing_address = BillingAddress.objects.filter(user=user).first()
+
+            # 如果没有找到付款方式或账单地址，可以处理为默认值或返回错误
+            if not payment_method or not billing_address:
+                return JsonResponse({'error': 'Payment method or billing address not found'}, status=400)
+
             # 创建 Checkout Session
             session = stripe.checkout.Session.create(
                 payment_method_types=['card'],
@@ -506,6 +520,16 @@ def create_checkout_session(request):
                 }],
                 success_url=f'http://127.0.0.1:8000/success/?session_id={{CHECKOUT_SESSION_ID}}',
                 cancel_url='http://127.0.0.1:8000/canceled/',
+                customer_email=email,  # 自动填充电子邮件
+                billing_address_collection='required',  # 需要账单地址
+                shipping_address_collection={
+                    'allowed_countries': ['US', 'CA'],  # 可以根据需求修改允许的国家
+                },
+                metadata={
+                    'cardholder_name': billing_address.full_name,
+                    'country': billing_address.country_region,  # 从账单地址提取的国家
+                    'zip_code': billing_address.zip_code,  # 从账单地址提取的邮政编码
+                }
             )
 
             return JsonResponse({'id': session.id})
