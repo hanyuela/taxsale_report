@@ -8,6 +8,43 @@
     <!-- 使用 Django 静态文件标签 -->
     <link rel="stylesheet" href="{% static 'css/normalize.css' %}" />
     <link rel="stylesheet" href="{% static 'css/global.css' %}" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Zono admin is super flexible, powerful, clean &amp; modern responsive bootstrap 5 admin template with unlimited possibilities.">
+    <meta name="keywords" content="admin template, Zono admin template, dashboard template, flat admin template, responsive admin template, web app">
+    <meta name="author" content="pixelstrap">
+    <link rel="icon" href="{% static 'images/favicon.png' %}" type="image/x-icon">
+    <link rel="shortcut icon" href="{% static 'images/favicon.png' %}" type="image/x-icon">
+    <title>Zono - Premium Admin Template</title>
+    <!-- Google font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@200;300;400;600;700;800;900&amp;display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,500,500i,700,700i,900&amp;display=swap" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/font-awesome.css' %}">
+    <!-- ico-font-->
+    <link rel="stylesheet" type="text/css" href="{% static 'css/vendors/icofont.css' %}">
+    <!-- Themify icon-->
+    <link rel="stylesheet" type="text/css" href="{% static 'css/vendors/themify.css' %}">
+    <!-- Flag icon-->
+    <link rel="stylesheet" type="text/css" href="{% static 'css/vendors/flag-icon.css' %}">
+    <!-- Feather icon-->
+    <link rel="stylesheet" type="text/css" href="{% static 'css/vendors/feather-icon.css' %}">
+    <!-- Plugins css start-->
+    <link rel="stylesheet" type="text/css" href="{% static 'css/vendors/slick.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/vendors/slick-theme.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/vendors/scrollbar.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/vendors/animate.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/vendors/prism.css' %}">
+    <!-- Plugins css Ends-->
+    <!-- Bootstrap css-->
+    <link rel="stylesheet" type="text/css" href="{% static 'css/vendors/bootstrap.css' %}">
+    <!-- App css-->
+    <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
+    <link id="color" rel="stylesheet" href="{% static 'css/color-1.css' %}" media="screen">
+    <!-- Responsive css-->
+    <link rel="stylesheet" type="text/css" href="{% static 'css/responsive.css' %}">
     <!-- Load Stripe.js on your website. -->
     <script src="https://js.stripe.com/v3/"></script>
     
@@ -107,41 +144,84 @@
     </style>
 </head>
 <body>
-    <div class="pricing-container">
-        <div class="toggle-switch">
-            <button class="active" onclick="togglePlan('monthly')">Billed Monthly</button>
-            <button onclick="togglePlan('yearly')">Billed Yearly</button>
-        </div>
-        <div id="monthly-plan" class="pricing-plan">
-            <h2>Monthly Plan</h2>
-            <div class="price">$5 <small>/mo</small></div>
-            <button class="cta-button" data-plan="monthly">Let's Start Researching!</button>
-            <ul class="features">
-                <li>Access filtered auction data.</li>
-                <li>Evaluate foreclosure possibilities with insights from our AI algorithms.</li>
-                <li>Unlimited access to recommended property types, addresses and basic auction information based on your filters.</li>
-                <li>Create tasks to efficiently track your work.</li>
-                <li>Organize and manage your existing purchased data.</li>
-                <li>Unlock detailed property information for an additional fee.</li>
-            </ul>
-        </div>
-        <div id="yearly-plan" class="pricing-plan" style="display: none;">
-            <h2>Annual Plan</h2>
-            <div class="price">$50 <small>/year</small></div>
-            <p>Get two months free!</p>
-            <button class="cta-button" data-plan="yearly">Let's Start Researching!</button>
-            <ul class="features">
-                <li>Get two months free with our annual plan!</li>
-                <li>Access filtered auction data.</li>
-                <li>Evaluate foreclosure possibilities with insights from our AI algorithms.</li>
-                <li>Unlimited access to recommended property types, addresses and basic auction information based on your filters.</li>
-                <li>Create tasks to efficiently track your work.</li>
-                <li>Organize and manage your existing purchased data.</li>
-                <li>Unlock detailed property information for an additional fee.</li>
-            </ul>
+    <!-- tap on top starts-->
+    <div class="tap-top"><i data-feather="chevrons-up"></i></div>
+    <!-- tap on top ends-->
+
+    <!-- page-wrapper Start-->
+    <div class="page-wrapper compact-wrapper" id="pageWrapper">
+      
+      <!-- Page Header Start-->
+      {% include 'header.html' %}
+      <!-- Page Header Ends-->
+      
+        <div class="pricing-container" style="margin-top: 100px;">
+            <div class="toggle-switch">
+                <button class="active" onclick="togglePlan('monthly')">Billed Monthly</button>
+                <button onclick="togglePlan('yearly')">Billed Yearly</button>
+            </div>
+            <div id="monthly-plan" class="pricing-plan">
+                <h2>Monthly Plan</h2>
+                <div class="price">$5 <small>/mo</small></div>
+                <button class="cta-button" data-plan="monthly">Let's Start Researching!</button>
+                <ul class="features">
+                    <li>Access filtered auction data.</li>
+                    <li>Evaluate foreclosure possibilities with insights from our AI algorithms.</li>
+                    <li>Unlimited access to recommended property types, addresses and basic auction information based on your filters.</li>
+                    <li>Create tasks to efficiently track your work.</li>
+                    <li>Organize and manage your existing purchased data.</li>
+                    <li>Unlock detailed property information for an additional fee.</li>
+                </ul>
+            </div>
+            <div id="yearly-plan" class="pricing-plan" style="display: none;">
+                <h2>Annual Plan</h2>
+                <div class="price">$50 <small>/year</small></div>
+                <p>Get two months free!</p>
+                <button class="cta-button" data-plan="yearly">Let's Start Researching!</button>
+                <ul class="features">
+                    <li>Get two months free with our annual plan!</li>
+                    <li>Access filtered auction data.</li>
+                    <li>Evaluate foreclosure possibilities with insights from our AI algorithms.</li>
+                    <li>Unlimited access to recommended property types, addresses and basic auction information based on your filters.</li>
+                    <li>Create tasks to efficiently track your work.</li>
+                    <li>Organize and manage your existing purchased data.</li>
+                    <li>Unlock detailed property information for an additional fee.</li>
+                </ul>
+            </div>
         </div>
     </div>
-
+    <!-- latest jquery-->
+    <script src="{% static 'js/jquery.min.js' %}"></script>
+    <!-- Bootstrap js-->
+    <script src="{% static 'js/bootstrap/bootstrap.bundle.min.js' %}"></script>
+    <!-- feather icon js-->
+    <script src="{% static 'js/icons/feather-icon/feather.min.js' %}"></script>
+    <script src="{% static 'js/icons/feather-icon/feather-icon.js' %}"></script>
+    <!-- scrollbar js-->
+    <script src="{% static 'js/scrollbar/simplebar.js' %}"></script>
+    <script src="{% static 'js/scrollbar/custom.js' %}"></script>
+    <!-- Sidebar jquery-->
+    <script src="{% static 'js/config.js' %}"></script>
+    <!-- Plugins JS start-->
+    <script src="{% static 'js/sidebar-menu.js' %}"></script>
+    <script src="{% static 'js/sidebar-pin.js' %}"></script>
+    <script src="{% static 'js/slick/slick.min.js' %}"></script>
+    <script src="{% static 'js/slick/slick.js' %}"></script>
+    <script src="{% static 'js/header-slick.js' %}"></script>
+    <script src="{% static 'js/prism/prism.min.js' %}"></script>
+    <script src="{% static 'js/clipboard/clipboard.min.js' %}"></script>
+    <script src="{% static 'js/custom-card/custom-card.js' %}"></script>
+    <script src="{% static 'js/typeahead/handlebars.js' %}"></script>
+    <script src="{% static 'js/typeahead/typeahead.bundle.js' %}"></script>
+    <script src="{% static 'js/typeahead/typeahead.custom.js' %}"></script>
+    <script src="{% static 'js/typeahead-search/handlebars.js' %}"></script>
+    <script src="{% static 'js/typeahead-search/typeahead-custom.js' %}"></script>
+    <script src="{% static 'js/hide-on-scroll.js' %}"></script>
+    <!-- Plugins JS Ends-->
+    <!-- Theme js-->
+    <script src="{% static 'js/script.js' %}"></script>
+    <script src="{% static 'js/theme-customizer/customizer.js' %}"></script>
+    <!-- Plugin used-->
     <script src="https://js.stripe.com/v3/"></script>
     <script>
         // 从模板上下文中获取动态注入的 Stripe Publishable Key
