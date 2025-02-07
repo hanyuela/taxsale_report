@@ -70,3 +70,20 @@ class BillingAddress(models.Model):
     class Meta:
         verbose_name = 'Billing Address'
         verbose_name_plural = 'Billing Addresses'
+
+
+class Coupon(models.Model):
+    code = models.CharField(max_length=50, unique=True, verbose_name='Coupon Code')  # 优惠券号码
+    created = models.DateTimeField(auto_now_add=True, verbose_name='Created Date')  # 开始日期
+    expired = models.DateTimeField(verbose_name='Expired Date')  # 过期日期
+    value = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='Value')  # 金额
+    is_used = models.BooleanField(default=False, verbose_name='Is Used')  # 是否使用
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='coupons', null=True, blank=True, verbose_name='User')  # 使用用户ID
+
+    def __str__(self):
+        return f"Coupon {self.code} - {self.value} ({'Used' if self.is_used else 'Not Used'})"
+
+    class Meta:
+        verbose_name = 'Coupon'
+        verbose_name_plural = 'Coupons'
+        ordering = ['-created']
