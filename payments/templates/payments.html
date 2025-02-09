@@ -429,10 +429,14 @@
                 <div class="form-group mt-4">
                   <label for="coupon">Use Coupon</label>
                   <div style="display: flex; align-items: center;">
-                    <input class="form-control" id="coupon" type="text" placeholder="Enter coupon code" style="flex: 1; margin-right: 10px; height: 38px;">
-                    <button id="apply-coupon-btn" class="btn btn-primary" style="height: 38px; margin-bottom: 20px;">Apply</button>
+                      <input class="form-control" id="coupon" type="text" placeholder="Enter coupon code" style="flex: 1; margin-right: 10px; height: 38px;">
+                      <button id="apply-coupon-btn" class="btn btn-primary" style="height: 38px; margin-bottom: 20px;">Apply</button>
                   </div>
-                </div>
+                  <div id="coupon-message" class="mt-3" style="display: none;">
+                      <p id="coupon-error" style="color: red; display: none;"></p>
+                      <p id="coupon-success" style="color: green; display: none;"></p>
+                  </div>
+               </div>
               </div>
             </div>
           </div>
@@ -473,6 +477,55 @@
 <script src="{% static 'js/script.js' %}"></script>
 <script src="{% static 'js/theme-customizer/customizer.js' %}"></script>
 <!-- Plugin used-->
+<script>
+  document.getElementById("apply-coupon-btn").addEventListener("click", function() {
+      var couponCode = document.getElementById("coupon").value.trim();
+      var messageContainer = document.getElementById("coupon-message");
+      var errorMessage = document.getElementById("coupon-error");
+      var successMessage = document.getElementById("coupon-success");
+
+      // Clear previous messages
+      errorMessage.style.display = "none";
+      successMessage.style.display = "none";
+
+      if (couponCode === "") {
+          errorMessage.textContent = "Please enter a coupon code.";
+          errorMessage.style.display = "block";
+          return;
+      }
+
+      // Sending AJAX request to backend
+      fetch("{% url 'apply_coupon' %}", {
+          method: "POST",
+          headers: {
+              "Content-Type": "application/json",
+              "X-CSRFToken": "{{ csrf_token }}"  // Adding CSRF token for security
+          },
+          body: JSON.stringify({ coupon_code: couponCode })
+      })
+      .then(response => response.json())
+      .then(data => {
+          messageContainer.style.display = "block";
+          if (data.success) {
+              successMessage.textContent = `Coupon applied successfully! Your new balance is: $${data.remaining_balance}`;
+              successMessage.style.display = "block";
+
+              // Delay 2 seconds before refreshing the page
+              setTimeout(function() {
+                  window.location.reload(); // Refresh the page after 2 seconds
+              }, 2000); // 2000ms = 2 seconds
+          } else {
+              errorMessage.textContent = data.error || "Invalid or expired coupon.";
+              errorMessage.style.display = "block";
+          }
+      })
+      .catch(error => {
+          console.error("Error:", error);
+          errorMessage.textContent = "An error occurred. Please try again.";
+          errorMessage.style.display = "block";
+      });
+  });
+</script>
 
 <script>
     $(document).ready(function () {
