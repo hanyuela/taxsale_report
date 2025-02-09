@@ -9,11 +9,12 @@ import json
 from datetime import datetime
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
-from .models import Payment_history, Payment_method, BillingAddress  # 导入 BillingAddress 模型
+from .models import Payment_history, Payment_method, BillingAddress, Coupon  # 导入 BillingAddress 模型
 from django.db.models import Sum
 from django.conf import settings
 from authentication.models import UserProfile
 from datetime import timedelta
+from django.utils import timezone
 
 @login_required
 def payments(request):
@@ -488,3 +489,46 @@ def cancel_subscription(request):
         # 如果找不到 UserProfile，返回失败的 JSON 响应
         return JsonResponse({'success': False, 'error': 'UserProfile 未找到'})
 
+
+def apply_coupon(request):
+    if request.method == 'POST':
+        try:
+            # 获取用户输入的优惠券号码
+            import json
+            data = json.loads(request.body)
+            coupon_code = data.get('coupon_code', '').strip()
+
+            # 查找优惠券：有效且未被使用的优惠券
+            coupon = Coupon.objects.get(code=coupon_code, is_used=False, expired__gt=timezone.now())
+
+            # 更新优惠券的使用状态
+            coupon.is_used = True
+            coupon.user = request.user  # 关联当前用户
+            coupon.save()
+
+            # 记录付款记录到 Payment_history
+            Payment_history.objects.create(
+                user=request.user,
+                amount=coupon.value,
+                time=datetime.now().time(),
+                date=datetime.now().date(),
+                method="credit_card",  # 假设是信用卡支付
+                type="add_funds",  # 添加资金
+            )
+
+            # 计算新的余额
+            remaining_balance = Payment_history.objects.filter(user=request.user).aggregate(total_amount=Sum('amount'))['total_amount'] or 0
+            
+            # 返回成功响应
+            return JsonResponse({
+                'success': True,
+                'remaining_balance': remaining_balance
+            })
+
+        except Coupon.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Invalid or expired coupon.'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)})
+
+    # 如果不是 POST 请求，返回一个错误
+    return JsonResponse({'success': False, 'error': 'Invalid request method.'})
