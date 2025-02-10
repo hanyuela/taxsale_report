@@ -31,6 +31,8 @@ import stripe
 from payments.models import Payment_history,Payment_method,BillingAddress
 from datetime import datetime
 from django.urls import reverse
+from django.db.models import Sum
+from django.utils import timezone
 # 注册页面
 def register(request):
     if request.method == 'POST':
@@ -489,50 +491,85 @@ def create_checkout_session(request):
 
             # 根据计划选择价格 ID 和金额
             price_id = ''
+            amount_to_charge = 0
             if plan == 'monthly':
                 price_id = 'price_1QjwKIHzoCY5vXyDQErW5avg'  # 月度计划价格 ID
+                amount_to_charge = 5  # 月度计划费用 5 美金
             elif plan == 'yearly':
                 price_id = 'price_1QjwLuHzoCY5vXyDxQ7nXr1l'  # 年度计划价格 ID
+                amount_to_charge = 50  # 年度计划费用 50 美金
             else:
                 return JsonResponse({'error': 'Invalid plan'}, status=400)
-
+            
+            
             # 获取当前用户
             user = request.user
+            
+            # 直接查询 UserProfile 实例
+            user_profile = UserProfile.objects.get(user=user)
 
             # 获取用户的电子邮件
             email = user.email
 
+            # 计算用户的 remaining_balance（总余额）
+            remaining_balance = Payment_history.objects.filter(user=user).aggregate(total_amount=Sum('amount'))['total_amount'] or 0
+
+            # 检查余额是否足够
+            if remaining_balance >= amount_to_charge:
+                # 余额足够，从余额中扣除
+                Payment_history.objects.create(
+                    user=user,
+                    amount=-amount_to_charge,
+                    time=timezone.now(),
+                    date=timezone.now().date(),
+                    method='balance',  # 设置支付方式为余额
+                    type='add_funds'  # 设置类型为 "add_funds"
+                )  # 扣除费用
+
+                # 根据价格 ID 更新用户会员状态
+                if price_id == 'price_1QjwKIHzoCY5vXyDQErW5avg':  # 月付
+                    user_profile.member = 1  # 设置为月付会员
+                elif price_id == 'price_1QjwLuHzoCY5vXyDxQ7nXr1l':  # 年付
+                    user_profile.member = 2  # 设置为年付会员
+
+                user_profile.save()  # 保存更新后的会员状态
+
+                payment_method = 'balance'  # 选择余额支付
+                return JsonResponse({'status': 'Subscription started with balance payment', 'payment_method': payment_method})
+            else:
+                # 余额不足，转到信用卡支付页面
+                payment_method = 'credit_card'  # 选择信用卡支付
+
             # 获取最新的支付方式和账单地址
-            payment_method = Payment_method.objects.filter(user=user).order_by('-created_at').first()
+            payment_method_record = Payment_method.objects.filter(user=user).order_by('-created_at').first()
             billing_address = BillingAddress.objects.filter(user=user).first()
 
             # 如果没有找到付款方式或账单地址，可以处理为默认值或返回错误
-            if not payment_method or not billing_address:
+            if not payment_method_record or not billing_address:
                 return JsonResponse({'error': 'Payment method or billing address not found'}, status=400)
 
-            # 创建 Checkout Session
-            session = stripe.checkout.Session.create(
-                payment_method_types=['card'],
-                mode='subscription',
-                line_items=[{
-                    'price': price_id,
-                    'quantity': 1,
-                }],
-                success_url=f'http://127.0.0.1:8000/success/?session_id={{CHECKOUT_SESSION_ID}}',
-                cancel_url='http://127.0.0.1:8000/canceled/',
-                customer_email=email,  # 自动填充电子邮件
-                billing_address_collection='required',  # 需要账单地址
-                shipping_address_collection={
-                    'allowed_countries': ['US', 'CA'],  # 可以根据需求修改允许的国家
-                },
-                metadata={
-                    'cardholder_name': billing_address.full_name,
-                    'country': billing_address.country_region,  # 从账单地址提取的国家
-                    'zip_code': billing_address.zip_code,  # 从账单地址提取的邮政编码
-                }
-            )
+            # 如果是信用卡支付，则创建 Checkout Session
+            if payment_method == 'credit_card':
+                session = stripe.checkout.Session.create(
+                    payment_method_types=['card'],
+                    mode='subscription',
+                    line_items=[{
+                        'price': price_id,
+                        'quantity': 1,
+                    }],
+                    success_url=f'http://127.0.0.1:8000/success/?session_id={{CHECKOUT_SESSION_ID}}',
+                    cancel_url='http://127.0.0.1:8000/canceled/',
+                    customer_email=email,
+                    billing_address_collection='required',
+                    shipping_address_collection={'allowed_countries': ['US', 'CA']},
+                    metadata={
+                        'cardholder_name': billing_address.full_name,
+                        'country': billing_address.country_region,
+                        'zip_code': billing_address.zip_code,
+                    }
+                )
 
-            return JsonResponse({'id': session.id})
+                return JsonResponse({'id': session.id, 'payment_method': payment_method})
 
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=400)
