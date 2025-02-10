@@ -226,7 +226,7 @@
     <script>
         // 从模板上下文中获取动态注入的 Stripe Publishable Key
         const stripe = Stripe('{{ stripe_publishable_key }}');
-
+    
         document.querySelectorAll('.cta-button').forEach(button => {
             button.addEventListener('click', async () => {
                 const plan = button.getAttribute('data-plan'); // 获取订阅计划类型
@@ -237,21 +237,31 @@
                     },
                     body: JSON.stringify({ plan }), // 将计划传递到后端
                 });
-
+    
                 const session = await response.json();
-                if (session.id) {
-                    stripe.redirectToCheckout({ sessionId: session.id });
+    
+                if (session.payment_method === 'credit_card') {
+                    // 如果选择信用卡支付，跳转到 Stripe
+                    if (session.id) {
+                        stripe.redirectToCheckout({ sessionId: session.id });
+                    } else {
+                        alert('Error: ' + (session.error || 'Unknown error occurred.'));
+                    }
+                } else if (session.payment_method === 'balance') {
+                    // 如果使用余额支付，显示成功信息并刷新页面
+                    alert('Payment successful using balance.');
+                    window.location.reload(); // 刷新页面
                 } else {
                     alert('Error: ' + (session.error || 'Unknown error occurred.'));
                 }
             });
         });
-
+    
         function togglePlan(plan) {
             const monthlyPlan = document.getElementById('monthly-plan');
             const yearlyPlan = document.getElementById('yearly-plan');
             const buttons = document.querySelectorAll('.toggle-switch button');
-
+    
             if (plan === 'monthly') {
                 monthlyPlan.style.display = 'block';
                 yearlyPlan.style.display = 'none';
@@ -264,6 +274,6 @@
                 buttons[0].classList.remove('active');
             }
         }
-    </script>
+    </script> 
 </body>
 </html>
