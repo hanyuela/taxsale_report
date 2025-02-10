@@ -38,6 +38,9 @@ class Payment_method(models.Model):  # 使用您指定的模型名称
         ('paypal', 'PayPal'),
         ('bank_transfer', 'Bank Transfer'),
         ('stripe', 'Stripe'),
+        ('coupon', 'Coupon') ,
+        ('balance', 'Balance'),
+        ('other', 'Other'),
     ]
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='payment_methods', verbose_name='user')
