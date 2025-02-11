@@ -56,6 +56,7 @@ urlpatterns = [
     path('subscription-trial/',views.subscription_trial,name='subscription_trial'),
     path('cancel-subscription/', payments_views.cancel_subscription, name='cancel_subscription'),
     path('apply-coupon/', payments_views.apply_coupon, name='apply_coupon'),
+    path('check-balance/', property_views.check_balance, name='check_balance'),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
