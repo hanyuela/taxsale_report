@@ -1,6 +1,10 @@
 from django.db import models
+from django.contrib.auth.models import User  # 导入 Django 内置的 User 模型
 
 class Task(models.Model):
+    # 关联到用户
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='tasks')
+
     # content 字段，最多 500 个字符
     content = models.TextField(max_length=500)
     
