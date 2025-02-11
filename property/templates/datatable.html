@@ -428,67 +428,76 @@
             // 弹窗中“同意”按钮的逻辑
             $('#agree-button').off('click').on('click', function() {
                 if (window.bulkSelectedData && window.bulkSelectedData.length > 0) {
-                    var requests = [];
-                    var hasPurchased = false; // 标志是否存在已购买的项
-                    var hasProcessed = false; // 标志是否有成功处理的项
-
-                    window.bulkSelectedData.forEach(function(item) {
-                        var request = $.ajax({
-                            url: '/agree-to-view/',
-                            method: 'POST',
-                            data: {
-                                property_id: item.propertyId,
-                                user_id: item.userId,
-                                default: $('#default-checkbox').is(':checked'),
-                                csrfmiddlewaretoken: '{{ csrf_token }}'
-                            },
-                            success: function(response) {
-                                if (response.success) {
-                                    if (response.agreement_exists) {
-                                        // 如果返回已购买，提示用户
-                                        alert(`Property ID: ${item.propertyId} 的数据已被购买！`);
-                                        hasPurchased = true; // 设置标志
-                                    } else {
-                                        // 提示用户未被购买的数据已成功处理
-                                        //alert(`Property ID: ${item.propertyId} 的数据已成功处理！`);
-                                        console.log(`成功处理 property_id: ${item.propertyId}`);
-                                        hasProcessed = true; // 有成功处理的数据
-                                    }
-                                }
-                            },
-                            error: function(xhr, status, error) {
-                                console.error(`请求失败 property_id: ${item.propertyId}, 错误: ${error}`);
-                            }
-                        });
-                        requests.push(request);
-                    });
-
-                    // 等待所有请求完成
-                    $.when.apply($, requests).done(function() {
-                        // 遍历选中的数据并更新图标为 √
-                        window.bulkSelectedData.forEach(function(item) {
-                            // 更新图标为 √
-                            var icon = $('.delete a[data-property-id="' + item.propertyId + '"] i');
-                            if (icon.length > 0) {
-                                icon.removeClass('fa-shopping-cart').addClass('icon-eye');
-                            }
-                        });
-                        // 如果有成功处理的数据，清空数据并关闭弹窗
-                        if (hasProcessed) {
-                            window.bulkSelectedData = []; // 清空数据
-                            $('#confirm-modal').fadeOut();
-                            console.log("已成功处理所有选中项！");
-                        }
-
-                        // 如果所有数据均已被购买，仅提示，不清空数据或关闭弹窗
-                        if (!hasProcessed && hasPurchased) {
-                            console.log("所有选中项均已被购买！");
-                        }
-                    }).fail(function() {
-                        console.error("处理部分选中项时出错！");
-                    });
-                } else {
+                    // 计算总费用：选中数量 × 100 美金
+                    const totalCost = window.bulkSelectedData.length * 5;
                     
+                    // 先检查用户余额是否足够支付总费用
+                    $.ajax({
+                        url: '/check-balance/',
+                        method: 'GET',
+                        success: function(response) {
+                            if (response.success) {
+                                const remainingBalance = response.balance;
+                                
+                                if (remainingBalance >= totalCost) {
+                                    // 余额足够，逐个处理购买请求
+                                    let allSuccess = true;
+                                    let hasInsufficientFunds = false;
+                                    
+                                    // 遍历所有选中的项
+                                    window.bulkSelectedData.forEach(function(item) {
+                                        $.ajax({
+                                            url: '/agree-to-view/',
+                                            method: 'POST',
+                                            async: false,  // 同步请求，确保顺序执行
+                                            data: {
+                                                property_id: item.propertyId,
+                                                user_id: item.userId,
+                                                default: $('#default-checkbox').is(':checked'),
+                                                csrfmiddlewaretoken: '{{ csrf_token }}'
+                                            },
+                                            success: function(response) {
+                                                if (response.success) {
+                                                    // 更新图标为 √
+                                                    const icon = $(`.delete a[data-property-id="${item.propertyId}"] i`);
+                                                    icon.removeClass('fa-shopping-cart').addClass('icon-check');
+                                                } else {
+                                                    allSuccess = false;
+                                                    if (response.error === 'Insufficient Funds') {
+                                                        hasInsufficientFunds = true;
+                                                    }
+                                                }
+                                            },
+                                            
+                                            error: function(xhr) {
+                                                allSuccess = false;
+                                                console.error(`请求失败 property_id: ${item.propertyId}`, xhr.responseText);
+                                            }
+                                        });
+                                    });
+
+                                    // 统一处理结果
+                                    if (allSuccess) {
+                                        alert('所有报告购买成功！');
+                                        window.bulkSelectedData = [];
+                                        $('#confirm-modal').fadeOut();
+                                    } else if (hasInsufficientFunds) {
+                                        alert('Insufficient Funds');
+                                        window.location.href = '/payments/';
+                                    } else {
+                                        alert('部分报告购买失败，请重试！');
+                                    }
+                                } else {
+                                    // 余额不足，直接跳转
+                                    alert('Insufficient Funds');
+                                    window.location.href = '/payments/';
+                                }
+                            }
+                        },
+                        error: function(xhr) {
+                            console.error('检查余额失败:', xhr.responseText);
+                        }
+                    });
                 }
             });
 
@@ -608,11 +617,10 @@
             });
     
             // 点击同意按钮后发送AJAX请求
+            // 点击同意按钮后发送AJAX请求
             $('#agree-button').click(function() {
                 var propertyId = window.selectedProperty;
                 var userId = window.selectedUser;
-
-                
 
                 // 获取复选框状态，表示是否默认同意
                 var isDefaultChecked = $('#default-checkbox').is(':checked'); // 确保复选框的 ID 是 #default-checkbox
@@ -638,6 +646,15 @@
 
                             // 关闭弹出框
                             $('#confirm-modal').fadeOut();
+                        } else {
+                            // 如果返回的 success 为 false，表示发生了错误或余额不足
+                            if (response.error === 'Insufficient Funds') {
+                                // 弹出余额不足的提示
+                                alert(response.error);  // 显示错误信息
+                                window.location.href = response.redirect_url;  // 跳转到付款页面
+                            } else {
+                                alert('Error: ' + (response.error || 'Unknown error occurred.'));
+                            }
                         }
                     },
                     error: function(xhr, status, error) {
@@ -645,6 +662,7 @@
                     }
                 });
             });
+
 
     
             // 点击取消按钮后关闭弹出框
