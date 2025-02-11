@@ -500,11 +500,10 @@ def create_checkout_session(request):
                 amount_to_charge = 50  # 年度计划费用 50 美金
             else:
                 return JsonResponse({'error': 'Invalid plan'}, status=400)
-            
-            
+
             # 获取当前用户
             user = request.user
-            
+
             # 直接查询 UserProfile 实例
             user_profile = UserProfile.objects.get(user=user)
 
@@ -540,14 +539,6 @@ def create_checkout_session(request):
                 # 余额不足，转到信用卡支付页面
                 payment_method = 'credit_card'  # 选择信用卡支付
 
-            # 获取最新的支付方式和账单地址
-            payment_method_record = Payment_method.objects.filter(user=user).order_by('-created_at').first()
-            billing_address = BillingAddress.objects.filter(user=user).first()
-
-            # 如果没有找到付款方式或账单地址，可以处理为默认值或返回错误
-            if not payment_method_record or not billing_address:
-                return JsonResponse({'error': 'Payment method or billing address not found'}, status=400)
-
             # 如果是信用卡支付，则创建 Checkout Session
             if payment_method == 'credit_card':
                 session = stripe.checkout.Session.create(
@@ -560,13 +551,8 @@ def create_checkout_session(request):
                     success_url=f'http://127.0.0.1:8000/success/?session_id={{CHECKOUT_SESSION_ID}}',
                     cancel_url='http://127.0.0.1:8000/canceled/',
                     customer_email=email,
-                    billing_address_collection='required',
-                    shipping_address_collection={'allowed_countries': ['US', 'CA']},
-                    metadata={
-                        'cardholder_name': billing_address.full_name,
-                        'country': billing_address.country_region,
-                        'zip_code': billing_address.zip_code,
-                    }
+                    billing_address_collection='required',  # 要求用户填写账单地址
+                    shipping_address_collection={'allowed_countries': ['US', 'CA']},  # 允许的国家
                 )
 
                 return JsonResponse({'id': session.id, 'payment_method': payment_method})
