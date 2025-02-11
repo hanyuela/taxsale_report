@@ -11,6 +11,9 @@ from .models import Property, User
 from authentication.models import UserProfile
 from holdings.models import Holding
 from django.shortcuts import redirect
+from payments.views import Payment_history
+from django.db.models import Sum
+from django.utils import timezone
 # Create your views here.
 
 @login_required
@@ -290,76 +293,98 @@ def agree_to_view(request):
         print(f"Received POST request with property_id: {property_id}, default: {default}")
         print(f"Bid details: my_bid={my_bid}, my_bid_percentage={my_bid_percentage}, note={note}")
 
-        # 输入验证
-        if not property_id:
-            return JsonResponse({"error": "Missing property_id."})
+        # 查找对应的 Property
+            
+        property = Property.objects.get(id=property_id)
+        print(f"Found Property: {property}")
+            
 
-        try:
-            # 查找对应的 Property
-            try:
-                property = Property.objects.get(id=property_id)
-                print(f"Found Property: {property}")
-            except Property.DoesNotExist:
-                return JsonResponse({"error": "Property not found."})
+        # 确保用户的 UserProfile 存在
+        user_profile, created = UserProfile.objects.get_or_create(user=request.user)
+        user_profile.default = default  # 更新 default 值
+        user_profile.save()  # 保存更改
+        print(f"UserProfile default updated to: {default} (Created: {created})")
 
-            # 确保用户的 UserProfile 存在
-            user_profile, created = UserProfile.objects.get_or_create(user=request.user)
-            user_profile.default = default  # 更新 default 值
-            user_profile.save()  # 保存更改
-            print(f"UserProfile default updated to: {default} (Created: {created})")
+        # 尝试获取已存在的 holding 记录
+        agreement = Holding.objects.filter(
+            property=property,
+            user=request.user,  # 使用当前登录的用户
+        ).first()
 
-            # 尝试获取已存在的 holding 记录
-            agreement = Holding.objects.filter(
-                property=property,
-                user=request.user,  # 使用当前登录的用户
-            ).first()
-
-            if agreement:
-                print("Agreement already exists. Directly opening report.")
-                # 如果同意记录已存在，直接返回报告 URL
-                report_url = f"/report/{property_id}/"
-                return JsonResponse({
-                    "success": True,
-                    "report_url": report_url,  # 返回报告的 URL
-                    "agreement_exists": True,  # 标识同意记录已存在
-                })
-
-
-            # 处理 Holding 记录（仅根据 property_id 和当前用户创建）
-            try:
-                holding, holding_created = Holding.objects.get_or_create(
-                    property=property,
-                    user=request.user,  # 将当前用户 ID 存入 Holding 记录
-                    defaults={
-                        "status": "Bid",  # 默认状态
-                        "my_bid": my_bid if my_bid else 0.00,  # 如果没有提供竞标金额，默认为 0.00
-                        "my_bid_percentage": my_bid_percentage if my_bid_percentage else 0.00,  # 默认为 0.00
-                        "note": note if note else "",  # 默认为空备注
-                    }
-                )
-
-                if holding_created:
-                    print("Successfully created Holding record.")
-                else:
-                    print("Holding record already exists. No update required.")
-            except Exception as e:
-                print(f"Error while creating Holding record: {str(e)}")
-                return JsonResponse({"error": f"Error while creating Holding record: {str(e)}"})
-
-            print("Successfully created/updated Holding record.")
+        if agreement:
+            print("Agreement already exists. Directly opening report.")
+            # 如果同意记录已存在，直接返回报告 URL
+            report_url = f"/report/{property_id}/"
             return JsonResponse({
                 "success": True,
-                "agreement_created": created,  # 是否是新创建的记录
-                "holding_created": holding_created  # 是否是新创建的 Holding 记录
+                "report_url": report_url,  # 返回报告的 URL
+                "agreement_exists": True,  # 标识同意记录已存在
             })
 
-        except Exception as e:
-            print(f"Unexpected error: {str(e)}")
-            return JsonResponse({"error": f"Unexpected error: {str(e)}"})
+        # 获取用户的余额
+        remaining_balance = Payment_history.objects.filter(user=request.user).aggregate(total_amount=Sum('amount'))['total_amount'] or 0
+
+        # 定义报告的费用（假设报告费用为 10 美金）
+        report_cost = 5
+
+        # 检查余额是否足够支付报告费用
+        if remaining_balance >= report_cost:
+            # 余额足够，扣减余额并创建 Holding 记录
+            Payment_history.objects.create(
+                user=request.user,
+                amount=-report_cost,  # 扣减余额
+                time=timezone.now(),
+                date=timezone.now().date(),
+                method='balance',  # 支付方式为余额
+                type='add_funds'  # 类型为报告购买
+            )
+
+            # 创建 Holding 记录
+            holding, holding_created = Holding.objects.get_or_create(
+                property=property,
+                user=request.user,  # 将当前用户 ID 存入 Holding 记录
+                defaults={
+                    "status": "Bid",  # 默认状态
+                    "my_bid": my_bid if my_bid else 0.00,  # 如果没有提供竞标金额，默认为 0.00
+                    "my_bid_percentage": my_bid_percentage if my_bid_percentage else 0.00,  # 默认为 0.00
+                    "note": note if note else "",  # 默认为空备注
+                }
+            )
+
+            if holding_created:
+                print("Successfully created Holding record.")
+            else:
+                print("Holding record already exists. No update required.")
+
+            # 返回成功响应
+            return JsonResponse({
+                "success": True,
+                "report_url": f"/report/{property_id}/",  # 返回报告的 URL
+                "agreement_created": True,  # 是否是新创建的记录
+                "holding_created": holding_created  # 是否是新创建的 Holding 记录
+            })
+        else:
+            # 余额不足，返回提示信息并引导用户到付款页
+            return JsonResponse({
+                "success": False,
+                "error": "Insufficient Funds",
+                "redirect_url": "/payments/",  # 引导用户到付款页
+            })
+
+        
 
     return JsonResponse({"error": "Invalid request method."})
 
-
+@login_required
+def check_balance(request):
+    if request.method == "GET":
+        try:
+            # 计算用户余额
+            remaining_balance = Payment_history.objects.filter(user=request.user).aggregate(total=Sum('amount'))['total'] or 0
+            return JsonResponse({"success": True, "balance": remaining_balance})
+        except Exception as e:
+            return JsonResponse({"success": False, "error": str(e)})
+    return JsonResponse({"error": "Invalid request method."})
 
 @login_required
 def check_agreement(request):
