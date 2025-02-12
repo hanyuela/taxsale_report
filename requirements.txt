@@ -4,3 +4,4 @@ Pillow==11.0.0
 numpy==1.26
 pandas==2.2
 stripe==6.0.0
+huey==2.4.5
