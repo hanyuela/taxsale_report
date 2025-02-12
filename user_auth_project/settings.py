@@ -29,8 +29,35 @@ INSTALLED_APPS = [
     'criterion',
     'holdings',
     'payments',
+    'huey.contrib.djhuey',
 ]
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+    }
+}
 
+HUEY = {
+    'huey_class': 'huey.SqliteHuey',
+
+    'name': DATABASES['default']['NAME'],  # Use db name for huey.
+    'results': True,  # Store return values of tasks.
+    'store_none': False,  # If a task returns None, do not save to results.
+    'immediate': False,  # If DEBUG=True, run synchronously.
+    'utc': True,  # Use UTC for all times internally.
+    'consumer': {
+        'workers': 1,
+        'worker_type': 'thread',
+        'initial_delay': 0.1,  # Smallest polling interval, same as -d.
+        'backoff': 1.15,  # Exponential backoff using this rate, -b.
+        'max_delay': 10.0,  # Max possible polling interval, -m.
+        'scheduler_interval': 1,  # Check schedule every second, -s.
+        'periodic': True,  # Enable crontab feature.
+        'check_worker_health': True,  # Enable worker health checks.
+        'health_check_interval': 1,  # Check worker health every second.
+    },
+}
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -117,3 +144,4 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')  # 媒体文件的存储路径
 # Stripe 配置
 STRIPE_TEST_PUBLISHABLE_KEY = "pk_test_PD2ascVHzDPlb6wmo4bBKJUP00AHECz4dU"  # 替换为你的 Publishable Key
 STRIPE_TEST_SECRET_KEY = "sk_test_51FN1KgHzoCY5vXyDhcXO9SRUWBU2h94vRRsWDo6ilvSSaEVX9kD75k63uWT9dGw8VKYmQZpCvRBUb4zTcRdKK67g00B3LP1JP9"  # 替换为你的 Secret Key
+
