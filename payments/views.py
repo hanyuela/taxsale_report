@@ -15,6 +15,7 @@ from django.conf import settings
 from authentication.models import UserProfile
 from datetime import timedelta
 from django.utils import timezone
+from django.utils.timezone import make_aware, is_aware
 
 @login_required
 def payments(request):
@@ -104,13 +105,18 @@ def payments(request):
     }
     return render(request, 'payments.html', context)
 
+
+
 def get_next_payment_date(start_date, monthly=True):
     """
     根据开始日期计算下一次付款日期
     :param start_date: 订阅开始日期
     :param monthly: 如果是True，表示按月计算，否则表示按年计算
-    :return: 下一次付款日期
+    :return: 下一次付款日期，返回 datetime 对象
     """
+    if not start_date:  # 如果 start_date 为 None，则返回当前日期
+        return timezone.now()
+    
     if monthly:
         # 每月同一天支付，如果没有31号，提前调整
         next_payment = start_date.replace(year=start_date.year + (start_date.month == 12), month=(start_date.month % 12) + 1)
@@ -121,7 +127,11 @@ def get_next_payment_date(start_date, monthly=True):
         # 每年同一天支付
         next_payment = start_date.replace(year=start_date.year + 1)
 
-    return next_payment.strftime('%m/%d/%Y')
+    # 如果 next_payment 是 naive datetime 对象（没有时区），则转换为带时区的 datetime
+    if not is_aware(next_payment):
+        next_payment = make_aware(next_payment)  # 转换为带时区的 datetime 对象
+
+    return next_payment
 
 @csrf_exempt
 def save_payment_details(request):
