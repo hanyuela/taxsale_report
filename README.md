@@ -13,5 +13,5 @@ username TaxsaleSoyhome
 email  taxsalesoyhome@gmail.com
 password  Soyhome@us2021!
 2. 进入管理员后台
-http://127.0.0.1:8000/admin/
+http://127.0.0.1:8000/adminsoyhome/
 
