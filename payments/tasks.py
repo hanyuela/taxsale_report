@@ -7,7 +7,7 @@ from payments.views import get_next_payment_date,Payment_history
 from django.db.models import Sum
 from django.utils import timezone
 
-@periodic_task(crontab(minute='*'))  # 每分钟执行一次
+@periodic_task(crontab(hour='*/12'))
 def check_membership_payments():
     today = make_aware(datetime.now())  # 获取当前日期并转换为带时区的时间
 
