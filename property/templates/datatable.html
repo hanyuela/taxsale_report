@@ -206,6 +206,7 @@
         <div id="confirm-modal" style="display: none;">
           <div class="modal-content">
               <p>Are you sure you want to view this report?</p>
+              <p>A fee of $5 will be charged per report.</p>
               <label>
                   <input type="checkbox" id="default-checkbox"> 
                   Agree to pay by default without showing this notification next time
@@ -345,86 +346,120 @@
             // 绑定“统一购买”按钮的点击事件
             $(document).on('click', '.bulk-purchase-btn', function() {
                 var selectedRows = $('.row-select:checked');
-    
+
                 // 检查是否有选中的行
                 if (selectedRows.length > 0) {
                     var bulkData = [];
                     var checkRequests = []; // 用于存放检查请求
-                    
-                    selectedRows.each(function() {
-                        var row = $(this).closest('tr'); // 获取当前行
-                        var propertyId = row.find('.delete a').data('property-id'); // 从 `a` 标签中获取 data-property-id
-                        var userId = row.find('.delete a').data('user-id'); // 从 `a` 标签中获取 data-user-id
-                    
-                        if (propertyId && userId) {
-                            bulkData.push({ propertyId, userId });
-    
-                            // 检查 `agreement_exists`
-                            var checkRequest = $.ajax({
-                                url: '/check-agreement/',
-                                method: 'GET',
-                                data: {
-                                    property_id: propertyId,
-                                    user_id: userId,
-                                    csrfmiddlewaretoken: '{{ csrf_token }}'
-                                },
-                                success: function(response) {
-                                    if (response.success) {
-                                        if (response.agreement_exists) {
-                                            // 如果 agreement_exists 为 true，直接处理
-                                            $.ajax({
-                                                url: '/agree-to-view/',
-                                                method: 'POST',
-                                                data: {
-                                                    property_id: propertyId,
-                                                    user_id: userId,
-                                                    default: true, // 直接默认同意
-                                                    csrfmiddlewaretoken: '{{ csrf_token }}'
-                                                },
-                                                success: function(res) {
-                                                    if (res.success) {
-                                                        console.log(`成功处理 property_id: ${propertyId}`);
-                                                    }
-                                                },
-                                                error: function(xhr, status, error) {
-                                                    console.error(`处理失败 property_id: ${propertyId}, 错误: ${error}`);
-                                                }
-                                            });
-                                        }
-                                    }
-                                },
-                                error: function(xhr, status, error) {
-                                    console.error(`检查失败 property_id: ${propertyId}, 错误: ${error}`);
+
+                    // 先检查用户余额
+                    $.ajax({
+                        url: '/check-balance/',
+                        method: 'GET',
+                        success: function(balanceResponse) {
+                            if (balanceResponse.success) {
+                                var remainingBalance = balanceResponse.balance;
+
+                                // 检查余额是否足够
+                                if (remainingBalance <= 0) {
+                                    // 余额不足，直接跳转到支付页面
+                                    window.location.href = '/payments?error=insufficient_funds';
+                                    return;
                                 }
-                            });
-                            checkRequests.push(checkRequest);
-                        } else {
-                            console.log("缺少 property_id 或 user_id，跳过该行");
-                        }
-                    });
-    
-                    // 等待所有检查请求完成
-                    $.when.apply($, checkRequests).done(function() {
-                        // 检查完毕后，过滤出需要弹出同意窗口的数据
-                        var pendingApproval = bulkData.filter(function(item) {
-                            // 根据检查结果决定是否需要同意窗口
-                            var checkbox = $(`.delete a[data-property-id="${item.propertyId}"]`);
-                            return !checkbox.data('agreement-exists'); // 只有 `agreement_exists == false` 才需要弹窗
-                        });
-    
-                        if (pendingApproval.length > 0) {
-                            // 弹出同意窗口，保存待处理数据
-                            window.bulkSelectedData = pendingApproval;
-                            $('#confirm-modal').fadeIn();
-                        } else {
-                            alert("已成功处理所有选中项！");
+
+                                // 余额足够，继续处理选中的行
+                                selectedRows.each(function() {
+                                    var row = $(this).closest('tr'); // 获取当前行
+                                    var propertyId = row.find('.delete a').data('property-id'); // 从 `a` 标签中获取 data-property-id
+                                    var userId = row.find('.delete a').data('user-id'); // 从 `a` 标签中获取 data-user-id
+
+                                    if (propertyId && userId) {
+                                        bulkData.push({ propertyId, userId });
+
+                                        // 检查 `agreement_exists`
+                                        var checkRequest = $.ajax({
+                                            url: '/check-agreement/',
+                                            method: 'GET',
+                                            data: {
+                                                property_id: propertyId,
+                                                user_id: userId,
+                                                csrfmiddlewaretoken: '{{ csrf_token }}'
+                                            },
+                                            success: function(response) {
+                                                if (response.success) {
+                                                    if (response.agreement_exists) {
+                                                        // 如果 agreement_exists 为 true，直接处理
+                                                        $.ajax({
+                                                            url: '/agree-to-view/',
+                                                            method: 'POST',
+                                                            data: {
+                                                                property_id: propertyId,
+                                                                user_id: userId,
+                                                                default: true, // 直接默认同意
+                                                                csrfmiddlewaretoken: '{{ csrf_token }}'
+                                                            },
+                                                            success: function(res) {
+                                                                if (res.success) {
+                                                                    console.log(`成功处理 property_id: ${propertyId}`);
+                                                                } else if (res.error === 'insufficient_funds') {
+                                                                    // 如果余额不足，直接跳转到支付页面
+                                                                    window.location.href = '/payments?error=insufficient_funds';
+                                                                }
+                                                            },
+                                                            error: function(xhr, status, error) {
+                                                                console.error(`处理失败 property_id: ${propertyId}, 错误: ${error}`);
+                                                            }
+                                                        });
+                                                    }
+                                                }
+                                            },
+                                            error: function(xhr, status, error) {
+                                                console.error(`检查失败 property_id: ${propertyId}, 错误: ${error}`);
+                                            }
+                                        });
+                                        checkRequests.push(checkRequest);
+                                    } else {
+                                        console.log("缺少 property_id 或 user_id，跳过该行");
+                                    }
+                                });
+
+                                // 等待所有检查请求完成
+                                $.when.apply($, checkRequests).done(function() {
+                                    // 检查完毕后，过滤出需要弹出同意窗口的数据
+                                    var pendingApproval = bulkData.filter(function(item) {
+                                        // 根据检查结果决定是否需要同意窗口
+                                        var checkbox = $(`.delete a[data-property-id="${item.propertyId}"]`);
+                                        return !checkbox.data('agreement-exists'); // 只有 `agreement_exists == false` 才需要弹窗
+                                    });
+
+                                    if (pendingApproval.length > 0) {
+                                        // 弹出同意窗口，保存待处理数据
+                                        window.bulkSelectedData = pendingApproval;
+                                        $('#confirm-modal').fadeIn();
+                                    } else {
+                                        alert("已成功处理所有选中项！");
+                                    }
+                                });
+                            } else {
+                                console.error("检查余额失败: " + balanceResponse.error);
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            console.error("检查余额请求失败: " + error);
                         }
                     });
                 } else {
                     alert("Please select at least one item for purchase first!");
                 }
             });
-    
+
+            $(document).ready(function() {
+                const urlParams = new URLSearchParams(window.location.search);
+                if (urlParams.get('error') === 'insufficient_funds') {
+                    alert('Insufficient funds, please add money.');
+                }
+            });
+            
             // 弹窗中“同意”按钮的逻辑
             $('#agree-button').off('click').on('click', function() {
                 if (window.bulkSelectedData && window.bulkSelectedData.length > 0) {
@@ -565,53 +600,79 @@
                     return;
                 }
 
-                // 检查是否已经存在同意记录
+                // 先检查用户余额
                 $.ajax({
-                    url: '/check-agreement/', // 后端检查记录的URL
+                    url: '/check-balance/',
                     method: 'GET',
-                    data: {
-                        property_id: propertyId,
-                        user_id: userId,
-                        csrfmiddlewaretoken: '{{ csrf_token }}'
-                    },
-                    success: function(response) {
-                        if (response.success) {
-                            // 如果 default 或 agreement_exists 为 true，直接打开报告页面
-                            if (response.default || response.agreement_exists) {
-                                $.ajax({
-                                    url: '/agree-to-view/', // 调用 agree-to-view 逻辑
-                                    method: 'POST',
-                                    data: {
-                                        property_id: propertyId,
-                                        user_id: userId,
-                                        default: response.default, // 确保传递 default 状态
-                                        csrfmiddlewaretoken: '{{ csrf_token }}'
-                                    },
-                                    success: function(response) {
-                                        if (response.success) {
-                                            var reportUrl = response.report_url || '/report/' + propertyId + '/';
-                                            window.open(reportUrl, '_blank');
+                    success: function(balanceResponse) {
+                        if (balanceResponse.success) {
+                            var remainingBalance = balanceResponse.balance;
 
-                                            // 更新图标为√
-                                            var icon = $('.delete a[data-property-id="' + propertyId + '"] i');
-                                            icon.removeClass('fa fa-shopping-cart').addClass('icon-eye');
-                                        }
-                                    },
-                                    error: function(xhr, status, error) {
-                                        console.log("存储失败: " + error);
-                                    }
-                                });
-                            } else {
-                                // 如果没有同意记录且 default 为 false，显示同意弹窗
-                                $('#confirm-modal').fadeIn();
-                                // 保存数据
-                                window.selectedProperty = propertyId;
-                                window.selectedUser = userId;
+                            // 检查余额是否足够
+                            if (remainingBalance <= 0) {
+                                // 余额不足，直接跳转到支付页面
+                                window.location.href = '/payments?error=insufficient_funds';
+                                return;
                             }
+
+                            // 余额足够，继续检查是否已经存在同意记录
+                            $.ajax({
+                                url: '/check-agreement/', // 后端检查记录的URL
+                                method: 'GET',
+                                data: {
+                                    property_id: propertyId,
+                                    user_id: userId,
+                                    csrfmiddlewaretoken: '{{ csrf_token }}'
+                                },
+                                success: function(response) {
+                                    if (response.success) {
+                                        // 如果 default 或 agreement_exists 为 true，直接打开报告页面
+                                        if (response.default || response.agreement_exists) {
+                                            $.ajax({
+                                                url: '/agree-to-view/', // 调用 agree-to-view 逻辑
+                                                method: 'POST',
+                                                data: {
+                                                    property_id: propertyId,
+                                                    user_id: userId,
+                                                    default: response.default, // 确保传递 default 状态
+                                                    csrfmiddlewaretoken: '{{ csrf_token }}'
+                                                },
+                                                success: function(response) {
+                                                    if (response.success) {
+                                                        var reportUrl = response.report_url || '/report/' + propertyId + '/';
+                                                        window.open(reportUrl, '_blank');
+
+                                                        // 更新图标为√
+                                                        var icon = $('.delete a[data-property-id="' + propertyId + '"] i');
+                                                        icon.removeClass('fa fa-shopping-cart').addClass('icon-eye');
+                                                    } else if (response.error === 'Insufficient Funds') {
+                                                        // 如果余额不足，直接跳转到支付页面
+                                                        window.location.href = '/payments?error=insufficient_funds';
+                                                    }
+                                                },
+                                                error: function(xhr, status, error) {
+                                                    console.log("存储失败: " + error);
+                                                }
+                                            });
+                                        } else {
+                                            // 如果没有同意记录且 default 为 false，显示同意弹窗
+                                            $('#confirm-modal').fadeIn();
+                                            // 保存数据
+                                            window.selectedProperty = propertyId;
+                                            window.selectedUser = userId;
+                                        }
+                                    }
+                                },
+                                error: function(xhr, status, error) {
+                                    console.log("检查失败: " + error);
+                                }
+                            });
+                        } else {
+                            console.error("检查余额失败: " + balanceResponse.error);
                         }
                     },
                     error: function(xhr, status, error) {
-                        console.log("检查失败: " + error);
+                        console.error("检查余额请求失败: " + error);
                     }
                 });
             });
