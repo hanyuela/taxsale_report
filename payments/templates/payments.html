@@ -205,6 +205,10 @@
                     <div class="d-flex align-items-center justify-content-between">
                       <input class="form-control w-auto" id="remaining_balance" type="text" value="${{ remaining_balance }}" disabled>
                       <a href="{% url 'transactions' %}" class="ml-2 text-primary align-self-center">See transactions</a>
+                    </div>
+                    <!-- 余额不足的提示信息 -->
+                    <div id="insufficientFundsMessage" class="text-danger mt-2" style="display:none;">
+                      Insufficient funds, please add money.
                     </div>  
                   </div>
 
@@ -891,4 +895,13 @@
           }
       });
   });
+</script>
+
+<script>
+  $(document).ready(function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('error') === 'insufficient_funds') {
+        $('#insufficientFundsMessage').show(); // 如果余额不足，显示提示信息
+    }
+});
 </script>
