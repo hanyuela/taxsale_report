@@ -78,36 +78,33 @@
                 </li>
                 <li class="profile-nav onhover-dropdown pe-0 py-0">
                     <div class="d-flex align-items-center profile-media">
-                        <div class="user-profile">
+                        <div class="user-profile" style="display: flex; align-items: center;">
                             <img class="b-r-25" 
                                  src="{% if user.profile.avatar_path %}{{ user.profile.avatar_path }}{% else %}{% static 'images/user/7.jpg' %}{% endif %}" 
-                                 alt="User Avatar">
-                          </div>
-                        <div class="flex-grow-1 user">
+                                 alt="User Avatar" style="border-radius: 50%; margin-right: 10px;">
+                        </div>
+                        <div class="flex-grow-1 user" style="display: flex; align-items: center;">
                             {% if user.is_authenticated %}
-                                <span>
-                                    {% if user.profile.first_name %}
-                                        {{ user.profile.first_name }}
-                                    {% else %}
-                                        {{ user.username }}
-                                    {% endif %}
-                                </span>
-                                <p class="mb-0 font-nunito">Logged in as 
-                                    {% if user.profile.first_name %}
-                                        {{ user.profile.first_name }}
-                                    {% else %}
-                                        {{ user.username }}
-                                    {% endif %}
-                                </p>
+                                <div class="user-info" style="display: flex; align-items: center;">
+                                    <span style="font-size: 16px; font-weight: bold;">
+                                        {% if user.profile.first_name %}
+                                            {{ user.profile.first_name }}
+                                        {% else %}
+                                            {{ user.username }}
+                                        {% endif %}
+                                    </span>
+                                </div>
                             {% else %}
-                                <span>Guest</span>
-                                <p class="mb-0 font-nunito">Not logged in</p>
+                                <div class="user-info" style="display: flex; align-items: center;">
+                                    <span>Guest</span>
+                                    <p class="mb-0 font-nunito">Not logged in</p>
+                                </div>
                             {% endif %}
-
                             <svg>
                                 <use href="{% static 'svg/icon-sprite.svg#header-arrow-down' %}"></use>
                             </svg>
                         </div>
+                        
                     </div>
                     <ul class="profile-dropdown onhover-show-div">
                         {% if user.is_authenticated %}
