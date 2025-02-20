@@ -726,6 +726,10 @@
         return;
     }
 
+    // 禁用按钮，防止用户重复点击
+    const btn = $('#confirm-payment-btn');
+    btn.prop('disabled', true);
+
     // 发起 AJAX 请求，将 PaymentMethod ID 和支付信息发送到后端
     $.ajax({
         url: '/process-payment/', // 后端支付接口
@@ -739,10 +743,11 @@
         headers: { "X-CSRFToken": "{{ csrf_token }}" },
         success: function (response) {
             if (response.success) {
-                //alert('Payment processed successfully!');
-                location.reload(); // 刷新页面或跳转到支付成功页面
+                // 如果支付成功，刷新页面或跳转到支付成功页面
+                location.reload();
             } else if (response.requires_action) {
-                handleAction(response.client_secret); // 如果需要 3D Secure 验证
+                // 如果需要 3D Secure 验证
+                handleAction(response.client_secret);
             } else {
                 alert('Payment failed: ' + response.error);
             }
@@ -750,6 +755,10 @@
         error: function (error) {
             alert('An error occurred: ' + error.responseText);
         },
+        // 请求完成后，重新启用按钮
+        complete: function () {
+            btn.prop('disabled', false);
+        }
     });
   });
 
@@ -904,4 +913,17 @@
         $('#insufficientFundsMessage').show(); // 如果余额不足，显示提示信息
     }
 });
+</script>
+
+<script>
+  // 获取余额输入框
+  const remainingBalanceInput = document.getElementById('remaining_balance');
+  
+  // 获取余额值，并格式化为两位小数
+  let remainingBalance = parseFloat(remainingBalanceInput.value.replace('$', '').trim());
+  
+  // 如果余额是有效数字，则格式化为两位小数
+  if (!isNaN(remainingBalance)) {
+    remainingBalanceInput.value = `$${remainingBalance.toFixed(2)}`;
+  }
 </script>
