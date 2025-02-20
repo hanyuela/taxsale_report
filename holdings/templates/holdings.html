@@ -237,7 +237,21 @@
         justify-content: space-between; /* 按钮两端对齐 */
         z-index: 10; /* 确保按钮位于内容上方 */
       }
-      
+      /* 设置表头列的背景色 */
+      .jsgrid-header-cell:nth-child(1) {
+        background-color: #E9EFEF !important;
+      }
+
+      /* 设置数据行对应列的背景色 */
+      .jsgrid-cell:nth-child(1) {
+        background-color: #E9EFEF !important;
+      }
+
+      /* 编辑模式下的输入框背景色（可选） */
+      .jsgrid-edit-row input,
+      .jsgrid-edit-row select {
+        background-color: #E9EFEF !important;
+      }
     </style>  
   <body> 
     <!-- Loader Section -->
@@ -315,6 +329,7 @@
         <!-- 显示/隐藏列功能 -->
         <div id="visibility" class="tab active">
           <ul id="columnSettingsList">
+            <li><label><input type="checkbox" class="column-toggle" data-column="Label" checked> Status</label></li>
             <li><label><input type="checkbox" class="column-toggle" data-column="Address" checked> Address</label></li>
             <li><label><input type="checkbox" class="column-toggle" data-column="City" checked> City</label></li>
             <li><label><input type="checkbox" class="column-toggle" data-column="Zip" checked> Zip</label></li>
@@ -325,7 +340,7 @@
             <li><label><input type="checkbox" class="column-toggle" data-column="Auction Start" checked> Auction Start</label></li>
             <li><label><input type="checkbox" class="column-toggle" data-column="Auction End" checked> Auction End</label></li>
             <li><label><input type="checkbox" class="column-toggle" data-column="My Bid" checked> My Bid</label></li>
-            <li><label><input type="checkbox" class="column-toggle" data-column="Label" checked> Status</label></li>
+            
             <!-- 新字段 -->
             <li><label><input type="checkbox" class="column-toggle" data-column="Batch Number" checked> Batch Number</label></li>
             <li><label><input type="checkbox" class="column-toggle" data-column="Sort No" checked> Sort No</label></li>
@@ -363,6 +378,7 @@
         <!-- 列排序功能 -->
         <div id="sorting" class="tab">
           <ul id="sortableColumnList">
+            <li class="sortable-item" data-column="Label">Status</li>
             <li class="sortable-item" data-column="Address">Address</li>
             <li class="sortable-item" data-column="City">City</li>
             <li class="sortable-item" data-column="Zip">Zip</li>
@@ -373,7 +389,7 @@
             <li class="sortable-item" data-column="Auction Start">Auction Start</li>
             <li class="sortable-item" data-column="Auction End">Auction End</li>
             <li class="sortable-item" data-column="My Bid">My Bid</li>
-            <li class="sortable-item" data-column="Label">Status</li>
+            
             <li class="sortable-item" data-column="Batch Number">Batch Number</li>
             <li class="sortable-item" data-column="Sort No">Sort No</li>
             <li class="sortable-item" data-column="Bankruptcy Flag">Bankruptcy Flag</li>
