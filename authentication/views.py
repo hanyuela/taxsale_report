@@ -579,12 +579,25 @@ def success(request):
         if session['payment_status'] == 'paid':  # 确认支付成功
             user = request.user  # 当前登录用户
 
+            # 获取支付金额
+            amount = session['amount_total'] / 100  # Stripe 金额以分为单位，需转换为美元
+
             # 检查是否已经记录过此支付历史，避免重复记录
             if not Payment_history.objects.filter(user=user, time=datetime.now().time(), date=datetime.now().date()).exists():
-                # 记录支付历史
+                # 记录第一条数据：正数的金额，表示通过信用卡添加的余额
                 Payment_history.objects.create(
                     user=user,
-                    amount=session['amount_total'] / 100,  # Stripe 金额以分为单位，需转换为美元
+                    amount=amount,  # 正数金额
+                    time=datetime.now().time(),
+                    date=datetime.now().date(),
+                    method='credit_card',
+                    type='add_funds',
+                )
+
+                # 记录第二条数据：负数的金额，表示扣除会员费用
+                Payment_history.objects.create(
+                    user=user,
+                    amount=-amount,  # 负数金额
                     time=datetime.now().time(),
                     date=datetime.now().date(),
                     method='credit_card',
