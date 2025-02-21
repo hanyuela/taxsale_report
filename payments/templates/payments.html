@@ -226,26 +226,29 @@
                     <div class="form-group">
                       <label>Select Payment Method</label>
                       {% if payment_methods.exists %}
-                      {% for method in payment_methods %}
-                      <div class="radio-option d-flex justify-content-between align-items-center">
-                        <div>
-                          <input type="radio" name="payment_method" value="{{ method.stripe_payment_method_id }}" id="payment_method_{{ forloop.counter }}">
-                          <label for="payment_method_{{ forloop.counter }}">
-                            <!-- 占位符，初始时显示“Loading...” -->
-                            <span id="brand_{{ forloop.counter }}">Loading...</span> •••• <span id="last4_{{ forloop.counter }}">...</span>
-                            <br>
-                            <small class="text-muted">Created at: {{ method.created_at|date:"Y-m-d H:i:s" }}</small>
-                          </label>
-                        </div>                     
-                        <!-- 删除按钮 -->
-                        <button type="button" class="btn  btn-sm delete-card-btn" data-payment-method-id="{{ method.stripe_payment_method_id }}">
-                          🗑
-                        </button>
-                      </div>
-                      {% endfor %}
+                        {% for method in payment_methods %}
+                          <div class="radio-option d-flex justify-content-between align-items-center">
+                            <div>
+                              <input type="radio" name="payment_method" value="{{ method.stripe_payment_method_id }}" 
+                                    id="payment_method_{{ forloop.counter }}"
+                                    {% if forloop.last %} checked {% endif %}>
+                              <label for="payment_method_{{ forloop.counter }}">
+                                <!-- 占位符，初始时显示“Loading...” -->
+                                <span id="brand_{{ forloop.counter }}">Loading...</span> •••• <span id="last4_{{ forloop.counter }}">...</span>
+                                <br>
+                                <small class="text-muted">Created at: {{ method.created_at|date:"Y-m-d H:i:s" }}</small>
+                              </label>
+                            </div>                     
+                            <!-- 删除按钮 -->
+                            <button type="button" class="btn btn-sm delete-card-btn" data-payment-method-id="{{ method.stripe_payment_method_id }}">
+                              🗑
+                            </button>
+                          </div>
+                        {% endfor %}
                       {% else %}
-                      <p class="text-muted">No payment methods available. Please add one.</p>
+                        <p class="text-muted">No payment methods available. Please add one.</p>
                       {% endif %}
+
                       <!-- Add New Billing Address -->
                       <div class="mt-3">
                         <a href="#" id="add-new-payment-method-link" class="text-primary" data-bs-toggle="modal" data-bs-target="#paymentMethodModal">Add a new payment method</a>
@@ -288,23 +291,26 @@
                       <h5 class="mt-4">Billing Address</h5>
                       <div>
                           {% for address in billing_addresses %}
-                          <div class="radio-option d-flex justify-content-between align-items-center">
-                            <div>
-                              <input type="radio" id="billing_{{ forloop.counter }}" name="billing_address" value="{{ address.id }}">
-                              <label for="billing_{{ forloop.counter }}">
-                                <strong>{{ address.full_name }}</strong><br>
-                                {{ address.address }}{% if address.address_line_2 %}, {{ address.address_line_2 }}{% endif %}<br>
-                                {{ address.city }}, {{ address.state }}, {{ address.zip_code }}, {{ address.country_region }}
-                              </label>
+                            <div class="radio-option d-flex justify-content-between align-items-center">
+                              <div>
+                                <input type="radio" id="billing_{{ forloop.counter }}" name="billing_address" value="{{ address.id }}"
+                                      {% if forloop.last %} checked {% endif %}>
+                                <label for="billing_{{ forloop.counter }}">
+                                  <strong>{{ address.full_name }}</strong><br>
+                                  {{ address.address }}{% if address.address_line_2 %}, {{ address.address_line_2 }}{% endif %}<br>
+                                  {{ address.city }}, {{ address.state }}, {{ address.zip_code }}, {{ address.country_region }}
+                                </label>
+                              </div>
+                              <!-- 删除图标 -->
+                              <button type="button" class="btn btn-sm delete-address-btn" data-address-id="{{ address.id }}"
+                                      style="height: 36px; width: 36px; display: flex; justify-content: center; align-items: center;">
+                                🗑
+                              </button>
                             </div>
-                            <!-- 删除图标 -->
-                            <button type="button" class="btn  btn-sm delete-address-btn" data-address-id="{{ address.id }}" style="height: 36px; width: 36px; display: flex; justify-content: center; align-items: center;">
-                              🗑
-                            </button>
-                          </div>
                           {% empty %}
-                          <p class="text-muted">No billing addresses found. Please add one.</p>
+                            <p class="text-muted">No billing addresses found. Please add one.</p>
                           {% endfor %}
+                      
                           <!-- Add New Billing Address -->
                           <div class="mt-3">
                             <a href="#" id="add-billing-address-link" class="text-primary" data-bs-toggle="modal" data-bs-target="#billingAddressModal">Add a new billing address</a>
