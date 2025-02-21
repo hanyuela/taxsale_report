@@ -33,6 +33,7 @@ from datetime import datetime
 from django.urls import reverse
 from django.db.models import Sum
 from django.utils import timezone
+from django.utils.timezone import now
 # 注册页面
 def register(request):
     if request.method == 'POST':
@@ -604,7 +605,7 @@ def success(request):
                     type='member_fee',
                 )
 
-            # 更新 UserProfile 的 member 值
+            # 更新 UserProfile 的 member 值和 member_start
             try:
                 # 查询订阅详情
                 subscription_id = session['subscription']
@@ -621,6 +622,10 @@ def success(request):
                     user_profile.member = 1  # 月付会员
                 elif price_id == 'price_1QjwLuHzoCY5vXyDxQ7nXr1l':
                     user_profile.member = 2  # 年付会员
+
+                # 更新会员开始日期为当前时间，去掉微秒部分
+                current_time = now().strftime("%Y-%m-%d %H:%M:%S")  # 格式化时间，去掉微秒
+                user_profile.member_start = datetime.strptime(current_time, "%Y-%m-%d %H:%M:%S")  # 转换回 datetime 对象
                 user_profile.save()
             except UserProfile.DoesNotExist:
                 return redirect(reverse('index') + '?payment_error=true')
