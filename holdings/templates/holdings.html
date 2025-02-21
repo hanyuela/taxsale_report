@@ -237,21 +237,17 @@
         justify-content: space-between; /* 按钮两端对齐 */
         z-index: 10; /* 确保按钮位于内容上方 */
       }
-      /* 设置表头列的背景色 */
-      .jsgrid-header-cell:nth-child(1) {
+      /* 设置 Status 列的表头背景色 */
+      .jsgrid-header-cell.status-column {
         background-color: #E9EFEF !important;
       }
 
-      /* 设置数据行对应列的背景色 */
-      .jsgrid-cell:nth-child(1) {
+      /* 设置 Status 列的数据单元格背景色 */
+      .jsgrid-cell.status-column {
         background-color: #E9EFEF !important;
       }
 
-      /* 编辑模式下的输入框背景色（可选） */
-      .jsgrid-edit-row input,
-      .jsgrid-edit-row select {
-        background-color: #E9EFEF !important;
-      }
+      
     </style>  
   <body> 
     <!-- Loader Section -->
