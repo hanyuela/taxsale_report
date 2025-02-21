@@ -171,6 +171,7 @@
                 name: "Label",
                 title: "Status",
                 width: 120,
+                css: "status-column", // 为 Status 列添加自定义类名
                 headerTemplate: function () {
                   const $header = $("<div>").text("Status");
                   const $select = $("<select>")
