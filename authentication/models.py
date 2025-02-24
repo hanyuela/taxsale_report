@@ -31,6 +31,7 @@ class UserProfile(models.Model):
     member_start = models.DateTimeField(null=True, blank=True)  # 会员开始时间
     # 新增字段
     customer_id = models.CharField(max_length=255, blank=True, null=True)  # Stripe Customer ID
+    is_cancelled = models.BooleanField(default=False)  # 新增字段，表示是否取消了下一次订阅
     
     def __str__(self):
         return f"{self.user.username}'s Profile"
