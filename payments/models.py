@@ -40,6 +40,7 @@ class Payment_method(models.Model):  # 使用您指定的模型名称
         ('stripe', 'Stripe'),
         ('coupon', 'Coupon') ,
         ('balance', 'Balance'),
+        ('discount', 'Discount'),
         ('other', 'Other'),
     ]
 
