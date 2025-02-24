@@ -481,16 +481,8 @@ def cancel_subscription(request):
     try:
         # 获取当前用户的关联 UserProfile
         user_profile = request.user.profile  # 通过 OneToOne 关联获取 UserProfile
-        user_profile.member = 0  # 设置为非付费用户
-        user_profile.member_start = None  # 清空会员开始时间
-        
-        # 调试信息，查看当前数据
-        print(f"User profile before saving: {user_profile.member_start}")
-        
+        user_profile.is_cancelled = 1  # 设置为取消下一次订阅
         user_profile.save()  # 保存更新
-
-        # 调试信息，查看保存后的数据
-        print(f"User profile after saving: {user_profile.member_start}")
 
         # 返回成功的 JSON 响应
         return JsonResponse({'success': True})

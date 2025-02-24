@@ -15,6 +15,13 @@ def check_membership_payments():
     for user_profile in users:
         user = user_profile.user  # 获取 User 实例
 
+        # 如果用户已经取消了下一次订阅
+        if user_profile.is_cancelled:
+            user_profile.member = 0  # 设置为非付费用户
+            user_profile.is_cancelled = 0  # 重置 is_cancelled 字段
+            user_profile.save()
+            continue  # 跳过扣款逻辑
+
         # 获取下一个付款日期
         next_payment_date = get_next_payment_date(user_profile.member_start, monthly=True)
         
