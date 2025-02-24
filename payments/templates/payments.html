@@ -427,14 +427,14 @@
                   <p>Next Payment Amount: ${{ subscription.next_payment_amount }}</p>
                 </div>
                 
-                <form method="POST" action="{% url 'cancel_subscription' %}">
+                <form id="cancel-subscription-form" method="POST" action="{% url 'cancel_subscription' %}">
                   {% csrf_token %}
                   <div class="form-group">
-                      <button class="btn btn-primary" style="margin-top: 15px; margin-bottom: 15px; margin-left: 10px;" type="submit">
+                      <button id="cancel-subscription-btn" class="btn btn-primary" style="margin-top: 15px; margin-bottom: 15px; margin-left: 10px;" type="button">
                           Cancel Next Subscription
                       </button>
                   </div>
-                </form>             
+                </form>           
 
                 <div class="form-group mt-4">
                   <label for="coupon">Use Coupon</label>
@@ -904,10 +904,14 @@
       .then(response => response.json())
       .then(data => {
           if (data.success) {
-              alert('订阅已取消，用户类型已设置为 0');
+              alert('订阅已取消');
+              // 可以在这里处理页面更新逻辑
           } else {
               alert('取消订阅失败: ' + (data.error || '未知错误'));
           }
+      })
+      .catch(error => {
+          alert('网络错误: ' + error.message);
       });
   });
 </script>
